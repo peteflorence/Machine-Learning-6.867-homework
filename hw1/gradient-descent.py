@@ -85,7 +85,7 @@ class GradientDescent:
     @staticmethod
     def minimize(f, x_initial, grad=None, stepSize=None):
         gradDescent = GradientDescent(f, grad)
-        (x_min, f_min, numFuntionCalls, tol) = gradDescent.computeMin(x_initial, stepSize=stepSize)
+        return gradDescent.computeMin(x_initial, stepSize=stepSize)
 
 
 def quad(x):
