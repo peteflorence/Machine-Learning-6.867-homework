@@ -37,7 +37,7 @@ class LinearRegression:
         return sse
 
     def SSE_gradient(self,w):
-        return 2.0*np.dot(self.phi.transpose(),np.dot(self.phi,w) - y)
+        return 2.0*np.dot(self.phi.transpose(),np.dot(self.phi,w) - self.y)
 
     @staticmethod
     def getData(name):
