@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  21 SEP 2015 10:10
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  21 SEP 2015 10:13
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -278,24 +278,25 @@ Package hyperref Info: Option `colorlinks' set `true' on input line 98.
 \cv@tmpc@=\count113
 \cv@tmpc=\count114
 )
-No file example_paper.aux.
+(./example_paper.aux)
 \openout1 = `example_paper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 49.
-LaTeX Font Info:    ... okay on input line 49.
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 49.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 51.
+LaTeX Font Info:    ... okay on input line 51.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 51.
+
 (/usr/local/texlive/2014/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
@@ -328,7 +329,7 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 \AtBeginShipoutBox=\box33
-Package hyperref Info: Link coloring ON on input line 49.
+Package hyperref Info: Link coloring ON on input line 51.
 
 (/usr/local/texlive/2014/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
@@ -338,76 +339,58 @@ Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
 \c@section@level=\count121
 )
-LaTeX Info: Redefining \ref on input line 49.
-LaTeX Info: Redefining \pageref on input line 49.
-LaTeX Info: Redefining \nameref on input line 49.
+LaTeX Info: Redefining \ref on input line 51.
+LaTeX Info: Redefining \pageref on input line 51.
+LaTeX Info: Redefining \nameref on input line 51.
+
+(./example_paper.out) (./example_paper.out)
 \@outlinefile=\write3
 \openout3 = `example_paper.out'.
 
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\\' on input line 72.
-
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 72.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 72.
-
-Overfull \hbox (5.1225pt too wide) in paragraph at lines 74--74
- [] 
- []
-
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 74.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 84.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 83.
+(Font)              <7> on input line 88.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 83.
+(Font)              <5> on input line 88.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 86.
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 86.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 91.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 91.
+
 (/usr/local/texlive/2014/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 LaTeX Font Info:    Font shape `OT1/pcr/bx/n' in size <10> not available
-(Font)              Font shape `OT1/pcr/b/n' tried instead on input line 86.
+(Font)              Font shape `OT1/pcr/b/n' tried instead on input line 91.
 
-Underfull \hbox (badness 10000) in paragraph at lines 88--90
+Underfull \hbox (badness 10000) in paragraph at lines 93--95
 \OT1/ptm/m/n/10 Send ques-tions about sub-mis-sion and elec-tronic
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 88--90
+Underfull \hbox (badness 10000) in paragraph at lines 93--95
 \OT1/ptm/m/n/10 tem-plates to \OT1/pcr/m/n/10 francis.bach@inria.fr,
  []
 
-LaTeX Font Info:    Try loading font information for OMS+ptm on input line 94.
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 99.
 (/usr/local/texlive/2014/texmf-dist/tex/latex/psnfss/omsptm.fd
 File: omsptm.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 94.
-
-
-LaTeX Warning: Reference `author info' on page 1 undefined on input line 118.
-
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 99.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 147.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 152.
+
+Overfull \hbox (13.52222pt too wide) in paragraph at lines 164--164
+[]\OT1/pcr/m/n/9 dvips -Ppdf -tletter -G0 -o paper.ps paper.dvi[] 
+ []
+
 [1{/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 
 
 ]
-Overfull \hbox (13.52222pt too wide) in paragraph at lines 159--159
-[]\OT1/pcr/m/n/9 dvips -Ppdf -tletter -G0 -o paper.ps paper.dvi[] 
- []
-
-
-LaTeX Warning: Reference `final author' on page 2 undefined on input line 187.
-
-
-Underfull \hbox (badness 1748) in paragraph at lines 197--199
+Underfull \hbox (badness 1748) in paragraph at lines 202--204
 []\OT1/ptm/m/n/10 For those us-ing the \OT1/ptm/b/n/10 L[]T[]X \OT1/ptm/m/n/10 
 style file, sim-ply change
  []
@@ -415,17 +398,20 @@ style file, sim-ply change
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
+
+
+Package natbib Warning: Citation `langley00' on page 2 undefined on input line 
+272.
+
+
+Package natbib Warning: Citation `anonymous' on page 2 undefined on input line 
+278.
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
  [2]
-
-Package natbib Warning: Citation `langley00' on page 3 undefined on input line 
-267.
-
-
-Package natbib Warning: Citation `anonymous' on page 3 undefined on input line 
-273.
-
-
-Underfull \hbox (badness 1796) in paragraph at lines 301--309
+Underfull \hbox (badness 1796) in paragraph at lines 306--314
 []\OT1/ptm/m/n/10 The pa-per ab-stract should be-gin in the left col-umn,
  []
 
@@ -433,134 +419,104 @@ Underfull \hbox (badness 1796) in paragraph at lines 301--309
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 340.
+(Font)              <9> on input line 345.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 340.
+(Font)              <6> on input line 345.
 
-<icml_numpapers.pdf, id=33, 498.86375pt x 416.55624pt>
+<icml_numpapers.pdf, id=37, 498.86375pt x 416.55624pt>
 File: icml_numpapers.pdf Graphic file (type pdf)
 
 <use icml_numpapers.pdf>
-Package pdftex.def Info: icml_numpapers.pdf used on input line 352.
+Package pdftex.def Info: icml_numpapers.pdf used on input line 357.
 (pdftex.def)             Requested size: 234.8775pt x 196.12468pt.
+ [3 <./icml_numpapers.pdf>]
 
-
-LaTeX Warning: Reference `icml-historical' on page 3 undefined on input line 37
-9.
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [3]
-
-LaTeX Warning: Reference `alg:example' on page 4 undefined on input line 392.
-
-
-LaTeX Warning: Reference `sample-table' on page 4 undefined on input line 417.
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
+Package natbib Warning: Citation `Samuel59' on page 4 undefined on input line 4
+77.
 
 
 Package natbib Warning: Citation `Samuel59' on page 4 undefined on input line 4
-72.
-
-
-Package natbib Warning: Citation `Samuel59' on page 4 undefined on input line 4
-74.
+79.
 
 
 Package natbib Warning: Citation `kearns89' on page 4 undefined on input line 4
-75.
+80.
 
 
 Package natbib Warning: Citation `Samuel59' on page 4 undefined on input line 4
-75.
+80.
 
 
 Package natbib Warning: Citation `mitchell80' on page 4 undefined on input line
- 475.
+ 480.
 
 
 Package natbib Warning: Citation `MachineLearningI' on page 4 undefined on inpu
-t line 477.
-
-
-LaTeX Warning: Reference `author info' on page 4 undefined on input line 481.
+t line 482.
 
 
 Package natbib Warning: Citation `Samuel59' on page 4 undefined on input line 4
-88.
+93.
 
 
 Package natbib Warning: Citation `langley00' on page 4 undefined on input line 
-488.
+493.
 
 
 Package natbib Warning: Citation `Newell81' on page 4 undefined on input line 4
-88.
+93.
 
 
 Package natbib Warning: Citation `DudaHart2nd' on page 4 undefined on input lin
-e 488.
+e 493.
 
 
 Package natbib Warning: Citation `MachineLearningI' on page 4 undefined on inpu
-t line 488.
+t line 493.
 
 
 Package natbib Warning: Citation `mitchell80' on page 4 undefined on input line
- 489.
+ 494.
 
 
 Package natbib Warning: Citation `kearns89' on page 4 undefined on input line 4
-89.
+94.
 
 
-Underfull \vbox (badness 7649) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [4 <./icml_numpapers.pdf>]
+ [4]
 
-Package natbib Warning: Citation `langley00' undefined on input line 526.
+Package natbib Warning: Citation `langley00' undefined on input line 531.
 
 No file example_paper.bbl.
 
 Package natbib Warning: There were undefined citations.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 531.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 536.
 [5
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 531.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 536.
  (./example_paper.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 531.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 531.
-
-
-Package rerunfilecheck Warning: File `example_paper.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `example_paper.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  D41D8CD98F00B204E9800998ECF8427E;0.
-
-LaTeX Warning: There were undefined references.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 536.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 536.
+Package rerunfilecheck Info: File `example_paper.out' has not changed.
+(rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
 
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 531.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 536.
  ) 
 Here is how much of TeX's memory you used:
- 6348 strings out of 493117
- 91809 string characters out of 6135433
- 195018 words of memory out of 5000000
- 9694 multiletter control sequences out of 15000+600000
- 31843 words of font info for 64 fonts, out of 8000000 for 9000
+ 6345 strings out of 493117
+ 91805 string characters out of 6135433
+ 196615 words of memory out of 5000000
+ 9687 multiletter control sequences out of 15000+600000
+ 28084 words of font info for 59 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 30i,11n,45p,409b,570s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 30i,12n,45p,411b,570s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2014/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
 xlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texl
@@ -575,10 +531,10 @@ t/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/
 type1/urw/times/utmb8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/
 times/utmr8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/times/utmr
 8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on example_paper.pdf (5 pages, 165100 bytes).
+Output written on example_paper.pdf (5 pages, 164513 bytes).
 PDF statistics:
- 123 PDF objects out of 1000 (max. 8388607)
- 100 compressed objects within 1 object stream
+ 130 PDF objects out of 1000 (max. 8388607)
+ 106 compressed objects within 2 object streams
  31 named destinations out of 1000 (max. 500000)
  6 words of extra memory for PDF output out of 10000 (max. 10000000)
 
