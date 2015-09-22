@@ -11,6 +11,7 @@ class GradientDescent:
             self.grad = self.numericalGradient
         self.numFunctionCalls = 0
         self.numGradientCalls = 0
+        self.stepSize = 1e-2
 
     def evalF(self,x):
         self.numFunctionCalls += 1
@@ -37,12 +38,8 @@ class GradientDescent:
 
         return grad
 
-
     # x_0 is the initial guess
-    def computeMin(self, x_0, stepSize = 1e-2, tol=1e-4, maxFunctionCalls=1000, useGradientCriterion=False):
-
-        if stepSize is None:
-            stepSize = 1e-1
+    def computeMin(self, x_0, tol=1e-4, maxFunctionCalls=1000, useGradientCriterion=False):
 
         self.numFunctionCalls = 0
         self.numGradientCalls = 0
@@ -51,7 +48,7 @@ class GradientDescent:
         eps = 1;
 
         while(np.abs(eps) > tol):
-            (x_current, f_current) = self.gradDescentUpdate(x_current, stepSize)
+            (x_current, f_current) = self.gradDescentUpdate(x_current)
             eps = f_current - f_old
             f_old = f_current
             if useGradientCriterion:
@@ -72,20 +69,16 @@ class GradientDescent:
 
         return (x_current, f_current, self.numFunctionCalls, tol)
 
-
-
     # compute one update step of gradient descent
-    def gradDescentUpdate(self, x, stepSize):
-        x_new = x - stepSize*self.evalGradient(x)
+    def gradDescentUpdate(self, x):
+        x_new = x - self.stepSize*self.evalGradient(x)
         f_new = self.evalF(x_new)
         return (x_new, f_new)
 
-
-
     @staticmethod
-    def minimize(f, x_initial, grad=None, stepSize=None):
+    def minimize(f, x_initial, grad=None):
         gradDescent = GradientDescent(f, grad)
-        return gradDescent.computeMin(x_initial, stepSize=stepSize)
+        return gradDescent.computeMin(x_initial)
 
 
 def quad(x):

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  21 SEP 2015 10:13
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  21 SEP 2015 17:32
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -503,10 +503,6 @@ Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 536.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 536.
 Package rerunfilecheck Info: File `example_paper.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 536.
  ) 
 Here is how much of TeX's memory you used:
