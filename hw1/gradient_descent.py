@@ -17,6 +17,7 @@ class GradientDescent:
 
         self.numFunctionCalls = 0
         self.numGradientCalls = 0
+        self.numIterations = 0
         
 
     def evalF(self,x):
@@ -57,23 +58,31 @@ class GradientDescent:
 
         self.numFunctionCalls = 0
         self.numGradientCalls = 0
+        self.numIterations = 0
+
         x_current = x_initial
     
         f_old = self.evalF(x_current)
         eps = 1;
 
         while(np.abs(eps) > self.tol):
+            self.numIterations += 1
             (x_current, f_current) = self.gradDescentUpdate(x_current)
             eps = f_current - f_old
             f_old = f_current
+
+
             if useGradientCriterion:
                 eps = np.max(np.abs(self.evalGradient(x_current)))
 
             if storeIterValues:
-                self.iterValues[self.numFunctionCalls-2] = f_current
+                self.iterValues[self.numIterations-1] = f_current
 
             if self.numFunctionCalls >= maxFunctionCalls:
                 break;
+
+
+
 
         if printSummary == True:
 
@@ -93,7 +102,7 @@ class GradientDescent:
 
     def plotIterValues(self):
         import matplotlib.pyplot as plt
-        numIter = (self.numFunctionCalls-2)
+        numIter = (self.numIterations-1)
         y_plotvalues = self.iterValues[0:numIter]
         x_plotvalues = np.linspace(1,numIter,numIter)
         plt.plot(x_plotvalues,y_plotvalues)
