@@ -6,12 +6,18 @@ class GradientDescent:
 
     def __init__(self, f, grad):
         self.f = f
-        self.grad = grad
         if grad is None:
             self.grad = self.numericalGradient
+        else:
+            self.grad = grad
+
+
+        self.stepSize = 1e-2              # learning rate
+        self.x_0 = np.array([0.0, 0.0])   # initial guess, default at origin
+
         self.numFunctionCalls = 0
         self.numGradientCalls = 0
-        self.stepSize = 1e-2
+        
 
     def evalF(self,x):
         self.numFunctionCalls += 1
@@ -38,12 +44,13 @@ class GradientDescent:
 
         return grad
 
-    # x_0 is the initial guess
-    def computeMin(self, x_0, tol=1e-4, maxFunctionCalls=1000, useGradientCriterion=False):
+    def computeMin(self, tol=1e-4, maxFunctionCalls=1000, useGradientCriterion=False):
 
         self.numFunctionCalls = 0
         self.numGradientCalls = 0
-        x_current = x_0
+        x_current = self.x_0
+        print "x_current is"
+        print x_current
         f_old = self.evalF(x_current)
         eps = 1;
 
