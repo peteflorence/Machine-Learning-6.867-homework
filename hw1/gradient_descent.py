@@ -14,6 +14,7 @@ class GradientDescent:
 
         self.stepSize = 1e-2              # learning rate
         self.x_0 = np.array([0.0, 0.0])   # initial guess, default at origin
+        self.tol = 1e-4
 
         self.numFunctionCalls = 0
         self.numGradientCalls = 0
@@ -44,7 +45,7 @@ class GradientDescent:
 
         return grad
 
-    def computeMin(self, tol=1e-4, maxFunctionCalls=1000, useGradientCriterion=False):
+    def computeMin(self, maxFunctionCalls=1000, useGradientCriterion=False):
 
         self.numFunctionCalls = 0
         self.numGradientCalls = 0
@@ -54,15 +55,14 @@ class GradientDescent:
         f_old = self.evalF(x_current)
         eps = 1;
 
-        while(np.abs(eps) > tol):
+        while(np.abs(eps) > self.tol):
             (x_current, f_current) = self.gradDescentUpdate(x_current)
             eps = f_current - f_old
             f_old = f_current
             if useGradientCriterion:
                 eps = np.max(np.abs(self.evalGradient(x_current)))
 
-
-            if self.numFunctionCalls > maxFunctionCalls:
+            if self.numFunctionCalls >= maxFunctionCalls:
                 break;
 
         print "x_min is "
@@ -74,7 +74,7 @@ class GradientDescent:
         print "numFunctionCalls"
         print self.numFunctionCalls
 
-        return (x_current, f_current, self.numFunctionCalls, tol)
+        return (x_current, f_current, self.numFunctionCalls, self.tol)
 
     # compute one update step of gradient descent
     def gradDescentUpdate(self, x):
