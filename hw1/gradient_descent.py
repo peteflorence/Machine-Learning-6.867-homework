@@ -4,7 +4,7 @@ import numpy as np
 
 class GradientDescent:
 
-    def __init__(self, f, grad):
+    def __init__(self, f, grad=None):
         self.f = f
         if grad is None:
             self.grad = self.numericalGradient
@@ -83,7 +83,7 @@ class GradientDescent:
             print " "
             print "--- Minimization Summary --- "
             print "x_min is = " + str(x_current)
-            print "f_min is = " + str(eps)
+            print "f_min is = " + str(f_current)
             print "achieved tolerance = " + str(eps)
             print "numFunctionCalls = " + str(self.numFunctionCalls)
             print "---------------------------- "
