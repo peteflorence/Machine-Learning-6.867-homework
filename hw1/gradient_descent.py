@@ -13,7 +13,6 @@ class GradientDescent:
 
 
         self.stepSize = 1e-2              # learning rate
-        self.x_0 = np.array([0.0, 0.0])   # initial guess, default at origin
         self.tol = 1e-4
 
         self.numFunctionCalls = 0
@@ -45,13 +44,21 @@ class GradientDescent:
 
         return grad
 
-    def computeMin(self, maxFunctionCalls=1000, useGradientCriterion=False):
+    def computeMin(self, x_initial, maxFunctionCalls=1000, useGradientCriterion=False, storeIterValues=False, printSummary=True):
+
+        if x_initial is None:
+            print "Please specify an initial guess"
+            print "Using origin by default"
+            x_initial = np.array([0.0, 0.0])
+
+        if storeIterValues:
+            self.iterValues = np.zeros((maxFunctionCalls,1))
+
 
         self.numFunctionCalls = 0
         self.numGradientCalls = 0
-        x_current = self.x_0
-        print "x_current is"
-        print x_current
+        x_current = x_initial
+    
         f_old = self.evalF(x_current)
         eps = 1;
 
@@ -62,19 +69,35 @@ class GradientDescent:
             if useGradientCriterion:
                 eps = np.max(np.abs(self.evalGradient(x_current)))
 
+            if storeIterValues:
+                self.iterValues[self.numFunctionCalls-2] = f_current
+
             if self.numFunctionCalls >= maxFunctionCalls:
                 break;
 
-        print "x_min is "
-        print x_current
-        print "f_min is "
-        print f_current
-        print "achieved tolerance"
-        print eps
-        print "numFunctionCalls"
-        print self.numFunctionCalls
+        if printSummary == True:
+
+            if self.numFunctionCalls >= maxFunctionCalls:
+                print "WARNING: hit maximum number of function calls"
+
+            print " "
+            print "--- Minimization Summary --- "
+            print "x_min is = " + str(x_current)
+            print "f_min is = " + str(eps)
+            print "achieved tolerance = " + str(eps)
+            print "numFunctionCalls = " + str(self.numFunctionCalls)
+            print "---------------------------- "
+            print " "
 
         return (x_current, f_current, self.numFunctionCalls, self.tol)
+
+    def plotIterValues(self):
+        import matplotlib.pyplot as plt
+        numIter = (self.numFunctionCalls-2)
+        y_plotvalues = self.iterValues[0:numIter]
+        x_plotvalues = np.linspace(1,numIter,numIter)
+        plt.plot(x_plotvalues,y_plotvalues)
+        plt.show()
 
     # compute one update step of gradient descent
     def gradDescentUpdate(self, x):
