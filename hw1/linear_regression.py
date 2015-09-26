@@ -95,6 +95,18 @@ class LinearRegression:
         return LinearRegression(x,y,M)
 
     @staticmethod
+    def fromBlog(type='train'):
+        x_filename = 'BlogFeedback_data/x_' + type + '.csv'
+        y_filename = 'BlogFeedback_data/y_' + type + '.csv'
+
+        x = np.genfromtxt(x_filename, delimiter=',')
+        y = np.genfromtxt(y_filename, delimiter=',')
+
+        lr = LinearRegression(x,y,1,phi=x)
+        return lr
+
+
+    @staticmethod
     def fromLASSOData():
         data = sio.loadmat("regress-highdim.mat")
         phi_train = data['X_train'].transpose()
