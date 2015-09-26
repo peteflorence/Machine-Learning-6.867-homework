@@ -34,7 +34,8 @@
 % Employ the following version of the ``usepackage'' statement for
 % submitting the draft version of the paper for review.  This will set
 % the note in the first column to ``Under review.  Do not distribute.''
-\usepackage{icml2015} 
+\usepackage{icml2015}
+\usepackage{amsmath}
 
 % Employ this version of the ``usepackage'' statement after the paper has
 % been accepted, when creating the final version.  This will set the
@@ -190,6 +191,39 @@ Visually the data look linear. However the one outlier in the training set is le
 %
 %
 Hence when we perform our model selection procedure we end up choose $M = 4$ rather than $M = 1$ because this choice of $M$ allows us to roughly hit the outlier and the bulk of the validation data points. However since the test set extends to larger magnitude $x$ values, we have a terrible fit on the test dataset, even though we get a relatively good fit on the validation data. Thus the lesson is that in the presence of outliers model selection can lead us to incorrect results.
+%
+%
+For the blog feedback there is only one parameter to choose during model selection, namely $\lambda$ since the feature set $\Phi$ has already been specified for us. The objective function that is being minimized during ridge regression is
+
+\begin{equation*}
+(\Phi w - y)^T(\Phi w - y) + \lambda ||w||_2^2 = \frac{1}{N}(\Phi w - y)^T(\Phi w - y) + \frac{\lambda}{N} ||w||_2^2
+\end{equation*}
+
+%
+%
+Hence, it really make sense to think about $\hat{\lambda} = \frac{\lambda}{N}$ since this removes the dependence on the size of the training data. For the curvefitting dataset we had a $\hat{\lambda}$ value of around $0.1$. Thus we test $\lambda \in [0.01,2]$. The results are shown in Figure \ref{blog-model-selection}.
+%
+%
+%
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{blog-model-selection}
+\caption{The x-axis is $\hat{\lambda} = \frac{\lambda}{N}$ plotted against the MSE of the validation set on the y-axis.}
+\label{blog-model-selection}
+\end{figure}
+%
+ Interestingly the plot is very flat. So the choice of regularize $\lambda$ is not having too much of an effect on the MSE of the validation data. In particular it seems that the fit of the model is much less dependent on $\lambda$ than in the curvefitting example.  The plot of $\hat{\lambda}$ against the MSE of the test set looks quite different however. It decreases fairly continuously as $\hat{\lambda}$ increases, see Figure \ref{blog-model-select-test}.
+ %
+ %
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{blog-model-select-test}
+\caption{The x-axis is $\hat{\lambda} = \frac{\lambda}{N}$ plotted against the MSE of the test set on the y-axis.}
+\label{blog-model-select-test}
+\end{figure}
+ %
+ %
+  One possibility for this strange behavior could be that the data is not well modeled by the linear model $\hat{y} = w^T x$. Glancing at the data one can see that many of the observations are zero, and then a a few have quite a high value, e.g. above 50. If, for example, the true data generating process depends on interactions between features we wouldn't be able to model it well with our linear model. This could be one explanation for the strange performance of the model selection procdedure.
 
 \section{Electronic Submission}
 \label{submission}
