@@ -45,7 +45,7 @@ class GradientDescent:
 
         return grad
 
-    def computeMin(self, x_initial, maxFunctionCalls=1000, useGradientCriterion=False, storeIterValues=False, printSummary=True):
+    def computeMin(self, x_initial, maxFunctionCalls=1000, useGradientCriterion=False, storeIterValues=False, storeIterX=False, printSummary=True):
 
         if x_initial is None:
             print "Please specify an initial guess"
@@ -56,6 +56,8 @@ class GradientDescent:
             self.iterValues = np.zeros((maxFunctionCalls,1))
 
 
+
+
         self.numFunctionCalls = 0
         self.numGradientCalls = 0
         self.numIterations = 0
@@ -64,6 +66,10 @@ class GradientDescent:
     
         f_old = self.evalF(x_current)
         eps = 1;
+
+        if storeIterX:
+            self.iterX = np.zeros((maxFunctionCalls,len(x_initial)))
+            self.iterX[0] = x_current
 
         while(np.abs(eps) > self.tol):
             self.numIterations += 1
@@ -77,6 +83,9 @@ class GradientDescent:
 
             if storeIterValues:
                 self.iterValues[self.numIterations-1] = f_current
+
+            if storeIterX:
+                self.iterX[self.numIterations,:] = x_current
 
             if self.numFunctionCalls >= maxFunctionCalls:
                 break;
