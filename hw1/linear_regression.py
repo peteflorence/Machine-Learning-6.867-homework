@@ -58,12 +58,27 @@ class LinearRegression:
         sse = np.linalg.norm(s)**2
         return sse
 
+    def SSE_gradient(self,w):
+        return 2.0*np.dot(self.phi.transpose(),np.dot(self.phi,w) - self.y)
+    
+
+    # compute sum of absolute errors, can optionally pass in phi and y
+    def SAEwReg(self,w,lam,phi=None, y=None):
+        if phi is None:
+            phi = self.phi
+
+        if y is None:
+            y = self.y
+
+        s = np.dot(phi,w) - y
+        saeWreg = np.linalg.norm(s,ord=1) + lam*np.linalg.norm(w)**2
+        return saeWreg
+
     #computes the mean square error
     def MSE(self,w, phi=None, y=None):
         return 1/(1.0*self.N)*self.SSE(w, phi=phi, y=y)
 
-    def SSE_gradient(self,w):
-        return 2.0*np.dot(self.phi.transpose(),np.dot(self.phi,w) - self.y)
+
 
     def LASSO_objective(self,w,lam):
         return self.MSE(w) + lam*np.linalg.norm(w,ord=1)
@@ -116,7 +131,7 @@ class LinearRegression:
         y_test = data['Y_test']
         y_test = np.reshape(y_test,(np.size(y_test),))
 
-        lasso = LinearRegression(x_train,y_train,1,phi=phi_train)
+        lasso = LinearRegression(y_train,y_train,1,phi=phi_train)
         return (lasso, phi_train, y_train, phi_test, y_test)
 
     # @staticmethod

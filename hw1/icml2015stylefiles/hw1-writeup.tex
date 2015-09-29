@@ -83,7 +83,7 @@
 %\end{abstract} 
 
 \section{Linear Basis Function Regression}
-We implemented the linear basis function regression in python and were able to get good agreement of our plots and regression weights with those in Bishop (MAYBE INCLUDE SOME PLOTS HERE???). The closed form solution to the linear least squares problem is convenient, however it requires inverting the matrix $\Phi^T \Phi$. An alternative to avoid this matrix inversion is to apply gradient descent to the sum of squared error (SSE) objective function given by $(\Phi w - y)^T(\Phi w - y)$. Differentiating the SSE with respect to $w$ gives a gradient of $2\Phi^T(\Phi^T w - y)$. Using this numerical gradient we can apply our gradient descent code from problem 1. Our code employs a fixed step size of $\eta$ and the termination criterion is as soon as $\epsilon_{n+1} = |SSE(w_n) - SSE(w_{n+1})| \leq \gamma $ where $\gamma$ is a tolerance parameter. Our initial parameter choices are $\eta = 0.05, \gamma = 1 \times 10^{-8}$. The initial guess is set to $w_0 = -w_{OLS}$ where $w_{OLS}$ are the true regression weights. For $M = 1$ gradient descent works quite well.
+We implemented the linear basis function regression in python and were able to get good agreement of our plots and regression weights with those in Bishop (MAYBE INCLUDE SOME PLOTS HERE???). The closed form solution to the linear least squares problem is convenient, however it requires inverting the matrix $\Phi^T \Phi$. An alternative to avoid this matrix inversion is to apply gradient descent to the sum of squared error (SSE) objective function given by $(\Phi w - y)^T(\Phi w - y)$. Differentiating the SSE with respect to $w$ gives a gradient of $2\Phi^T(\Phi^T w - y)$. Using this analytical gradient we can apply our gradient descent code from problem 1. Our code employs a fixed step size of $\eta$ and the termination criterion is as soon as $\epsilon_{n+1} = |SSE(w_n) - SSE(w_{n+1})| \leq \gamma $ where $\gamma$ is a tolerance parameter. Our initial parameter choices are $\eta = 0.05, \gamma = 1 \times 10^{-8}$. The initial guess is set to $w_0 = -w_{OLS}$ where $w_{OLS}$ are the true regression weights. For $M = 1$ gradient descent works quite well.
 
 \begin{tabular}{|l|l|l|}
 \hline
@@ -195,9 +195,10 @@ Hence when we perform our model selection procedure we end up choose $M = 4$ rat
 %
 For the blog feedback there is only one parameter to choose during model selection, namely $\lambda$ since the feature set $\Phi$ has already been specified for us. The objective function that is being minimized during ridge regression is
 
-\begin{equation*}
-(\Phi w - y)^T(\Phi w - y) + \lambda ||w||_2^2 = \frac{1}{N}(\Phi w - y)^T(\Phi w - y) + \frac{\lambda}{N} ||w||_2^2
-\end{equation*}
+\begin{align*}
+&(\Phi w - y)^T(\Phi w - y) + \lambda ||w||_2^2\\
+& = \frac{1}{N}(\Phi w - y)^T(\Phi w - y) + \frac{\lambda}{N} ||w||_2^2
+\end{align*}
 
 %
 %
@@ -223,7 +224,7 @@ Hence, it really make sense to think about $\hat{\lambda} = \frac{\lambda}{N}$ s
 \end{figure}
  %
  %
-  One possibility for this strange behavior could be that the data is not well modeled by the linear model $\hat{y} = w^T x$. Glancing at the data one can see that many of the observations are zero, and then a a few have quite a high value, e.g. above 50. If, for example, the true data generating process depends on interactions between features we wouldn't be able to model it well with our linear model. This could be one explanation for the strange performance of the model selection procdedure.
+  One possibility for this strange behavior could be that the data is not well modeled by the linear model $\hat{y} = w^T x$. Glancing at the data one can see that many of the observations are zero, and then a few have quite a high value, e.g. above 50. If, for example, the true data generating process depends on interactions between features we wouldn't be able to model it well with our linear model. This could be one explanation for the strange performance of the model selection procdedure.
 
 \section{Electronic Submission}
 \label{submission}
