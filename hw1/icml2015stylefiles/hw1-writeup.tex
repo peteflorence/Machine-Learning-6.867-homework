@@ -85,7 +85,7 @@
 %\end{abstract} 
 
 \section{Linear Basis Function Regression}
-We implemented the linear basis function regression in python and were able to get good agreement of our plots and regression weights with those in Bishop (MAYBE INCLUDE SOME PLOTS HERE???). The closed form solution to the linear least squares problem is convenient, however it requires inverting the matrix $\Phi^T \Phi$. An alternative to avoid this matrix inversion is to apply gradient descent to the sum of squared error (SSE) objective function given by $(\Phi w - y)^T(\Phi w - y)$. Differentiating the SSE with respect to $w$ gives a gradient of $2\Phi^T(\Phi^T w - y)$. Using this numerical gradient we can apply our gradient descent code from problem 1. Our code employs a fixed step size of $\eta$ and the termination criterion is as soon as $\epsilon_{n+1} = |SSE(w_n) - SSE(w_{n+1})| \leq \gamma $ where $\gamma$ is a tolerance parameter. Our initial parameter choices are $\eta = 0.05, \gamma = 1 \times 10^{-8}$. The initial guess is set to $w_0 = -w_{OLS}$ where $w_{OLS}$ are the true regression weights. For $M = 1$ gradient descent works quite well.
+We implemented the linear basis function regression in python and were able to get good agreement of our plots and regression weights with those in Bishop (MAYBE INCLUDE SOME PLOTS HERE???). The closed form solution to the linear least squares problem is convenient, however it requires inverting the matrix $\Phi^T \Phi$. An alternative to avoid this matrix inversion is to apply gradient descent to the sum of squared error (SSE) objective function given by $(\Phi w - y)^T(\Phi w - y)$. Differentiating the SSE with respect to $w$ gives a gradient of $2\Phi^T(\Phi^T w - y)$. Using this analytical gradient we can apply our gradient descent code from problem 1. Our code employs a fixed step size of $\eta$ and the termination criterion is as soon as $\epsilon_{n+1} = |SSE(w_n) - SSE(w_{n+1})| \leq \gamma $ where $\gamma$ is a tolerance parameter. Our initial parameter choices are $\eta = 0.05, \gamma = 1 \times 10^{-8}$. The initial guess is set to $w_0 = -w_{OLS}$ where $w_{OLS}$ are the true regression weights. For $M = 1$ gradient descent works quite well.
 
 \begin{tabular}{|l|l|l|}
 \hline
@@ -196,7 +196,14 @@ Hence when we perform our model selection procedure we end up choose $M = 4$ rat
 %
 %
 
+<<<<<<< HEAD
 For the blog feedback there is only one parameter to choose during model selection, namely $\lambda$ since the feature set $\Phi$ has already been specified for us. Similar to the previous analysis we perform a grid search over $\lambda$ to choose the best model.
+=======
+\begin{align*}
+&(\Phi w - y)^T(\Phi w - y) + \lambda ||w||_2^2\\
+& = \frac{1}{N}(\Phi w - y)^T(\Phi w - y) + \frac{\lambda}{N} ||w||_2^2
+\end{align*}
+>>>>>>> master
 
 %  The objective function that is being minimized during ridge regression is
 
@@ -232,6 +239,7 @@ Interestingly the plot is very flat. In other words the MSE of the validation se
 \end{figure}
  %
  %
+<<<<<<< HEAD
 \todo{Don't really understand why these two look so different} Looking at the actual regression weights $w$ shows for $\lambda = 3000$ they are less than $1.5$ in absolute value.
 
 %
