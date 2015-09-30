@@ -196,27 +196,8 @@ Hence when we perform our model selection procedure we end up choose $M = 4$ rat
 %
 %
 
-<<<<<<< HEAD
 For the blog feedback there is only one parameter to choose during model selection, namely $\lambda$ since the feature set $\Phi$ has already been specified for us. Similar to the previous analysis we perform a grid search over $\lambda$ to choose the best model.
-=======
-\begin{align*}
-&(\Phi w - y)^T(\Phi w - y) + \lambda ||w||_2^2\\
-& = \frac{1}{N}(\Phi w - y)^T(\Phi w - y) + \frac{\lambda}{N} ||w||_2^2
-\end{align*}
->>>>>>> master
-
-%  The objective function that is being minimized during ridge regression is
-
-% \begin{align*}
-% &(\Phi w - y)^T(\Phi w - y) + \lambda ||w||_2^2 \\
-% &= \frac{1}{N}(\Phi w - y)^T(\Phi w - y) + \frac{\lambda}{N} ||w||_2^2
-% \end{align*}
-
-% %
-% %
-% Hence, it really make sense to think about $\hat{\lambda} = \frac{\lambda}{N}$ since this removes the dependence on the size of the training data. For the curvefitting dataset we had a $\hat{\lambda}$ value of around $0.1$. Thus we test $\lambda \in [0.01,2]$. 
-% %
-% %
+%
 The results are shown in Figure \ref{blog-model-selection}.
 %
 %
@@ -239,7 +220,6 @@ Interestingly the plot is very flat. In other words the MSE of the validation se
 \end{figure}
  %
  %
-<<<<<<< HEAD
 \todo{Don't really understand why these two look so different} Looking at the actual regression weights $w$ shows for $\lambda = 3000$ they are less than $1.5$ in absolute value.
 
 %
