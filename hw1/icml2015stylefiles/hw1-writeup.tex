@@ -37,6 +37,9 @@
 \usepackage{icml2015}
 \usepackage{amsmath}
 
+\usepackage{todonotes}
+
+
 % Employ this version of the ``usepackage'' statement after the paper has
 % been accepted, when creating the final version.  This will set the
 % note in the first column to ``Proceedings of the...''
@@ -148,17 +151,18 @@ $x_0 = (1.0,1.0)$ & $-17.36$ & $-17.36$ & $-17.36$ \\ \hline
 
 
 \section{Linear Basis Function Regression}
-We implemented the linear basis function regression in python and were able to get good agreement of our plots and regression weights with those in Bishop (MAYBE INCLUDE SOME PLOTS HERE???). The closed form solution to the linear least squares problem is convenient, however it requires inverting the matrix $\Phi^T \Phi$. An alternative to avoid this matrix inversion is to apply gradient descent to the sum of squared error (SSE) objective function given by $(\Phi w - y)^T(\Phi w - y)$. Differentiating the SSE with respect to $w$ gives a gradient of $2\Phi^T(\Phi^T w - y)$. Using this analytical gradient we can apply our gradient descent code from problem 1. Our code employs a fixed step size of $\eta$ and the termination criterion is as soon as $\epsilon_{n+1} = |SSE(w_n) - SSE(w_{n+1})| \leq \gamma $ where $\gamma$ is a tolerance parameter. Our initial parameter choices are $\eta = 0.05, \gamma = 1 \times 10^{-8}$. The initial guess is set to $w_0 = -w_{OLS}$ where $w_{OLS}$ are the true regression weights. For $M = 1$ gradient descent works quite well.
+We implemented the linear basis function regression in python and were able to get good agreement of our plots and regression weights with those in Bishop. We omit these plots for brevity. The closed form solution to the linear least squares problem is convenient, however it requires inverting the matrix $\Phi^T \Phi$. An alternative to avoid this matrix inversion is to apply gradient descent to the sum of squared error (SSE) objective function given by $(\Phi w - y)^T(\Phi w - y)$. Differentiating the SSE with respect to $w$ gives a gradient of $2\Phi^T(\Phi^T w - y)$. We checked this analytical gradient against our numerical gradient implementation. Using $h = 1e-5$ in the central difference computation led to agreement between analytical and numerical gradient to with $1e-8$ for $M = 3$. Using this analytical gradient we can apply our gradient descent code from problem 1. Our code employs a fixed step size of $\eta$ and the termination criterion is as soon as $\epsilon_{n+1} = |SSE(w_n) - SSE(w_{n+1})| \leq \gamma $ where $\gamma$ is a tolerance parameter. Our initial parameter choices are $\eta = 0.05, \gamma = 1 \times 10^{-8}$. The initial guess is set to $w_0 = -w_{OLS}$ where $w_{OLS}$ are the true regression weights. For $M = 1$ gradient descent works quite well.
 
 \begin{tabular}{|l|l|l|}
 \hline
 Solver & Function Calls & Weights \\ \hline
 Gradient Descent & 113 & $(0.820, -1.267)$ \\ \hline
 Scipy & 20 & $(0.820, -1.267)$ \\ \hline
+OLS  & - & $(0.820, -1.267)$ \\ \hline
 \end{tabular}
 %
 
-Our gradient descent method converges to essentially the same regression weights as the scipy.optimize.minimize method, albeit with an order of magnitude more function calls. This is to be expected as the SSE function is convex in $w$ and hence there is a unique global minimum which can be reached by ``following'' the gradient downhill. Changing the initial guess to all zeros produces very similar performance in terms of objective value and number of function calls.e With $M=3$ however the performance of our solver changes dramatically however. In particular, if $w_{OLS}$ denote the true regression weights then
+Our gradient descent method converges to essentially the same regression weights as the scipy.optimize.minimize method and the true OLS regression weights, albeit with an order of magnitude more function calls. This is to be expected as the SSE function is convex in $w$ and hence there is a unique global minimum which can be reached by ``following'' the gradient downhill. Changing the initial guess to all zeros produces very similar performance in terms of objective value and number of function calls. With $M=3$ however the performance of our solver changes dramatically however. In particular, if $w_{OLS}$ denote the true regression weights then
 
 \begin{tabular}{|l|l|l|l|}
 \hline
@@ -170,50 +174,68 @@ Scipy & 114 & $4\times 10^{-5}$ & - \\ \hline
 %
 %
 
-Thus increasing the dimension of the optimization problem from 2 to 4 exposes the weaknesses of our gradient descent method. In particular it uses about 300 more function calls. The reason is that as we approach the optimum the SSE function becomes very flat and hence the gradient $\nabla SSE$ becomes very small. Hence, in our update step $w_{n+1} = w_n - \eta*\nabla SSE(w_n)$ the amount we move, $\eta*\nabla SSE(w_n)$ is becoming arbitrarily small. In particular if we plot function value vs iterations (Figure \ref{grad-descent-iterations}) we see that the plot is becomes very flat quite quicky. 
+Thus increasing the dimension of the optimization problem from 2 to 4 exposes the weaknesses of our gradient descent method. In particular it uses about $300$ times more function calls. The reason is that as we approach the optimum the SSE function becomes very flat and hence the gradient $\nabla SSE$ becomes very small. Hence, in our update step $w_{n+1} = w_n - \eta*\nabla SSE(w_n)$ the amount we move, $\eta*\nabla SSE(w_n)$ is becoming arbitrarily small. In particular if we plot function value vs iterations (Figure \ref{grad-descent-iterations}) we see that the plot becomes very flat quite quickly. Thus for most of the iterations of the algorithm we aren't really decreasing the value of the objective very much. 
 
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.5]{lin-reg-fig-1}
+\includegraphics[width=0.4\textwidth]{lin-reg-fig-1}
 \caption{Value of SSE at each iteration of our gradient descent algorithm, $\eta = 0.05$, $w_0 = 0$}
 \label{grad-descent-iterations}
-
 \end{figure}
 
-This is a result of our update step not moving us enough when the gradient becomes small. Reducing $\eta$ to $0.025$ just exacerbates this problem. In this case we require more iterations and achieve worse fit of the regression weights. If we try increasing $\eta = 0.07$ however the opposite happens. We adjust $w_{n+1}$ by too much and jumping to the other side of the ``bowl'' representing the SSE. Hence we end up bouncing back between different sides of the bowl and the solution ends up exploding. The effect of the inital guess isn't too important. Using $\eta = 0.05$ and choosing initial guess to the origin results in the number of function calls decreasing to about $34,000$ and doesn't change the achieved accuracy of the solution. This makes sense because since we are optimizing a convex function we have no risk of getting stuck in local minima and thus independent of where we start we should be able to follow the gradient down to the minimum.
+This is a result of our update step not moving us enough when the gradient becomes small. Reducing $\eta$ to $0.025$ just exacerbates this problem. In this case we require more iterations and achieve worse fit of the regression weights. If we try increasing $\eta = 0.07$ however the opposite happens. We adjust $w_{n+1}$ by too much and end up jumping to the other side of the ``bowl'' representing the SSE. Hence we end up bouncing back between different sides of the bowl and the solution ends up exploding. The effect of the inital guess for $M = 3$ isn't too important. Using $\eta = 0.05$ and choosing initial guess to the origin results in the number of function calls decreasing to about $34,000$ and doesn't change the achieved accuracy of the solution. This makes sense because since we are optimizing a convex function we have no risk of getting stuck in local minima and thus independent of where we start we should be able to follow the gradient down to the minimum.
 
-The results for $M = 9$ are very interesting as well. The value of $SSE(w_{OLS})$ is $1e-7$. If we set the initial guess for the scipy minimization to be $w_0 = 1.5*w_{OLS}$ then it achieves a minimum value of $0.09$ however if we set $w_0 = 0$ then the method only achieves $SSE = 0.314$. Our own gradient descent method behaves similarly. Thus the performance of the gradient descent methods depends heavily on the initial guess. I believe that this is because since we are considering large powers of $x$ the function is very flat near the minimum. Thus gradient descent methods have a hard time making progress since locally the function is almost flat.
+The results for $M = 9$ are very interesting as well. The value of $SSE(w_{OLS})$ is $1e-7$. If we set the initial guess for the scipy minimization to be $w_0 = 1.5*w_{OLS}$ then it achieves a minimum value of $0.09$ however if we set $w_0 = 0$ then the method only achieves $SSE = 0.314$. Our own gradient descent method behaves similarly. Thus in this case the performance of the gradient descent method is quite sensitive to the initial guess. A graphical illustration of the difference in the regression function can be seen in Figures \ref{m_9_grad_descent_good} and \ref{m_9_grad_descent_bad} and the difference in fit is quite striking. Thus the initial guess for gradient descent has a very large impact on the shape of the regression function for the $M = 9$ case.
+%
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.4\textwidth]{m_9_grad_descent_good}
+\caption{Gradient descent with $M = 9, w_0 = 1.5*w_{OLS}$. Blue are datapoints, green is true regression function, red is estimated regression function}
+\label{m_9_grad_descent_good}
+\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.4\textwidth]{m_9_grad_descent_bad}
+\caption{Gradient descent with $M = 9, w_0 = 0*w_{OLS}$. Blue are datapoints, green is true regression function, red is estimated regression function}
+\label{m_9_grad_descent_bad}
+\end{figure}
+%
+%
+I believe that this is because since we are considering large powers of $x$ the function is very flat near the minimum. Thus gradient descent methods have a hard time making progress towards the minimum since the function is locally very flat. 
 
-If the basis functions were of the form $\phi_n(x)=\sin(2\pi n x)$ then we would expect a regression vector of the form $w = (1,0,0,...,0)$ since the data was actually generated from $\sin(2 \pi x)$ with Gaussian noise added. A potential disadvantage is that since the sin function is periodic you are imposing periodicity on your data. In particular $x $ and $x+1$ will map to the same value.
+If the basis functions were of the form $\phi_n(x)=\sin(2\pi n x)$ then we would expect a regression vector of the form $w = (1,0,0,...,0)$ since the data was actually generated from $\sin(2 \pi x)$ with Gaussian noise added. A potential disadvantage is that since the sin function is periodic you are imposing periodicity on your data. In particular $x $ and $x+1$ will map to the same value. In addition the set of functions $\mathcal{B} = \{\sin(2 \pi m x)\}_{m \in \mathbb{N}}$ aren't a basis for the space of functions. You need both $\sin$ and $\cos$ to form a basis. Thus there are functions, and hence datasets that are generated from such functions, that could not be well approximated by the basis $\mathcal{B}$. \todo{add more comments here}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Ridge Regression}
 As we saw in the previous section $M = 3$ provides a fairly good fit to the data. As can be seen in Figure \ref{ridge_m_3_lam_0-01} using $M = 3, \lambda = 0.01$ doesn't provide good performance.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\textwidth]{m_3_lam_0-01}
-\caption{Ridge regression with $M = 3, \lambda = 0.01$. $SSE = 1.54$}
+\includegraphics[width=0.4\textwidth]{m_3_lam_0-01}
+\caption{Ridge regression with $M = 3, \lambda = 0.01$. $SSE = 1.54$. Blue are datapoints, green is true regression function, red is estimated regression function}
 \label{ridge_m_3_lam_0-01}
 \end{figure} 
-In particular the $\lambda$ weight is too high and keeps the weights close to zero, which results in a relatively flat straight line. Reducing $\lambda $ to $0.001$ as in Figure \ref{ridge_m_3_lam_0-001} produces better results, as can be seen by comparing the SSE's.
-
+In particular the $\lambda$ weight is too high and keeps the regression weights close to zero, which results in a relatively flat nearly linear fit. Reducing $\lambda $ to $0.001$ as in Figure \ref{ridge_m_3_lam_0-001} produces better results, as can be seen by comparing the SSE's since it doesn't penalize the weights $w$ as much for being far from zero.
+%
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.5\textwidth]{m_3_lam_0-001}
-\caption{Ridge regression with $M = 3, \lambda = 0.001$. $SSE = 0.588$}
+\caption{Ridge regression with $M = 3, \lambda = 0.001$. $SSE = 0.588$. Blue are datapoints, green is true regression function, red is estimated regression function}
 \label{ridge_m_3_lam_0-001}
 \end{figure}
-
+%
 The interesting thing is that increasing $M$ while keeping $\lambda$ fixed doesn't adversely affect performance. In particular the prediction curve in red looks fairly similar even as we increase the number of features to $M = 9$ in Figure \ref{ridge_m_9_lam_0-001}. 
-
+%
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.5\textwidth]{m_3_lam_0-001}
-\caption{Ridge regression with $M = 9, \lambda = 0.001$. $SSE = 0.418$}
+\caption{Ridge regression with $M = 9, \lambda = 0.001$. $SSE = 0.418$. Blue are datapoints, green is true regression function, red is estimated regression function}
 \label{ridge_m_9_lam_0-001}
 \end{figure}
-
-Thus the regularizer $\lambda$ helps us to avoid overfitting, contrary to the standard OLS regression as in the previous section.
+%
+Thus the regularizer $\lambda$ helps us to avoid overfitting. In particular there is a very large difference between the fit between Figures \ref{ridge_m_9_lam_0-001} and \ref{m_9_grad_descent_good}.
 
 For the train, validate and test datasets we perform the following model selection procedure. Given $(M,\lambda)$ we run ridge regression on the training dataset to find the regression weights $w(M,\lambda)$. Then we compute the SSE using weights $w(M,\lambda)$ on the validation dataset, denote this by $SSE_v(M,\lambda)$. We choose $(M,\lambda)$ to minimize $SSE_v(M,\lambda)$. In essence we are using the training set to choose the weights, and then using the validation set to optimize over the model, given by $(M,\lambda)$. For each $M$ we search over $\lambda \in [0,10]$ to minimize $SSE_v(M,\lambda)$. Then we can check how well our model is doing on the test dataset. Table \ref{model-selection} shows the results.
 
@@ -233,41 +255,41 @@ $5$ & $8.9$ & $10.3$ & $2.19$ & $36.5$ \\
 \end{table}
 %
 %
-The result of the model selection is $M=4,\lambda=0.85$. However this is misleading. If we plot the three datasets and the prediction function resulting from the weights we get
+The result of the model selection is $M=4,\lambda=0.85$. However this is misleading result. Consider the plot of the three datasets and the prediction function in Figure \ref{m-4-model-selection}.
 %
 %
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\textwidth]{m-4-model-selection}
-\caption{Ridge regression with $M = 3, \lambda = 0.85$. Train datapoints are red, validation are blue, and test are green}
+\includegraphics[width=0.4\textwidth]{m-4-model-selection}
+\caption{Ridge regression with $M = 4, \lambda = 0.85$. Train datapoints are red, validation are blue, and test are green. Estimated regression function is in red.}
 \label{m-4-model-selection}
 \end{figure}
 %
 %
-Visually the data look linear. However the one outlier in the training set is leading to bad fits for the $M = 1$ case as can be seen in Figure \ref{m-1-model-selection}
-
+Visually the data look linear. However the one outlier in the training set is leading to bad fits for the $M = 1$ case as can be seen in Figure \ref{m-1-model-selection}.
+%
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\textwidth]{m-1-model-selection}
-\caption{Ridge regression with $M = 1, \lambda = 6.5$. Train datapoints are red, validation are blue, and test are green}
+\includegraphics[width=0.4\textwidth]{m-1-model-selection}
+\caption{Ridge regression with $M = 1, \lambda = 6.5$. Train datapoints are red, validation are blue, and test are green. Estimated regression function is in red.}
 \label{m-1-model-selection}
 \end{figure}
 %
 %
 %
-Hence when we perform our model selection procedure we end up choose $M = 4$ rather than $M = 1$ because this choice of $M$ allows us to roughly hit the outlier and the bulk of the validation data points. However since the test set extends to larger magnitude $x$ values, we have a terrible fit on the test dataset, even though we get a relatively good fit on the validation data. Thus the lesson is that in the presence of outliers model selection can lead us to incorrect results.
+Hence when we perform our model selection procedure we end up choose $M = 4$ rather than $M = 1$ because this choice of $M$ allows us to roughly hit the outlier and the bulk of the validation data points. However since the test set extends to larger magnitude $x$ values, we have a terrible fit on the test dataset, even though we get a relatively good fit on the validation data. Thus the lesson is that in the presence of outliers model selection together with ridge regression can lead us to incorrect results.
 %
-%
-For the blog feedback there is only one parameter to choose during model selection, namely $\lambda$ since the feature set $\Phi$ has already been specified for us. The objective function that is being minimized during ridge regression is
 
-\begin{align*}
-&(\Phi w - y)^T(\Phi w - y) + \lambda ||w||_2^2\\
-& = \frac{1}{N}(\Phi w - y)^T(\Phi w - y) + \frac{\lambda}{N} ||w||_2^2
-\end{align*}
+% For the blog feedback data there is only one parameter to choose during model selection, namely $\lambda$ since the feature set $\Phi$ has already been specified for us. The objective function that is being minimized during ridge regression is
 
+% \begin{align*}
+% &(\Phi w - y)^T(\Phi w - y) + \lambda ||w||_2^2\\
+% & = \frac{1}{N}(\Phi w - y)^T(\Phi w - y) + \frac{\lambda}{N} ||w||_2^2
+% \end{align*}
+
+% %
 %
-%
-Hence, it really make sense to think about $\hat{\lambda} = \frac{\lambda}{N}$ since this removes the dependence on the size of the training data. For the curvefitting dataset we had a $\hat{\lambda}$ value of around $0.1$. Thus we test $\lambda \in [0.01,2]$. The results are shown in Figure \ref{blog-model-selection}.
+We ran ridge regression with a variety of $\lambda$ values and saw that $\lambda \in [0.01,2]$ provided the best performance. Thus we computed ridge regression for a grid of $\lambda$ values in $[0.01,2]$. The results are shown in Figure \ref{blog-model-selection}.
 %
 %
 %
