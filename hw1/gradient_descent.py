@@ -119,7 +119,7 @@ class GradientDescent:
 
     # compute one update step of gradient descent
     def gradDescentUpdate(self, x):
-        x_new = x - self.stepSize*self.evalGradient(x)
+        x_new = x - self.stepSize*self.evalGradient(x).T
         f_new = self.evalF(x_new)
         return (x_new, f_new)
 
