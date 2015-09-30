@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  27 SEP 2015 19:11
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  30 SEP 2015 09:41
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -336,7 +336,14 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 567.
 LaTeX Info: Redefining \[ on input line 2665.
 LaTeX Info: Redefining \] on input line 2666.
 )
-(./hw1-writeup.aux)
+(./hw1-writeup.aux
+
+LaTeX Warning: Label `grad-descent-iterations' multiply defined.
+
+
+LaTeX Warning: Label `grad-descent-iterations' multiply defined.
+
+)
 \openout1 = `hw1-writeup.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 52.
@@ -354,8 +361,7 @@ LaTeX Font Info:    ... okay on input line 52.
 LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 52.
 LaTeX Font Info:    ... okay on input line 52.
 LaTeX Font Info:    Try loading font information for OT1+ptm on input line 52.
-
-(/usr/local/texlive/2014/texmf-dist/tex/latex/psnfss/ot1ptm.fd
+ (/usr/local/texlive/2014/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 (/usr/local/texlive/2014/texmf-dist/tex/context/base/supp-pdf.mkii
@@ -408,10 +414,37 @@ LaTeX Info: Redefining \nameref on input line 52.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 85.
 
-<lin-reg-fig-1.png, id=5, 384.43625pt x 256.96pt>
+<polynomialdescent.pdf, id=4, 542.025pt x 145.54375pt>
+File: polynomialdescent.pdf Graphic file (type pdf)
+
+<use polynomialdescent.pdf>
+Package pdftex.def Info: polynomialdescent.pdf used on input line 95.
+(pdftex.def)             Requested size: 487.81798pt x 130.98814pt.
+
+<negGaussianDescent.pdf, id=5, 541.02126pt x 155.58125pt>
+File: negGaussianDescent.pdf Graphic file (type pdf)
+
+<use negGaussianDescent.pdf>
+Package pdftex.def Info: negGaussianDescent.pdf used on input line 102.
+(pdftex.def)             Requested size: 486.91463pt x 140.02182pt.
+
+Overfull \hbox (6.95538pt too wide) in paragraph at lines 124--134
+[][] 
+ []
+
+
+Overfull \hbox (12.73561pt too wide) in paragraph at lines 137--147
+[][] 
+ []
+
+
+Underfull \vbox (badness 1383) has occurred while \output is active []
+
+
+<lin-reg-fig-1.png, id=7, 384.43625pt x 256.96pt>
 File: lin-reg-fig-1.png Graphic file (type png)
  <use lin-reg-fig-1.png>
-Package pdftex.def Info: lin-reg-fig-1.png used on input line 112.
+Package pdftex.def Info: lin-reg-fig-1.png used on input line 177.
 (pdftex.def)             Requested size: 192.21765pt x 128.47968pt.
 
 
@@ -420,157 +453,167 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
  [1{/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 
 
- <./lin-reg-fig-1.png>] <m_3_lam_0-01.png, id=28, 383.4325pt x 256.96pt>
+]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [2 <./polynomialdescent.pdf> <./negGaussianDescent.pdf>]
+<m_3_lam_0-01.png, id=113, 383.4325pt x 256.96pt>
 File: m_3_lam_0-01.png Graphic file (type png)
  <use m_3_lam_0-01.png>
-Package pdftex.def Info: m_3_lam_0-01.png used on input line 129.
+Package pdftex.def Info: m_3_lam_0-01.png used on input line 194.
 (pdftex.def)             Requested size: 243.91124pt x 163.46184pt.
 
-Overfull \hbox (9.03374pt too wide) in paragraph at lines 129--130
+Overfull \hbox (9.03374pt too wide) in paragraph at lines 194--195
  [][] 
  []
 
-<m_3_lam_0-001.png, id=30, 383.4325pt x 256.96pt>
+<m_3_lam_0-001.png, id=115, 383.4325pt x 256.96pt>
 File: m_3_lam_0-001.png Graphic file (type png)
  <use m_3_lam_0-001.png>
-Package pdftex.def Info: m_3_lam_0-001.png used on input line 137.
+Package pdftex.def Info: m_3_lam_0-001.png used on input line 202.
 (pdftex.def)             Requested size: 243.91124pt x 163.46184pt.
 
-Overfull \hbox (9.03374pt too wide) in paragraph at lines 137--138
+Overfull \hbox (9.03374pt too wide) in paragraph at lines 202--203
  [][] 
  []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
 
 File: m_3_lam_0-001.png Graphic file (type png)
 <use m_3_lam_0-001.png>
-Package pdftex.def Info: m_3_lam_0-001.png used on input line 146.
+Package pdftex.def Info: m_3_lam_0-001.png used on input line 211.
 (pdftex.def)             Requested size: 243.91124pt x 163.46184pt.
-
-Overfull \hbox (9.03374pt too wide) in paragraph at lines 146--147
- [][] 
- []
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-<m-4-model-selection.png, id=33, 369.38pt x 256.96pt>
-File: m-4-model-selection.png Graphic file (type png)
-
-<use m-4-model-selection.png>
-Package pdftex.def Info: m-4-model-selection.png used on input line 176.
-(pdftex.def)             Requested size: 243.91124pt x 169.67645pt.
-
-Overfull \hbox (9.03374pt too wide) in paragraph at lines 176--177
- [][] 
- []
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-<m-1-model-selection.png, id=35, 369.38pt x 256.96pt>
-File: m-1-model-selection.png Graphic file (type png)
-
-<use m-1-model-selection.png>
-Package pdftex.def Info: m-1-model-selection.png used on input line 186.
-(pdftex.def)             Requested size: 243.91124pt x 169.67645pt.
-
-Overfull \hbox (9.03374pt too wide) in paragraph at lines 186--187
- [][] 
- []
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-Underfull \vbox (badness 2035) has occurred while \output is active []
-
- [2 <./m_3_lam_0-01.png> <./m_3_lam_0-001.png>]
-<blog-model-selection.png, id=49, 376.40625pt x 262.9825pt>
-File: blog-model-selection.png Graphic file (type png)
-
-<use blog-model-selection.png>
-Package pdftex.def Info: blog-model-selection.png used on input line 211.
-(pdftex.def)             Requested size: 243.91124pt x 170.41893pt.
 
 Overfull \hbox (9.03374pt too wide) in paragraph at lines 211--212
  [][] 
  []
 
-<blog-model-select-test.png, id=51, 390.45876pt x 256.96pt>
-File: blog-model-select-test.png Graphic file (type png)
 
-<use blog-model-select-test.png>
-Package pdftex.def Info: blog-model-select-test.png used on input line 221.
-(pdftex.def)             Requested size: 243.91124pt x 160.51726pt.
+LaTeX Warning: `h' float specifier changed to `ht'.
 
-Overfull \hbox (9.03374pt too wide) in paragraph at lines 221--222
+<m-4-model-selection.png, id=118, 369.38pt x 256.96pt>
+File: m-4-model-selection.png Graphic file (type png)
+
+<use m-4-model-selection.png>
+Package pdftex.def Info: m-4-model-selection.png used on input line 241.
+(pdftex.def)             Requested size: 243.91124pt x 169.67645pt.
+
+Overfull \hbox (9.03374pt too wide) in paragraph at lines 241--242
  [][] 
  []
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[3 <./m-4-model-selection.png> <./m-1-model-selection.png> <./blog-model-select
-ion.png> <./blog-model-select-test.png>]
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 236.
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 236.
+<m-1-model-selection.png, id=120, 369.38pt x 256.96pt>
+File: m-1-model-selection.png Graphic file (type png)
 
+<use m-1-model-selection.png>
+Package pdftex.def Info: m-1-model-selection.png used on input line 251.
+(pdftex.def)             Requested size: 243.91124pt x 169.67645pt.
+
+Overfull \hbox (9.03374pt too wide) in paragraph at lines 251--252
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[3 <./lin-reg-fig-1.png> <./m_3_lam_0-01.png> <./m_3_lam_0-001.png>]
+<blog-model-selection.png, id=134, 376.40625pt x 262.9825pt>
+File: blog-model-selection.png Graphic file (type png)
+
+<use blog-model-selection.png>
+Package pdftex.def Info: blog-model-selection.png used on input line 276.
+(pdftex.def)             Requested size: 243.91124pt x 170.41893pt.
+
+Overfull \hbox (9.03374pt too wide) in paragraph at lines 276--277
+ [][] 
+ []
+
+<blog-model-select-test.png, id=136, 390.45876pt x 256.96pt>
+File: blog-model-select-test.png Graphic file (type png)
+
+<use blog-model-select-test.png>
+Package pdftex.def Info: blog-model-select-test.png used on input line 286.
+(pdftex.def)             Requested size: 243.91124pt x 160.51726pt.
+
+Overfull \hbox (9.03374pt too wide) in paragraph at lines 286--287
+ [][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 301.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 301.
 
 (/usr/local/texlive/2014/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 LaTeX Font Info:    Font shape `OT1/pcr/bx/n' in size <10> not available
-(Font)              Font shape `OT1/pcr/b/n' tried instead on input line 236.
+(Font)              Font shape `OT1/pcr/b/n' tried instead on input line 301.
 
-Underfull \hbox (badness 10000) in paragraph at lines 238--240
+Underfull \hbox (badness 10000) in paragraph at lines 303--305
 \OT1/ptm/m/n/10 Send ques-tions about sub-mis-sion and elec-tronic
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 238--240
+Underfull \hbox (badness 10000) in paragraph at lines 303--305
 \OT1/ptm/m/n/10 tem-plates to \OT1/pcr/m/n/10 francis.bach@inria.fr,
  []
 
-LaTeX Font Info:    Try loading font information for OMS+ptm on input line 244.
+[4 <./m-4-model-selection.png> <./m-1-model-selection.png> <./blog-model-select
+ion.png>]
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 309.
 
-(/usr/local/texlive/2014/texmf-dist/tex/latex/psnfss/omsptm.fd
+ (/usr/local/texlive/2014/texmf-dist/tex/latex/psnfss/omsptm.fd
 File: omsptm.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 244.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 309.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 297.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 362.
 
-Overfull \hbox (13.52222pt too wide) in paragraph at lines 309--309
+Overfull \hbox (13.52222pt too wide) in paragraph at lines 374--374
 []\OT1/pcr/m/n/9 dvips -Ppdf -tletter -G0 -o paper.ps paper.dvi[] 
  []
 
-[4]
-Underfull \hbox (badness 1748) in paragraph at lines 347--349
+[5 <./blog-model-select-test.png>]
+Underfull \hbox (badness 1748) in paragraph at lines 412--414
 []\OT1/ptm/m/n/10 For those us-ing the \OT1/ptm/b/n/10 L[]T[]X \OT1/ptm/m/n/10 
 style file, sim-ply change
  []
 
 
-Package natbib Warning: Citation `langley00' on page 5 undefined on input line 
-417.
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
-Package natbib Warning: Citation `anonymous' on page 5 undefined on input line 
-423.
+
+Package natbib Warning: Citation `langley00' on page 6 undefined on input line 
+482.
+
+
+Package natbib Warning: Citation `anonymous' on page 6 undefined on input line 
+488.
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [5]
-Underfull \hbox (badness 1796) in paragraph at lines 451--459
+ [6]
+Underfull \hbox (badness 1796) in paragraph at lines 516--524
 []\OT1/ptm/m/n/10 The pa-per ab-stract should be-gin in the left col-umn,
  []
 
@@ -578,122 +621,129 @@ Underfull \hbox (badness 1796) in paragraph at lines 451--459
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
-<icml_numpapers.pdf, id=91, 498.86375pt x 416.55624pt>
+<icml_numpapers.pdf, id=177, 498.86375pt x 416.55624pt>
 File: icml_numpapers.pdf Graphic file (type pdf)
 
 <use icml_numpapers.pdf>
-Package pdftex.def Info: icml_numpapers.pdf used on input line 502.
+Package pdftex.def Info: icml_numpapers.pdf used on input line 567.
 (pdftex.def)             Requested size: 234.8775pt x 196.12468pt.
- [6 <./icml_numpapers.pdf>]
+ [7 <./icml_numpapers.pdf>]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
-Package natbib Warning: Citation `Samuel59' on page 7 undefined on input line 6
-22.
+Package natbib Warning: Citation `Samuel59' on page 8 undefined on input line 6
+87.
 
 
-Package natbib Warning: Citation `Samuel59' on page 7 undefined on input line 6
-24.
+Package natbib Warning: Citation `Samuel59' on page 8 undefined on input line 6
+89.
 
 
-Package natbib Warning: Citation `kearns89' on page 7 undefined on input line 6
-25.
+Package natbib Warning: Citation `kearns89' on page 8 undefined on input line 6
+90.
 
 
-Package natbib Warning: Citation `Samuel59' on page 7 undefined on input line 6
-25.
+Package natbib Warning: Citation `Samuel59' on page 8 undefined on input line 6
+90.
 
 
-Package natbib Warning: Citation `mitchell80' on page 7 undefined on input line
- 625.
+Package natbib Warning: Citation `mitchell80' on page 8 undefined on input line
+ 690.
 
 
-Package natbib Warning: Citation `MachineLearningI' on page 7 undefined on inpu
-t line 627.
+Package natbib Warning: Citation `MachineLearningI' on page 8 undefined on inpu
+t line 692.
 
 
-Package natbib Warning: Citation `Samuel59' on page 7 undefined on input line 6
-38.
+Package natbib Warning: Citation `Samuel59' on page 8 undefined on input line 7
+03.
 
 
-Package natbib Warning: Citation `langley00' on page 7 undefined on input line 
-638.
+Package natbib Warning: Citation `langley00' on page 8 undefined on input line 
+703.
 
 
-Package natbib Warning: Citation `Newell81' on page 7 undefined on input line 6
-38.
+Package natbib Warning: Citation `Newell81' on page 8 undefined on input line 7
+03.
 
 
-Package natbib Warning: Citation `DudaHart2nd' on page 7 undefined on input lin
-e 638.
+Package natbib Warning: Citation `DudaHart2nd' on page 8 undefined on input lin
+e 703.
 
 
-Package natbib Warning: Citation `MachineLearningI' on page 7 undefined on inpu
-t line 638.
+Package natbib Warning: Citation `MachineLearningI' on page 8 undefined on inpu
+t line 703.
 
 
-Package natbib Warning: Citation `mitchell80' on page 7 undefined on input line
- 639.
+Package natbib Warning: Citation `mitchell80' on page 8 undefined on input line
+ 704.
 
 
-Package natbib Warning: Citation `kearns89' on page 7 undefined on input line 6
-39.
+Package natbib Warning: Citation `kearns89' on page 8 undefined on input line 7
+04.
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 7649) has occurred while \output is active []
 
- [7]
+ [8]
 
-Package natbib Warning: Citation `langley00' undefined on input line 676.
+Package natbib Warning: Citation `langley00' undefined on input line 741.
 
 No file hw1-writeup.bbl.
 
 Package natbib Warning: There were undefined citations.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 681.
-[8
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 746.
+[9
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 681.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 746.
  (./hw1-writeup.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 681.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 681.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 746.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 746.
 Package rerunfilecheck Info: File `hw1-writeup.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 681.
+
+
+LaTeX Warning: There were multiply-defined labels.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 746.
  ) 
 Here is how much of TeX's memory you used:
- 6984 strings out of 493117
- 99551 string characters out of 6135433
- 207731 words of memory out of 5000000
- 10287 multiletter control sequences out of 15000+600000
- 28990 words of font info for 63 fonts, out of 8000000 for 9000
+ 7008 strings out of 493117
+ 99934 string characters out of 6135433
+ 216774 words of memory out of 5000000
+ 10300 multiletter control sequences out of 15000+600000
+ 30537 words of font info for 68 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 30i,11n,45p,1103b,560s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 30i,11n,45p,1087b,560s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2014/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
-exlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
-xlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texl
-ive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texliv
-e/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/local/texlive/
-2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/20
-14/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2014/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2014/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2014/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2014/texmf-d
-ist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2014/texmf-dis
-t/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2014/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2014/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2014/texmf-dist/fo
-nts/type1/urw/courier/ucrb8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type
-1/urw/courier/ucrr8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/ti
-mes/utmb8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/times/utmr8a
-.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr
-/local/texlive/2014/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on hw1-writeup.pdf (8 pages, 283451 bytes).
+exlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/te
+xlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/tex
+live/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texl
+ive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texliv
+e/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/
+2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/local/texlive/20
+14/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2014
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2014/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2014/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2014/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2014/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2014/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2014/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2014/texmf-dist/font
+s/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2014/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2014/texmf-dist/fonts/
+type1/urw/courier/ucrb8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/ur
+w/courier/ucrr8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/times/
+utmb8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/times/utmr8a.pfb
+></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/loc
+al/texlive/2014/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on hw1-writeup.pdf (9 pages, 469583 bytes).
 PDF statistics:
- 202 PDF objects out of 1000 (max. 8388607)
- 156 compressed objects within 2 object streams
- 45 named destinations out of 1000 (max. 500000)
- 41 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 297 PDF objects out of 1000 (max. 8388607)
+ 220 compressed objects within 3 object streams
+ 49 named destinations out of 1000 (max. 500000)
+ 51 words of extra memory for PDF output out of 10000 (max. 10000000)
 
