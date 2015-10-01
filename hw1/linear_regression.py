@@ -21,6 +21,8 @@ class LinearRegression:
         self.x = 1.0*np.reshape(x,(np.size(x),))
         self.numFeatures = M+1
 
+        self.lam = 0.1
+
         # allow the user to pass in the feature matrix phi if so desired
         if phi is None:
             self.initializePhi()
@@ -96,7 +98,7 @@ class LinearRegression:
     
 
     # compute sum of absolute errors, can optionally pass in phi and y
-    def SAEwReg(self,w,lam=0.1, phi=None, y=None):
+    def SAEwReg(self,w, phi=None, y=None):
         if phi is None:
             phi = self.phi
 
@@ -104,7 +106,7 @@ class LinearRegression:
             y = self.y
 
         s = np.dot(phi,w) - y
-        saeWreg = np.linalg.norm(s,ord=1) + lam*np.linalg.norm(w)**2
+        saeWreg = np.linalg.norm(s,ord=1) + self.lam*np.linalg.norm(w)**2
         return saeWreg
 
     #computes the mean square error
