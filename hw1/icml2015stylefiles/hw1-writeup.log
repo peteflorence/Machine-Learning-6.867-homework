@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  1 OCT 2015 09:51
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  1 OCT 2015 10:24
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -735,13 +735,13 @@ LaTeX Info: Redefining \nameref on input line 62.
 
  ABD: EveryShipout initializing macros
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 95.
-LaTeX Font Info:    Try loading font information for U+msa on input line 96.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 90.
+LaTeX Font Info:    Try loading font information for U+msa on input line 91.
 
 (/usr/local/texlive/2014/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 96.
+LaTeX Font Info:    Try loading font information for U+msb on input line 91.
 
 (/usr/local/texlive/2014/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -750,67 +750,63 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 File: polynomialdescent.pdf Graphic file (type pdf)
 
 <use polynomialdescent.pdf>
-Package pdftex.def Info: polynomialdescent.pdf used on input line 102.
+Package pdftex.def Info: polynomialdescent.pdf used on input line 97.
 (pdftex.def)             Requested size: 487.81798pt x 130.98814pt.
 
 <negGaussianDescent.pdf, id=8, 541.02126pt x 155.58125pt>
 File: negGaussianDescent.pdf Graphic file (type pdf)
 
 <use negGaussianDescent.pdf>
-Package pdftex.def Info: negGaussianDescent.pdf used on input line 111.
+Package pdftex.def Info: negGaussianDescent.pdf used on input line 106.
 (pdftex.def)             Requested size: 486.91463pt x 140.02182pt.
 
 
-Package xcolor Warning: Incompatible color definition on input line 116.
+Package xcolor Warning: Incompatible color definition on input line 111.
 
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 120.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 115.
 
 (/usr/local/texlive/2014/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
-Overfull \hbox (6.95538pt too wide) in paragraph at lines 138--149
+Overfull \hbox (6.95538pt too wide) in paragraph at lines 133--144
 [][]
  []
 
-[1{/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
+[1
 
 
 
-]
+{/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [2 <./polynomialdescent.pdf> <./negGaussianDescent.pdf>]
-Underfull \hbox (badness 1412) in paragraph at lines 180--181
-[]\OT1/ptm/m/n/10 Our gra-di-ent de-scent method con-verges to es-sen-tially
- []
 
-
-Package xcolor Warning: Incompatible color definition on input line 192.
+Package xcolor Warning: Incompatible color definition on input line 190.
 
 <lin-reg-fig-1.png, id=118, 384.43625pt x 256.96pt>
 File: lin-reg-fig-1.png Graphic file (type png)
  <use lin-reg-fig-1.png>
-Package pdftex.def Info: lin-reg-fig-1.png used on input line 196.
+Package pdftex.def Info: lin-reg-fig-1.png used on input line 194.
 (pdftex.def)             Requested size: 195.126pt x 130.42444pt.
 
 
-Package xcolor Warning: Incompatible color definition on input line 203.
+Package xcolor Warning: Incompatible color definition on input line 201.
 
 
-Package xcolor Warning: Incompatible color definition on input line 203.
+Package xcolor Warning: Incompatible color definition on input line 201.
 
 <m_9_grad_descent_good.png, id=122, 389.455pt x 272.01625pt>
 File: m_9_grad_descent_good.png Graphic file (type png)
 
 <use m_9_grad_descent_good.png>
-Package pdftex.def Info: m_9_grad_descent_good.png used on input line 207.
+Package pdftex.def Info: m_9_grad_descent_good.png used on input line 205.
 (pdftex.def)             Requested size: 195.126pt x 136.28587pt.
 
 <m_9_grad_descent_bad.png, id=123, 398.48875pt x 272.01625pt>
 File: m_9_grad_descent_bad.png Graphic file (type png)
 
 <use m_9_grad_descent_bad.png>
-Package pdftex.def Info: m_9_grad_descent_bad.png used on input line 213.
+Package pdftex.def Info: m_9_grad_descent_bad.png used on input line 211.
 (pdftex.def)             Requested size: 195.126pt x 133.1978pt.
 
 
@@ -818,133 +814,120 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 [3 <./lin-reg-fig-1.png> <./m_9_grad_descent_good.png>]
 
-Package xcolor Warning: Incompatible color definition on input line 227.
+Package xcolor Warning: Incompatible color definition on input line 225.
 
-<m_3_lam_0-01.png, id=135, 383.4325pt x 256.96pt>
+<m_3_lam_0-01.png, id=136, 383.4325pt x 256.96pt>
 File: m_3_lam_0-01.png Graphic file (type png)
  <use m_3_lam_0-01.png>
-Package pdftex.def Info: m_3_lam_0-01.png used on input line 231.
+Package pdftex.def Info: m_3_lam_0-01.png used on input line 229.
 (pdftex.def)             Requested size: 195.126pt x 130.76555pt.
 
 
-Package xcolor Warning: Incompatible color definition on input line 235.
+Package xcolor Warning: Incompatible color definition on input line 233.
 
-<m_3_lam_0-001.png, id=137, 383.4325pt x 256.96pt>
+<m_3_lam_0-001.png, id=138, 383.4325pt x 256.96pt>
 File: m_3_lam_0-001.png Graphic file (type png)
  <use m_3_lam_0-001.png>
-Package pdftex.def Info: m_3_lam_0-001.png used on input line 239.
+Package pdftex.def Info: m_3_lam_0-001.png used on input line 237.
 (pdftex.def)             Requested size: 195.126pt x 130.76555pt.
 
 
-Package xcolor Warning: Incompatible color definition on input line 244.
+Package xcolor Warning: Incompatible color definition on input line 242.
 
-<m_9_lam_0-001.png, id=139, 383.4325pt x 256.96pt>
+<m_9_lam_0-001.png, id=140, 383.4325pt x 256.96pt>
 File: m_9_lam_0-001.png Graphic file (type png)
  <use m_9_lam_0-001.png>
-Package pdftex.def Info: m_9_lam_0-001.png used on input line 248.
+Package pdftex.def Info: m_9_lam_0-001.png used on input line 246.
 (pdftex.def)             Requested size: 195.126pt x 130.76555pt.
 
 
-Package xcolor Warning: Incompatible color definition on input line 253.
+Package xcolor Warning: Incompatible color definition on input line 251.
 
 
-Package xcolor Warning: Incompatible color definition on input line 253.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
+Package xcolor Warning: Incompatible color definition on input line 251.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Package xcolor Warning: Incompatible color definition on input line 255.
+LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Package xcolor Warning: Incompatible color definition on input line 273.
+Package xcolor Warning: Incompatible color definition on input line 253.
 
-<m-4-model-selection.png, id=144, 369.38pt x 256.96pt>
+
+Package xcolor Warning: Incompatible color definition on input line 271.
+
+<m-4-model-selection.png, id=145, 369.38pt x 256.96pt>
 File: m-4-model-selection.png Graphic file (type png)
 
 <use m-4-model-selection.png>
-Package pdftex.def Info: m-4-model-selection.png used on input line 278.
+Package pdftex.def Info: m-4-model-selection.png used on input line 276.
 (pdftex.def)             Requested size: 195.126pt x 135.74117pt.
 
 
-Package xcolor Warning: Incompatible color definition on input line 284.
+Package xcolor Warning: Incompatible color definition on input line 282.
 
-<m-1-model-selection.png, id=146, 369.38pt x 256.96pt>
+<m-1-model-selection.png, id=147, 369.38pt x 256.96pt>
 File: m-1-model-selection.png Graphic file (type png)
 
 <use m-1-model-selection.png>
-Package pdftex.def Info: m-1-model-selection.png used on input line 288.
+Package pdftex.def Info: m-1-model-selection.png used on input line 286.
 (pdftex.def)             Requested size: 195.126pt x 135.74117pt.
 
+Underfull \vbox (badness 1502) has occurred while \output is active []
 
-LaTeX Warning: `h' float specifier changed to `ht'.
+ [4 <./m_9_grad_descent_bad.png> <./m_3_lam_0-01.png> <./m_3_lam_0-001.png> <./
+m_9_lam_0-001.png>]
 
+Package xcolor Warning: Incompatible color definition on input line 297.
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[4 <./m_9_grad_descent_bad.png> <./m_3_lam_0-01.png> <./m_3_lam_0-001.png> <./m
-_9_lam_0-001.png>]
-
-Package xcolor Warning: Incompatible color definition on input line 299.
-
-<blog-model-selection.png, id=163, 384.43625pt x 262.9825pt>
+<blog-model-selection.png, id=162, 384.43625pt x 262.9825pt>
 File: blog-model-selection.png Graphic file (type png)
 
 <use blog-model-selection.png>
-Package pdftex.def Info: blog-model-selection.png used on input line 307.
+Package pdftex.def Info: blog-model-selection.png used on input line 305.
 (pdftex.def)             Requested size: 195.126pt x 133.48125pt.
 
 
-LaTeX Warning: `h' float specifier changed to `ht'.
+Package xcolor Warning: Incompatible color definition on input line 310.
 
-
-Package xcolor Warning: Incompatible color definition on input line 312.
-
-<blog-model-select-test.png, id=165, 387.4475pt x 256.96pt>
+<blog-model-select-test.png, id=164, 387.4475pt x 256.96pt>
 File: blog-model-select-test.png Graphic file (type png)
 
 <use blog-model-select-test.png>
-Package pdftex.def Info: blog-model-select-test.png used on input line 317.
+Package pdftex.def Info: blog-model-select-test.png used on input line 315.
 (pdftex.def)             Requested size: 195.126pt x 129.41284pt.
 
 
-LaTeX Warning: `h' float specifier changed to `ht'.
+Package xcolor Warning: Incompatible color definition on input line 338.
 
-
-Package xcolor Warning: Incompatible color definition on input line 340.
-
-<reg-weights-lam-350-normalize-true.png, id=167, 382.42876pt x 256.96pt>
+<reg-weights-lam-350-normalize-true.png, id=166, 382.42876pt x 256.96pt>
 File: reg-weights-lam-350-normalize-true.png Graphic file (type png)
 
 <use reg-weights-lam-350-normalize-true.png>
 Package pdftex.def Info: reg-weights-lam-350-normalize-true.png used on input l
-ine 344.
+ine 342.
 (pdftex.def)             Requested size: 243.91124pt x 163.88922pt.
 
-Overfull \hbox (9.03374pt too wide) in paragraph at lines 344--345
+Overfull \hbox (9.03374pt too wide) in paragraph at lines 342--343
  [][] 
  []
 
 
-Underfull \hbox (badness 1590) in paragraph at lines 345--345
+Underfull \hbox (badness 1590) in paragraph at lines 343--343
 [][][]\OT1/ptm/m/n/9 A plot of the re-gres-sion weights vs their in-dex.
  []
 
 
-Package xcolor Warning: Incompatible color definition on input line 350.
+Package xcolor Warning: Incompatible color definition on input line 348.
 
 
-Package xcolor Warning: Incompatible color definition on input line 350.
+Package xcolor Warning: Incompatible color definition on input line 348.
 
 [5 <./m-4-model-selection.png> <./m-1-model-selection.png> <./blog-model-select
-ion.png>]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Underfull \hbox (badness 2626) in paragraph at lines 372--373
+ion.png> <./blog-model-select-test.png>]
+Underfull \hbox (badness 2626) in paragraph at lines 370--373
 \OT1/ptm/m/n/10 than SSE ($\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 y \OMS/cmsy/m/n/10
  ^^@ \OML/cmm/m/it/10 h\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x\OT1/cmr/m/n/10 ))[]$
 \OT1/ptm/m/n/10 ). We search over $\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 M; ^^U\OT1
@@ -952,21 +935,21 @@ Underfull \hbox (badness 2626) in paragraph at lines 372--373
  []
 
 
-Underfull \hbox (badness 1005) in paragraph at lines 372--373
+Underfull \hbox (badness 1005) in paragraph at lines 370--373
 \OT1/ptm/m/n/10 for the best fit mea-sured by the SAE on the val-i-da-
  []
 
-<m_1_SAE.png, id=182, 369.38pt x 256.96pt>
+<m_1_SAE.png, id=182, 384.43625pt x 272.01625pt>
 File: m_1_SAE.png Graphic file (type png)
  <use m_1_SAE.png>
 Package pdftex.def Info: m_1_SAE.png used on input line 376.
-(pdftex.def)             Requested size: 195.126pt x 135.74117pt.
+(pdftex.def)             Requested size: 195.126pt x 138.0665pt.
 
-<m_4_SAE.png, id=183, 369.38pt x 256.96pt>
+<m_4_SAE.png, id=183, 384.43625pt x 272.01625pt>
 File: m_4_SAE.png Graphic file (type png)
  <use m_4_SAE.png>
 Package pdftex.def Info: m_4_SAE.png used on input line 383.
-(pdftex.def)             Requested size: 195.126pt x 135.74117pt.
+(pdftex.def)             Requested size: 195.126pt x 138.0665pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
@@ -983,8 +966,7 @@ Package xcolor Warning: Incompatible color definition on input line 390.
 
 Package xcolor Warning: Incompatible color definition on input line 390.
 
-[6 <./blog-model-select-test.png> <./reg-weights-lam-350-normalize-true.png> <.
-/m_1_SAE.png>]
+[6 <./reg-weights-lam-350-normalize-true.png> <./m_1_SAE.png>]
 
 Package natbib Warning: Citation `langley00' undefined on input line 402.
 
@@ -1002,20 +984,16 @@ Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 407.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 407.
 Package rerunfilecheck Info: File `hw1-writeup.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 407.
  ) 
 Here is how much of TeX's memory you used:
  17421 strings out of 493117
  320454 string characters out of 6135433
- 410265 words of memory out of 5000000
+ 401172 words of memory out of 5000000
  20491 multiletter control sequences out of 15000+600000
  22188 words of font info for 62 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 62i,12n,56p,1509b,329s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 62i,11n,56p,1509b,329s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2014/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/te
 xlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/tex
@@ -1039,7 +1017,7 @@ nts/type1/public/amsfonts/symbols/msbm7.pfb></usr/local/texlive/2014/texmf-dist
 ype1/urw/times/utmb8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/t
 imes/utmr8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/times/utmr8
 a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on hw1-writeup.pdf (7 pages, 501117 bytes).
+Output written on hw1-writeup.pdf (7 pages, 499707 bytes).
 PDF statistics:
  288 PDF objects out of 1000 (max. 8388607)
  201 compressed objects within 3 object streams
