@@ -15,7 +15,7 @@ def getData(name):
 
 class LinearRegression:
 
-    def __init__(self, x, y, M, phi=None):
+    def __init__(self, x, y, M, phi=None, rescaleFeatures=False):
         self.N = np.size(y)
         self.y = 1.0*np.reshape(y,(self.N,))
         self.x = 1.0*np.reshape(x,(np.size(x),))
@@ -28,11 +28,44 @@ class LinearRegression:
             self.phi = phi
             self.numFeatures = np.shape(phi)[1]
 
+        if rescaleFeatures:
+            self.rescaleFeatures()
+
 
     def initializePhi(self):
         self.phi = np.zeros((self.N,self.numFeatures))
         for i in range(0,self.numFeatures):
             self.phi[:,i] = np.power(self.x,i)
+
+    # applies feature normalization to the matrix Phi
+    def rescaleFeatures(self, method="interval"):
+
+
+        if method == "unit length":
+            columnNorm = np.linalg.norm(self.phi, ord=2, axis=0)
+
+            # need to be careful and remove any norms that are zero
+            eps = 1e-4
+            idx = np.where(columnNorm < eps)
+            columnNorm[idx] = 1.0
+            phiRescale = self.phi/columnNorm[None,:]
+            self.phi = phiRescale
+
+        if method == "interval":
+            columnMin = np.min(self.phi, axis=0)
+            columnMax = np.max(self.phi, axis=0)
+            columnDiff = columnMax - columnMin
+
+            eps=1e-4
+            idx = np.where(columnDiff < eps)
+            columnDiff[idx] = 1.0
+            phiRescale = (self.phi - columnMin[None,:])/columnDiff[None,:]
+
+            self.phi = phiRescale
+
+
+
+
 
     # standard linear regression
     def reg(self):
@@ -110,14 +143,14 @@ class LinearRegression:
         return LinearRegression(x,y,M)
 
     @staticmethod
-    def fromBlog(type='train'):
+    def fromBlog(type='train', rescaleFeatures=False):
         x_filename = 'BlogFeedback_data/x_' + type + '.csv'
         y_filename = 'BlogFeedback_data/y_' + type + '.csv'
 
         x = np.genfromtxt(x_filename, delimiter=',')
         y = np.genfromtxt(y_filename, delimiter=',')
 
-        lr = LinearRegression(x,y,1,phi=x)
+        lr = LinearRegression(x,y,1, phi=x, rescaleFeatures=rescaleFeatures)
         return lr
 
 
