@@ -96,7 +96,7 @@ class LinearRegression:
     
 
     # compute sum of absolute errors, can optionally pass in phi and y
-    def SAEwReg(self,w,lam,phi=None, y=None):
+    def SAEwReg(self,w,lam=0.1, phi=None, y=None):
         if phi is None:
             phi = self.phi
 
