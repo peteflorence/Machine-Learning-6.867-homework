@@ -28,7 +28,7 @@ class GradientDescent:
         self.numGradientCalls += 1
         return self.grad(x)
 
-    def numericalGradient(self, x, dx=0.01):
+    def numericalGradient(self, x, dx=0.00001):
         grad = np.zeros(x.shape)
         # make sure we are using floating point arithmetic, not integer
         # also need to be careful since x is pass by reference
@@ -119,7 +119,7 @@ class GradientDescent:
 
     # compute one update step of gradient descent
     def gradDescentUpdate(self, x):
-        x_new = x - self.stepSize*self.evalGradient(x)
+        x_new = x - self.stepSize*self.evalGradient(x).T
         f_new = self.evalF(x_new)
         return (x_new, f_new)
 

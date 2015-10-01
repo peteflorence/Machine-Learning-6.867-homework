@@ -16,21 +16,23 @@
 \gdef\HyperFirstAtBeginDocument#1{#1}
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
-\newlabel{grad-descent-iterations}{{1}{1}{Value of SSE at each iteration of our gradient descent algorithm, $\eta = 0.05$, $w_0 = 0$}{figure.1}{}}
-\newlabel{ridge_m_3_lam_0-01}{{2}{2}{Ridge regression with $M = 3, \lambda = 0.01$. $SSE = 1.54$}{figure.2}{}}
-\newlabel{ridge_m_3_lam_0-001}{{3}{2}{Ridge regression with $M = 3, \lambda = 0.001$. $SSE = 0.588$}{figure.3}{}}
-\newlabel{ridge_m_9_lam_0-001}{{4}{2}{Ridge regression with $M = 9, \lambda = 0.001$. $SSE = 0.418$}{figure.4}{}}
-\newlabel{model-selection}{{2}{2}{}{figure.4}{}}
-\newlabel{m-4-model-selection}{{5}{3}{Ridge regression with $M = 3, \lambda = 0.85$. Train datapoints are red, validation are blue, and test are green}{figure.5}{}}
-\newlabel{m-1-model-selection}{{6}{3}{Ridge regression with $M = 1, \lambda = 6.5$. Train datapoints are red, validation are blue, and test are green}{figure.6}{}}
-\newlabel{blog-model-selection}{{7}{3}{The x-axis is $\hat {\lambda } = \frac {\lambda }{N}$ plotted against the MSE of the validation set on the y-axis}{figure.7}{}}
-\newlabel{blog-model-select-test}{{8}{3}{The x-axis is $\hat {\lambda } = \frac {\lambda }{N}$ plotted against the MSE of the test set on the y-axis}{figure.8}{}}
-\newlabel{submission}{{3}{3}{}{section.3}{}}
+\newlabel{grad-descent-iterations}{{1}{2}{Visualization of gradient descent for three initial guesses, $x_0$, of the non-convex polynomial $f(x) = x^4 - x^3 -x^2$. Initial guesses are: (a), 1.9; (b) -1.0; (c), 0.0. The red $X$ marks the initial guess, the green $X$ marks the algorithm's final value, and the black $X$ represent sequential values produced by each gradient descent step. Plot (a) converges to the global minimum, while (b) converges to a local, non-global minimum. Plot (c) remains at the initial guess, since $f'(x_0)=0$. Shown are results using: analytical gradients $\eta = 0.02$, $\epsilon = 0.0004$}{figure.1}{}}
+\newlabel{grad-descent-iterations}{{2}{2}{Visualization of gradient descent for the negative bivariate Gaussian $p(x)$, plotted via contours. The red $X$ marks the initial guess, the green $X$ marks the algorithm's final value, and the black $X$ represent sequential values produced by each gradient descent step. Plots (a) and (b) show a comparison of using the analytical vs. numerical gradients: note although the descent path looks similar, the number of function calls is an order of magnitude different. Plot (c) shows the path of gradient descent when the step size is too large ($\eta = 0.2$). Unless otherwise noted, all plots used: $x_0 = (1.0,1.0)$, $\eta = 0.01$, $\epsilon = 0.0004$}{figure.2}{}}
+\newlabel{grad-descent-iterations}{{3}{3}{Value of SSE at each iteration of our gradient descent algorithm, $\eta = 0.05$, $w_0 = 0$}{figure.3}{}}
+\newlabel{ridge_m_3_lam_0-01}{{4}{3}{Ridge regression with $M = 3, \lambda = 0.01$. $SSE = 1.54$}{figure.4}{}}
+\newlabel{ridge_m_3_lam_0-001}{{5}{3}{Ridge regression with $M = 3, \lambda = 0.001$. $SSE = 0.588$}{figure.5}{}}
+\newlabel{ridge_m_9_lam_0-001}{{6}{3}{Ridge regression with $M = 9, \lambda = 0.001$. $SSE = 0.418$}{figure.6}{}}
+\newlabel{model-selection}{{3}{4}{}{figure.6}{}}
+\newlabel{m-4-model-selection}{{7}{4}{Ridge regression with $M = 3, \lambda = 0.85$. Train datapoints are red, validation are blue, and test are green}{figure.7}{}}
+\newlabel{m-1-model-selection}{{8}{4}{Ridge regression with $M = 1, \lambda = 6.5$. Train datapoints are red, validation are blue, and test are green}{figure.8}{}}
+\newlabel{blog-model-selection}{{9}{4}{The x-axis is $\hat {\lambda } = \frac {\lambda }{N}$ plotted against the MSE of the validation set on the y-axis}{figure.9}{}}
+\newlabel{submission}{{4}{4}{}{section.4}{}}
+\newlabel{blog-model-select-test}{{10}{5}{The x-axis is $\hat {\lambda } = \frac {\lambda }{N}$ plotted against the MSE of the test set on the y-axis}{figure.10}{}}
 \citation{langley00}
 \citation{anonymous}
-\newlabel{author info}{{4.3}{5}{}{subsection.4.3}{}}
-\newlabel{final author}{{4.3.2}{5}{}{subsubsection.4.3.2}{}}
-\newlabel{icml-historical}{{9}{6}{Historical locations and number of accepted papers for International Machine Learning Conferences (ICML 1993 -- ICML 2008) and International Workshops on Machine Learning (ML 1988 -- ML 1992). At the time this figure was produced, the number of accepted papers for ICML 2008 was unknown and instead estimated}{figure.9}{}}
+\newlabel{author info}{{5.3}{6}{}{subsection.5.3}{}}
+\newlabel{final author}{{5.3.2}{7}{}{subsubsection.5.3.2}{}}
+\newlabel{icml-historical}{{11}{7}{Historical locations and number of accepted papers for International Machine Learning Conferences (ICML 1993 -- ICML 2008) and International Workshops on Machine Learning (ML 1988 -- ML 1992). At the time this figure was produced, the number of accepted papers for ICML 2008 was unknown and instead estimated}{figure.11}{}}
 \citation{Samuel59}
 \citation{Samuel59}
 \citation{kearns89,Samuel59,mitchell80}
@@ -42,8 +44,8 @@
 \citation{MachineLearningI}
 \citation{mitchell80}
 \citation{kearns89}
-\newlabel{alg:example}{{1}{7}{}{algorithm.1}{}}
-\newlabel{sample-table}{{2}{7}{Classification accuracies for naive Bayes and flexible Bayes on various data sets}{table.2}{}}
+\newlabel{alg:example}{{1}{8}{}{algorithm.1}{}}
+\newlabel{sample-table}{{2}{8}{Classification accuracies for naive Bayes and flexible Bayes on various data sets}{table.2}{}}
 \citation{langley00}
 \bibdata{example_paper}
 \bibstyle{icml2015}
