@@ -96,8 +96,20 @@ class LinearRegression:
     def SSE_gradient(self,w):
         return 2.0*np.dot(self.phi.transpose(),np.dot(self.phi,w) - self.y)
     
-
     # compute sum of absolute errors, can optionally pass in phi and y
+    def SAE(self,w, phi=None, y=None):
+        if phi is None:
+            phi = self.phi
+
+        if y is None:
+            y = self.y
+
+        s = np.dot(phi,w) - y
+        sae = np.linalg.norm(s,ord=1)
+        return sae
+
+
+    # compute sum of absolute errors, with regularization, can optionally pass in phi and y
     def SAEwReg(self,w, phi=None, y=None):
         if phi is None:
             phi = self.phi

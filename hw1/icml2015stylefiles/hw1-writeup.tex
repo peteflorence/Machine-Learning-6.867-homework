@@ -350,8 +350,25 @@ Ultimately we achieved a smaller MSE on the test set when we didn't rescale the 
 
 
 
-\section{Implement Gradient Descent}
-A general-purpose gradient descent library was created which provides for specification of $x_0$ (the initial guess), $\eta$ (the step size), and $\epsilon$ (the convergence threshold: if two consecutive steps differ by less than this value, the algorithm terminates).
+\section{Generalizations}
+Problem 4.1, ``Outlier and LAD,'' was chosen.  We implemented minimization of the sum of absolute values of the errors (SAE) via gradient descent, also termed LAD (least absolute deviations) regression.  In contrast to OLS, there is no matrix manipulation that can lead to a closed form solution for LAD.  We instead must use a different approach -- here, we descend the SAE objective function via gradient descent.  Since the SAE is not differentiable at $| y - h(x)|$, we deferred to letting our optimization use numerical gradients.
+
+\begin{table}
+\begin{tabular}{|l|l|l|l|l|}
+\hline 
+$M$ & $\lambda$ & SAE Train & SAE Validate & SAE Test \\ \hline
+$1$ & $0.0$ & $6.29$ & $3.14$ & $3.71$ \\ \hline
+$2$ & $0.05$ & $6.59$ & $3.19$ & $4.10$ \\ \hline
+$3$ & $6.08$ & $12.8$ & $6.82$ & $9.13$ \\ \hline
+$4$ & $3.57$ & $11.5$ & $6.60$ & $8.27$ \\ \hline
+$5$ & $8.74$ & $13.0$ & $6.98$ & $13.3$ \\
+\hline
+\end{tabular}
+\label{model-selection}
+\caption{SAE for training, validation and test datasets for different $M$. The specified $\lambda$ minimizes SAE for validation set given that $M$.}
+\end{table}
+
+
 
 
 
