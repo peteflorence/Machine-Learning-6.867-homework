@@ -284,7 +284,7 @@ Hence when we perform our model selection procedure we end up choose $M = 4$ rat
 %
 %
 
-For the blog feedback there is only one parameter to choose during model selection, namely $\lambda$ since the feature set $\Phi$ has already been specified for us. We ran ridge regression with a variety of $\lambda$ values and saw that $\lambda \in [0.01,2]$ provided the best performance. Thus we computed ridge regression for a grid of $\lambda$ values in $[0.01,2]$. Similar to the previous analysis we then performed a grid search over $\lambda$ to choose the best model. The results are shown in Figure \ref{blog-model-selection}.
+For the blog feedback there is only one parameter to choose during model selection, namely $\lambda$ since the feature set $\Phi$ has already been specified for us. We ran ridge regression with a variety of $\lambda$ values and to compare performance. We saw that fairly large $\lambda$ around $3000$ were providing the best performance. Similar to the previous analysis we then performed a grid search over $\lambda$ to choose the best model. The results are shown in Figure \ref{blog-model-selection}. Note that the $\Phi$ matrix is not full rank since several of the features are identically zero for all observations.
 %
 
 %
@@ -297,7 +297,7 @@ For the blog feedback there is only one parameter to choose during model selecti
 \label{blog-model-selection}
 \end{figure}
 %
-Interestingly the plot is very flat. In other words the MSE of the validation set isn't very sensitive to the parameter $\lambda$.  So the choice of regularize $\lambda$ is not having too much of an effect on the MSE of the validation data. In particular it seems that the fit of the model is much less dependent on $\lambda$ than in the curvefitting example.  The plot of $\hat{\lambda}$ against the MSE of the test set looks quite different however. It decreases fairly continuously as $\hat{\lambda}$ increases, see Figure \ref{blog-model-select-test}.
+Interestingly the plot is very flat. In other words the MSE of the validation set isn't very sensitive to the parameter $\lambda$.  So the choice of regularize $\lambda$ is not having too much of an effect on the MSE of the validation data. In particular it seems that the fit of the model is much less dependent on $\lambda$ than in the curvefitting example.  The plot of $\lambda$ against the MSE of the test set looks quite different however. It decreases fairly continuously as $\lambda$ increases, see Figure \ref{blog-model-select-test}.
  %
  %
 \begin{figure}[h]
@@ -308,7 +308,7 @@ Interestingly the plot is very flat. In other words the MSE of the validation se
 \end{figure}
  %
  %
-\todo{Don't really understand why these two look so different} Looking at the actual regression weights $w$ shows for $\lambda = 3000$ they are less than $1.5$ in absolute value.
+Looking at the actual regression weights $w$ shows for $\lambda = 3000$ they are less than $1.5$ in absolute value.
 
 %
 %
@@ -318,21 +318,24 @@ Now we compare the results to performing feature rescaling using the interval me
 %
 %
 \begin{equation*}
-\frac{\phi_i(x) - \min_{x'}\phi_i(x')}{\max_{x'}\phi_i(x') - \min_{x'}\phi_i(x)}
+\tilde{\phi}(x) = \frac{\phi_i(x) - \min_{x'}\phi_i(x')}{\max_{x'}\phi_i(x') - \min_{x'}\phi_i(x)}
 \end{equation*}
  %
  %
- where max and min are over the observed values of that feature in the dataset. Note that this implies that the new features, $\phi'(x) \in [0,1]$.  Repeating the above analysis with the rescaled features gives
+ where max and min are over the observed values of that feature in the dataset. Some care had to be taken because some features were identically zero. The rescaling implies that the new features satisfy $\tilde{\phi}(x) \in [0,1]$.  Repeating the above analysis with the rescaled features gives
  %
  %
  Now we see that the MSE of the validation set is much more responsive to varying $\lambda$. However, we again notice that the plots of MSE look very different for the validation and test sets. This is somewhat surprising since neither of these datasets was used to train the regression weights. Interestingly looking at the regression weights after provides an interesting insight. Let $w$ be the regression weights with $\lambda = 350$. Then interestingly we see that most of the values are near zero and with a few notable exceptions see Figure \ref{reg-weights-lam-350-normalize-true}. Thus this shows that a small number of features are responsible for predicting the number of comments.
-
+%
  \begin{figure}[h]
 \centering
 \includegraphics[width=0.5\textwidth]{reg-weights-lam-350-normalize-true}
 \caption{A plot of the regression weights vs their index. Weights gotten using the feature rescaling with $\lambda = 350$. }
 \label{reg-weights-lam-350-normalize-true}
 \end{figure}
+%
+%
+Ultimately we achieved a smaller MSE on the test set when we didn't rescale the features. However, the insight we get from running the ridge regression with the rescaled features is that, as can be seen in Figure \ref{reg-weights-lam-350-normalize-true}, a few of the features contain most of the predictive power for the number of comments. The other thing that feature rescaling affects is the role of the regularization term $\lambda ||w||_2^2$. In particular rescaling the features also to some extent should rescale the weights $w$. Since the $\lambda$ term affects all weights equally in the regularization term, it proportionally now drives down the weights on the ``important'' features from Figure \ref{reg-weights-lam-350-normalize-true} more than it drives down those same weights in the unregularized dataset. Ultimately it is difficult to draw too many more specific conclusions since it is challenging to visualize data with $280$ features.
 
 
 \section{Electronic Submission}
