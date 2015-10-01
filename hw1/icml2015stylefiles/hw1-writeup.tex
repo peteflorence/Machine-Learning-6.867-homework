@@ -351,25 +351,28 @@ Ultimately we achieved a smaller MSE on the test set when we didn't rescale the 
 
 
 \section{Generalizations}
-Problem 4.1, ``Outlier and LAD,'' was chosen.  We implemented minimization of the sum of absolute values of the errors (SAE) via gradient descent, also termed LAD (least absolute deviations) regression.  In contrast to OLS, there is no matrix manipulation that can lead to a closed form solution for LAD.  We instead must use a different approach -- here, we descend the SAE objective function via gradient descent.  Since the SAE is not differentiable at $| y - h(x)|$, we deferred to letting our optimization use numerical gradients.
+Problem 4.1, ``Outlier and LAD,'' was chosen.  We implemented minimization of the sum of absolute values of the errors (SAE) via gradient descent, also termed LAD (least absolute deviations) regression.  In contrast to OLS, there is no matrix manipulation that can lead to a closed form solution for LAD.  We instead must use a different approach -- here, we descend the SAE objective function via gradient descent.  Since the SAE is not differentiable at $| y - h(x)|=0$, we deferred to letting our optimizer use numerical gradients.
 
 \begin{table}
 \begin{tabular}{|l|l|l|l|l|}
 \hline 
 $M$ & $\lambda$ & SAE Train & SAE Validate & SAE Test \\ \hline
-$1$ & $0.0$ & $6.29$ & $3.14$ & $3.71$ \\ \hline
-$2$ & $0.05$ & $6.59$ & $3.19$ & $4.10$ \\ \hline
-$3$ & $6.08$ & $12.8$ & $6.82$ & $9.13$ \\ \hline
-$4$ & $3.57$ & $11.5$ & $6.60$ & $8.27$ \\ \hline
-$5$ & $8.74$ & $13.0$ & $6.98$ & $13.3$ \\
+$1$ & $0.85$ & $6.33$ & $2.04$ & $2.85$ \\ \hline
+$2$ & $1.11$ & $6.53$ & $2.08$ & $3.16$ \\ \hline
+$3$ & $1.86$ & $6.35$ & $4.50$ & $8.58$ \\ \hline
+$4$ & $3.57$ & $8.47$ & $3.57$ & $5.24$ \\ \hline
+$5$ & $8.09$ & $9.16$ & $3.43$ & $9.77$ \\
 \hline
 \end{tabular}
-\label{model-selection}
+\label{model-selection-SAE}
 \caption{SAE for training, validation and test datasets for different $M$. The specified $\lambda$ minimizes SAE for validation set given that $M$.}
 \end{table}
 
+We repeat the model selection experiments that we performed in Problem 3, but for SAE ($|y-h(x)|$) rather than SSE ($(y-h(x))^2$). We search over $(M,\lambda)$ for the best fit measured by the SAE on the validation dataset, $SAE_v(M,\lambda)$, produced from the regression weights $w(M,\lambda)$ found by LAD regression on the test set.  Again, the range $\lambda \in [0,10]$ was used. Table \ref{model-selection-SAE} shows the results.
 
+This process for LAD model selection results in selecting a linear fit, $M=1$, with a small regularization term $\lambda=0.85$.  
 
+As was examined in Problem 3
 
 
 % In the unusual situation where you want a paper to appear in the
