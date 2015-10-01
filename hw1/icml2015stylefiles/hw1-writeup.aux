@@ -20,21 +20,16 @@
 \newlabel{poly}{{1}{2}{Visualization of gradient descent for three initial guesses, $x_0$, of the non-convex polynomial $f(x) = x^4 - x^3 -x^2$. Initial guesses are: (a), 1.9; (b) -1.0; (c), 0.0. The red $X$ marks the initial guess, the green $X$ marks the algorithm's final value, and the black $X$ represent sequential values produced by each gradient descent step. Plot (a) converges to the global minimum, while (b) converges to a local, non-global minimum. Plot (c) remains at the initial guess, since $f'(x_0)=0$. Shown are results using: analytical gradients, $\eta = 0.02$, $\gamma = 0.0004$}{figure.1}{}}
 \newlabel{gauss}{{2}{2}{Visualization of gradient descent for the negative bivariate Gaussian $p(x)$, plotted via contours. The red $X$ marks the initial guess $x_0$, the green $X$ marks the algorithm's final value, and the black $X$ represent sequential values produced by each gradient descent step. Plots (a) and (b) show a comparison of using the analytical vs. numerical gradients: note although the descent path looks similar, the number of function calls is an order of magnitude different. Plot (c) shows the path of gradient descent when the step size is too large ($\eta = 0.2$). Unless otherwise noted, all plots used: $x_0 = (1.0,1.0)$, $\eta = 0.01$, $\gamma = 0.0004$}{figure.2}{}}
 \newlabel{minvalues}{{1}{2}{}{table.1}{}}
-\newlabel{grad-descent-iterations}{{3}{3}{Value of SSE at each iteration of our gradient descent algorithm, $\eta = 0.05$, $w_0 = 0$}{figure.3}{}}
-\newlabel{m_9_grad_descent_good}{{4}{3}{Gradient descent with $M = 9, w_0 = 1.5*w_{OLS}$. Blue are datapoints, green is true regression function, red is estimated regression function}{figure.4}{}}
-\newlabel{m_9_grad_descent_bad}{{5}{4}{Gradient descent with $M = 9, w_0 = 0*w_{OLS}$. Blue are datapoints, green is true regression function, red is estimated regression function}{figure.5}{}}
-\newlabel{ridge_m_3_lam_0-01}{{6}{4}{Ridge regression with $M = 3, \lambda = 0.01$. $SSE = 1.54$. Blue are datapoints, green is true regression function, red is estimated regression function}{figure.6}{}}
-\newlabel{ridge_m_3_lam_0-001}{{7}{4}{Ridge regression with $M = 3, \lambda = 0.001$. $SSE = 0.588$. Blue are datapoints, green is true regression function, red is estimated regression function}{figure.7}{}}
-\newlabel{ridge_m_9_lam_0-001}{{8}{4}{Ridge regression with $M = 9, \lambda = 0.001$. $SSE = 0.418$. Blue are datapoints, green is true regression function, red is estimated regression function}{figure.8}{}}
-\newlabel{model-selection}{{3}{4}{}{figure.8}{}}
-\newlabel{m-4-model-selection}{{9}{5}{Ridge regression with $M = 4, \lambda = 0.85$. Train datapoints are red, validation are blue, and test are green. Estimated regression function is in red}{figure.9}{}}
-\newlabel{m-1-model-selection}{{10}{5}{Ridge regression with $M = 1, \lambda = 6.5$. Train datapoints are red, validation are blue, and test are green. Estimated regression function is in red}{figure.10}{}}
-\newlabel{blog-model-selection}{{11}{5}{The x-axis is $\hat {\lambda } = \frac {\lambda }{N}$ plotted against the MSE of the validation set on the y-axis}{figure.11}{}}
-\newlabel{blog-model-select-test}{{12}{5}{The x-axis is $\hat {\lambda } = \frac {\lambda }{N}$ plotted against the MSE of the test set on the y-axis}{figure.12}{}}
-\newlabel{reg-weights-lam-350-normalize-true}{{13}{6}{A plot of the regression weights vs their index. Weights calculated using the feature rescaling with $\lambda = 350$}{figure.13}{}}
+\newlabel{m_9_grad_descent_good}{{3}{3}{Gradient descent with $M = 9, w_0 = 1.5*w_{OLS}$. Blue are datapoints, green is true regression function, red is estimated regression function}{figure.3}{}}
+\newlabel{m_9_grad_descent_bad}{{4}{3}{Gradient descent with $M = 9, w_0 = 0*w_{OLS}$. Blue are datapoints, green is true regression function, red is estimated regression function}{figure.4}{}}
+\newlabel{ridge_m_3_lam_0-01}{{5}{4}{Ridge regression with $M = 3, \lambda = 0.01$. $SSE = 1.54$. Blue are datapoints, green is true regression function, red is estimated regression function}{figure.5}{}}
+\newlabel{ridge_m_3_lam_0-001}{{6}{4}{Ridge regression with $M = 3, \lambda = 0.001$. $SSE = 0.588$. Blue are datapoints, green is true regression function, red is estimated regression function}{figure.6}{}}
+\newlabel{ridge_m_9_lam_0-001}{{7}{4}{Ridge regression with $M = 9, \lambda = 0.001$. $SSE = 0.418$. Blue are datapoints, green is true regression function, red is estimated regression function}{figure.7}{}}
+\newlabel{model-selection}{{3}{4}{}{figure.7}{}}
+\newlabel{m-4-model-selection}{{8}{5}{Ridge regression with $M = 4, \lambda = 0.85$. Train datapoints are red, validation are blue, and test are green. Estimated regression function is in red}{figure.8}{}}
+\newlabel{m-1-model-selection}{{9}{5}{Ridge regression with $M = 1, \lambda = 6.5$. Train datapoints are red, validation are blue, and test are green. Estimated regression function is in red}{figure.9}{}}
+\newlabel{blog-model-selection}{{10}{5}{MSE of the validation set plotted vs. $\hat {\lambda } = \frac {\lambda }{N}$}{figure.10}{}}
+\newlabel{reg-weights-lam-350-normalize-true}{{11}{5}{A plot of the regression weights vs their index. Weights calculated using the feature rescaling with $\lambda = 350$}{figure.11}{}}
 \newlabel{tableSAE}{{4}{6}{}{section.4}{}}
-\newlabel{m-1-model-selection-SAE}{{14}{6}{LAD regression with $M = 1, \lambda = 0.85$. Train datapoints are red, validation are blue, and test are green. Estimated regression function is in red}{figure.14}{}}
-\citation{langley00}
-\bibdata{example_paper}
-\bibstyle{icml2015}
-\newlabel{m-4-model-selection-SAE}{{15}{7}{LAD regression with $M = 4, \lambda = 3.57$. Train datapoints are red, validation are blue, and test are green. Estimated regression function is in red}{figure.15}{}}
+\newlabel{m-1-model-selection-SAE}{{12}{6}{LAD regression with $M = 1, \lambda = 0.85$. Train datapoints are red, validation are blue, and test are green. Estimated regression function is in red}{figure.12}{}}
+\newlabel{m-4-model-selection-SAE}{{13}{6}{LAD regression with $M = 4, \lambda = 3.57$. Train datapoints are red, validation are blue, and test are green. Estimated regression function is in red}{figure.13}{}}
