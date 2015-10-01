@@ -5,7 +5,7 @@
 % Use the following line _only_ if you're still using LaTeX 2.09.
 %\documentstyle[icml2015,epsf,natbib]{article}
 % If you rely on Latex2e packages, like most moden people use this:
-\documentclass{article}
+\documentclass[10pt]{article}
 
 % use Times
 \usepackage{times}
@@ -99,7 +99,7 @@ $$p(\mathbf{x}) = \frac{-100}{2\pi|\mathbf{\Sigma}|^{1/2}}\exp{\bigg(-\frac{1}{2
 
 Where in $p(\mathbf{x})$, $\mathbf{\Sigma}$ represents the covariance and $\boldsymbol{\mu}$ the mean.  Note also that the standard Gaussian has been multiplied by $-1$ (so that we can pose our optimization as a minimization) and scaled by $100$, which is just to help with making plotting more clear.
 
-The effects of initial guesses ($x_0$) and varying step size ($\eta$) are best explained via the plots.  For the non-convex polynomial, $f(x)$, the effect of the starting position can be seen from the three plots in Figure \ref{poly}.  Initial guesses f$x_0 > 0$ will terminate at the global maximum of the function, whereas initial guesses $x_0 < 0$ get ``stuck'' at the local minimum in $\mathbb{R}^-$.  An initial guess of exactly a local maximum $x_0 = 0$ leads to the algorithm terminating still with $x_final = 0$ after only a handful of iterations, since initially $f'(x=0)=0$.  It is nice to note that local maxima can cause algorithm termination with poor initial guesses, but in practice adding randomization to initial guesses helps mitigate this problem.  The effect of the step size can be viewed by observing the counter plots for gradient descent on $p(\mathbf{x})$, the bivariate Gaussian.  In plots (a) and (b), the step size is sufficiently small and successful descent occurs to the global minimum.  In plot (c), however, the step size is sufficiently large such that the algorithm continually jumps ``back and forth'' over the minimum, and the algorithm terminates only due to the maximum number of function calls ($n_{max}=5000$ was used).
+The effects of initial guesses ($x_0$) and varying step size ($\eta$) are best explained via the plots.  For the non-convex polynomial, $f(x)$, the effect of the starting position can be seen from the three plots in Figure \ref{poly}.  Initial guesses $x_0 > 0$ will terminate at the global maximum of the function, whereas initial guesses $x_0 < 0$ get ``stuck'' at the local minimum in $\mathbb{R}^-$.  An initial guess of exactly a local maximum $x_0 = 0$ leads to the algorithm terminating still with $x_{final} = 0$ after only a handful of iterations, since initially $f'(x=0)=0$.  It is nice to note that local maxima can cause algorithm termination with poor initial guesses, but in practice adding randomization to initial guesses helps mitigate this problem.  The effect of the step size can be viewed by observing the counter plots for gradient descent on $p(\mathbf{x})$, the bivariate Gaussian.  In plots (a) and (b), the step size is sufficiently small and successful descent occurs to the global minimum.  In plot (c), however, the step size is sufficiently large such that the algorithm continually jumps ``back and forth'' over the minimum, and the algorithm terminates only due to the maximum number of function calls ($n_{max}=5000$ was used).
 
 Numerical gradients were also implemented by calculating finite differences.  Note that each gradient descent update accordingly requires two function evaluations (per dimension...).  A comparison of results for analytical vs. numerical gradients is provided in the three tables below.  For all points tested, analytical and numerical gradients resulted in the same termination value, although analytical gradients were typically able to find this value in approximately 1/5th the function calls.
 
@@ -218,7 +218,7 @@ The results for $M = 9$ are very interesting as well. The value of $SSE(w_{OLS})
 %
 I believe that this is because since we are considering large powers of $x$ the function is very flat near the minimum. Thus gradient descent methods have a hard time making progress towards the minimum since the function is locally very flat. 
 
-If the basis functions were of the form $\phi_n(x)=\sin(2\pi n x)$ then we would expect a regression vector of the form $w = (1,0,0,...,0)$ since the data was actually generated from $\sin(2 \pi x)$ with Gaussian noise added. A potential disadvantage is that since the sin function is periodic you are imposing periodicity on your data. In particular $x $ and $x+1$ will map to the same value. In addition the set of functions $\mathcal{B} = \{\sin(2 \pi m x)\}_{m \in \mathbb{N}}$ aren't a basis for the space of functions. You need both $\sin$ and $\cos$ to form a basis. Thus there are functions, and hence datasets that are generated from such functions, that could not be well approximated by the basis $\mathcal{B}$. \todo{add more comments here}
+If the basis functions were of the form $\phi_n(x)=\sin(2\pi n x)$ then we would expect a regression vector of the form $w = (1,0,0,...,0)$ since the data was actually generated from $\sin(2 \pi x)$ with Gaussian noise added. A potential disadvantage is that since the sin function is periodic you are imposing periodicity on your data. In particular $x $ and $x+1$ will map to the same value. In addition the set of functions $\mathcal{B} = \{\sin(2 \pi m x)\}_{m \in \mathbb{N}}$ aren't a basis for the space of functions. You need both $\sin$ and $\cos$ to form a basis. Thus there are functions, and hence datasets that are generated from such functions, that could not be well approximated by the basis $\mathcal{B}$.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -236,7 +236,7 @@ In particular the $\lambda$ weight is too high and keeps the regression weights 
 %
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\textwidth]{m_3_lam_0-001}
+\includegraphics[width=0.4\textwidth]{m_3_lam_0-001}
 \caption{Ridge regression with $M = 3, \lambda = 0.001$. $SSE = 0.588$. Blue are datapoints, green is true regression function, red is estimated regression function}
 \label{ridge_m_3_lam_0-001}
 \end{figure}
@@ -245,7 +245,7 @@ The interesting thing is that increasing $M$ while keeping $\lambda$ fixed doesn
 %
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\textwidth]{m_3_lam_0-001}
+\includegraphics[width=0.4\textwidth]{m_9_lam_0-001}
 \caption{Ridge regression with $M = 9, \lambda = 0.001$. $SSE = 0.418$. Blue are datapoints, green is true regression function, red is estimated regression function}
 \label{ridge_m_9_lam_0-001}
 \end{figure}
@@ -304,7 +304,7 @@ For the blog feedback there is only one parameter to choose during model selecti
 %
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\textwidth]{blog-model-selection}
+\includegraphics[width=0.4\textwidth]{blog-model-selection}
 \caption{The x-axis is $\hat{\lambda} = \frac{\lambda}{N}$ plotted against the MSE of the validation set on the y-axis.}
 \label{blog-model-selection}
 \end{figure}
@@ -314,7 +314,7 @@ Interestingly the plot is very flat. In other words the MSE of the validation se
  %
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\textwidth]{blog-model-select-test}
+\includegraphics[width=0.4\textwidth]{blog-model-select-test}
 \caption{The x-axis is $\hat{\lambda} = \frac{\lambda}{N}$ plotted against the MSE of the test set on the y-axis.}
 \label{blog-model-select-test}
 \end{figure}
