@@ -351,7 +351,7 @@ Ultimately we achieved a smaller MSE on the test set when we didn't rescale the 
 
 
 \section{Generalizations}
-Problem 4.1, ``Outlier and LAD,'' was chosen.  We implemented minimization of the sum of absolute values of the errors (SAE) via gradient descent, also termed LAD (least absolute deviations) regression.  In contrast to OLS, there is no matrix manipulation that can lead to a closed form solution for LAD.  We instead must use a different approach -- here, we descend the SAE objective function via gradient descent.  Since the SAE is not differentiable at $| y - h(x)|=0$, we deferred to letting our optimizer use numerical gradients.
+Problem 4.1, ``Outlier and LAD,'' was chosen.  We implemented minimization of the sum of absolute values of the errors (SAE) via gradient descent, also termed LAD (least absolute deviations) regression.  In contrast to OLS, there is no matrix manipulation that can lead to a closed form solution for LAD.  We instead must use a different approach -- here, we descend the SAE objective function via gradient descent.  Since the SAE is not differentiable at $| y - h(x)|=0$, a continuous function for the analytical gradients could not be provided, and so we deferred to letting our optimizer use numerical gradients.
 
 \begin{table}
 \begin{tabular}{|l|l|l|l|l|}
@@ -364,17 +364,13 @@ $4$ & $3.57$ & $8.47$ & $3.57$ & $5.24$ \\ \hline
 $5$ & $8.09$ & $9.16$ & $3.43$ & $9.77$ \\
 \hline
 \end{tabular}
-\label{model-selection-SAE}
+\label{tableSAE}
 \caption{SAE for training, validation and test datasets for different $M$. The specified $\lambda$ minimizes SAE for validation set given that $M$.}
 \end{table}
 
-We repeat the model selection experiments that we performed in Problem 3, but for SAE ($|y-h(x)|$) rather than SSE ($(y-h(x))^2$). We search over $(M,\lambda)$ for the best fit measured by the SAE on the validation dataset, $SAE_v(M,\lambda)$, produced from the regression weights $w(M,\lambda)$ found by LAD regression on the test set.  Again, the range $\lambda \in [0,10]$ was used. Table \ref{model-selection-SAE} shows the results.
+We repeat the model selection experiments that we performed in Problem 3, but for SAE ($|y-h(x)|$) rather than SSE ($(y-h(x))^2$). We search over $(M,\lambda)$ for the best fit measured by the SAE on the validation dataset, $SAE_v(M,\lambda)$, produced from the regression weights $w(M,\lambda)$ found by LAD regression on the test set.  Again, the range $\lambda \in [0,10]$ was used. Table 2 shows the results.  This process for LAD model selection results in selecting a linear fit, $M=1$, with a small regularization term $\lambda=0.85$.  
 
-This process for LAD model selection results in selecting a linear fit, $M=1$, with a small regularization term $\lambda=0.85$.  
-
-As was examined in Problem 3
-
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=0.4\textwidth]{m_1_SAE}
 \caption{LAD regression with $M = 1, \lambda = 0.85$. Train datapoints are red, validation are blue, and test are green. Estimated regression function is in red.}
@@ -389,6 +385,12 @@ As was examined in Problem 3
 \end{figure}
 %
 %
+
+The choice of $M=1$ for LAD model selection contrasts with the selection of $M=4$ for ridge regression model selection, and highlights the ability of LAD to handle outliers.  Figure \ref{m-1-model-selection-SAE} plots the LAD fit for $M=1$, which clearly ignores the outlier better than the ridge regression fit for $M=1$ in Figure \ref{m-1-model-selection-SAE}.  Model selection for ridge regression resulted in $M=4$, which as shown in Figure \ref{m-4-model-selection} produced a fit that responded strongly to the outlier, whereas $M=4$ for LAD is still relatively robust to the presence of the outlier (Figure \ref{m-4-model-selection-SAE}).  By increasing $M$ further, however, even LAD is eventually tempted by the outlier: $M=5$ for LAD produces an overfit (not shown to save space).  
+
+The data visually appear linear, excluding the outlier, and model selection for LAD naturally chooses $M=1$.  It is interesting to note that the regression weights $w_{LAD}(M=1,\lambda=0.85)$ outperform the $w_{ridge}$ weights on their own metric: $w_{LAD}(M=1,\lambda=0.85)$ produces $SSE_{v}=1.38$ and $SSE_{test}=1.94$ -- the latter is significantly better than any of the fits produced by ridge regression.  The experiments discussed in Problem 3 and Problem 4 suggest that when a dataset contains significant outliers that are not explicitly excluded, better generalizations may be produced with LAD than ridge regression.  Explicit outlier identification and exclusion could provide another route to avoiding overfitting.
+
+
 
 
 
