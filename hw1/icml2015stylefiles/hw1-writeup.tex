@@ -187,15 +187,15 @@ SciPy & 114 & $4\times 10^{-5}$ & - \\ \hline
 %
 %
 
-Thus increasing the dimension of the optimization problem from 2 to 4 exposes the weaknesses of our gradient descent method. In particular it uses about $300$ times more function calls. The reason is that as we approach the optimum the SSE function becomes very flat and hence the gradient $\nabla SSE$ becomes very small. Hence, in our update step $w_{n+1} = w_n - \eta*\nabla SSE(w_n)$ the amount we move, $\eta*\nabla SSE(w_n)$ is becoming arbitrarily small. In particular if we plot function value vs iterations (Figure \ref{grad-descent-iterations}) we see that the plot becomes very flat quite quickly. Thus for most of the iterations of the algorithm we aren't really decreasing the value of the objective very much. 
+Thus increasing the dimension of the optimization problem from 2 to 4 exposes the weaknesses of our gradient descent method. In particular it uses about $300$ times more function calls. The reason is that as we approach the optimum the SSE function becomes very flat and hence the gradient $\nabla SSE$ becomes very small. Hence, in our update step $w_{n+1} = w_n - \eta*\nabla SSE(w_n)$ the amount we move, $\eta*\nabla SSE(w_n)$ is becoming arbitrarily small. In particular if we plot function value vs iterations we see that the plot becomes very flat quite quickly, asymptoting towards the minimum value of the function. Thus for most of the iterations of the algorithm we aren't really decreasing the value of the objective very much. 
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.4\textwidth]{lin-reg-fig-1}
-\caption{Value of SSE at each iteration of our gradient descent algorithm, $\eta = 0.05$, $w_0 = 0$}
-\label{grad-descent-iterations}
-\end{figure}
-
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width=0.4\textwidth]{lin-reg-fig-1}
+% \caption{Value of SSE at each iteration of our gradient descent algorithm, $\eta = 0.05$, $w_0 = 0$}
+% \label{grad-descent-iterations}
+% \end{figure}
+%
 This is a result of our update step not moving us enough when the gradient becomes small. Reducing $\eta$ to $0.025$ just exacerbates this problem. In this case we require more iterations and achieve worse fit of the regression weights. If we try increasing $\eta = 0.07$ however the opposite happens. We adjust $w_{n+1}$ by too much and end up jumping to the other side of the ``bowl'' representing the SSE. Hence we end up bouncing back between different sides of the bowl and the solution ends up exploding. The effect of the inital guess for $M = 3$ isn't too important. Using $\eta = 0.05$ and choosing initial guess to the origin results in the number of function calls decreasing to about $34,000$ and doesn't change the achieved accuracy of the solution. This makes sense because since we are optimizing a convex function we have no risk of getting stuck in local minima and thus independent of where we start we should be able to follow the gradient down to the minimum.
 
 The results for $M = 9$ are very interesting as well. The value of $SSE(w_{OLS})$ is $1e-7$. If we set the initial guess for the SciPy minimization to be $w_0 = 1.5*w_{OLS}$ then it achieves a minimum value of $0.09$ however if we set $w_0 = 0$ then the method only achieves $SSE = 0.314$. Our own gradient descent method behaves similarly. Thus in this case the performance of the gradient descent method is quite sensitive to the initial guess. A graphical illustration of the difference in the regression function can be seen in Figures \ref{m_9_grad_descent_good} and \ref{m_9_grad_descent_bad} and the difference in fit is quite striking. Thus the initial guess for gradient descent has a very large impact on the shape of the regression function for the $M = 9$ case.
@@ -307,15 +307,17 @@ For the blog feedback there is only one parameter to choose during model selecti
 \label{blog-model-selection}
 \end{figure}
 %
-Interestingly the plot is very flat. In other words the MSE of the validation set isn't very sensitive to the parameter $\lambda$.  So the choice of regularize $\lambda$ is not having too much of an effect on the MSE of the validation data. In particular it seems that the fit of the model is much less dependent on $\lambda$ than in the curvefitting example.  The plot of $\lambda$ against the MSE of the test set looks quite different however. It decreases fairly continuously as $\lambda$ increases, see Figure \ref{blog-model-select-test}.
+Interestingly the plot is very flat. In other words the MSE of the validation set isn't very sensitive to the parameter $\lambda$.  So the choice of regularize $\lambda$ is not having too much of an effect on the MSE of the validation data. In particular it seems that the fit of the model is much less dependent on $\lambda$ than in the curvefitting example.  The plot of $\lambda$ against the MSE of the test set looks quite different however. It decreases continuously as $\lambda$ increases. We omit the figure for brevity.
+%
+ % see Figure \ref{blog-model-select-test}.
  %
  %
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.4\textwidth]{blog-model-select-test}
-\caption{The x-axis is $\hat{\lambda} = \frac{\lambda}{N}$ plotted against the MSE of the test set on the y-axis.}
-\label{blog-model-select-test}
-\end{figure}
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width=0.4\textwidth]{blog-model-select-test}
+% \caption{The x-axis is $\lambda$ plotted against the MSE of the test set on the y-axis.}
+% \label{blog-model-select-test}
+% \end{figure}
  %
  %
 Looking at the actual regression weights $w$ shows for $\lambda = 3000$ they are less than $1.5$ in absolute value.
@@ -339,7 +341,7 @@ Now we compare the results to performing feature rescaling using the interval me
 %
  \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\textwidth]{reg-weights-lam-350-normalize-true}
+\includegraphics[width=0.4\textwidth]{reg-weights-lam-350-normalize-true}
 \caption{A plot of the regression weights vs their index. Weights calculated using the feature rescaling with $\lambda = 350$. }
 \label{reg-weights-lam-350-normalize-true}
 \end{figure}
@@ -391,18 +393,6 @@ The choice of $M=1$ for LAD model selection contrasts with the selection of $M=4
 
 The data visually appear linear, excluding the outlier, and model selection for LAD naturally chooses $M=1$.  It is interesting to note that the regression weights $w_{LAD}(M=1,\lambda=0.85)$ outperform the $w_{ridge}$ weights on their own metric: $w_{LAD}(M=1,\lambda=0.85)$ produces $SSE_{v}=1.38$ and $SSE_{test}=1.94$. The latter is significantly better than any of the fits produced by ridge regression.  The experiments discussed in Problem 3 and Problem 4 suggest that when a dataset contains significant outliers that are not explicitly excluded, better generalizations may be produced with LAD than ridge regression.  Explicit outlier identification and exclusion could provide another route to avoiding overfitting.
 
-
-
-
-
-
-
-% In the unusual situation where you want a paper to appear in the
-% references without citing it in the main text, use \nocite
-\nocite{langley00}
-
-\bibliography{example_paper}
-\bibliographystyle{icml2015}
 
 \end{document} 
 
