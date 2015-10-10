@@ -1,0 +1,43 @@
+
+		SOLVING QUADRATIC PROGRAMS
+
+IN MATLAB:
+
+optim_ver = ver('optim');
+optim_ver = str2double(optim_ver.Version);
+if optim_ver >= 6
+    opts = optimset('Algorithm', 'interior-point-convex');
+else
+    opts = optimset('Algorithm', 'interior-point', 'LargeScale', 'off', 'MaxIter', 2000);
+end
+sol = quadprog(<all your arguments> , opts);
+
+IN PYTHON:
+
+Download and install cvxopt from http://abel.ee.ucla.edu/cvxopt/ 
+Look at the Install page for instructions.
+Read the documentaion for "Quadratic Programming" in the Documentation page.
+
+If you have a UNIX system (Linux or Mac with Xcode):
+You can download the source for the latest version and compile via
+"sudo python setup.py install" in the src directory.
+
+If you have a Windows machine, you can try following the instructions
+on the Install page or try downloading an older pre-compiled binary
+from the Archive page.
+
+To use it:
+
+import numpy as np
+from cvxopt import matrix, solvers
+
+# define your matrices
+	P = matrix(...)
+	q = matrix(...)
+	G = matrix(...)
+	h = matrix(...)
+	A = matrix(...)
+	b = matrix(...)
+# find the solution	
+	solution = solvers.qp(P, q, G, h, A, b)
+	xvals = np.array(solution['x'])
