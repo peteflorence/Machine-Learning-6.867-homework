@@ -32,16 +32,16 @@ class LogisticRegression:
 
     def NLL_Reg(self, w_full, lam):
         w = w_full[1:]
-        return self.NLL(w_full) + lam*np.linalg.norm(w)
+        return self.NLL(w_full) + lam*np.linalg.norm(w)**2
 
     # computes the gradient of NLL, not the regularization term though
     def NLL_grad(self, w_full):
         (w_0, w) = self.splitW(w_full)
-        exponent = -1.0*np.multiply(self.y, np.dot(self.x, w) + w_0)
-        t = np.log(1.0 + np.exp(exponent))
-        t_inv = np.power(t,-1) # this is N x 1
+        # exponent = -1.0*np.multiply(self.y, np.dot(self.x, w) + w_0)
+        e_term = np.exp(-1.0*np.multiply(self.y, np.dot(self.x, w) + w_0))
+        dlog = np.divide(e_term,1.0+e_term)
         a = -1.0*np.multiply(self.y[:,None], self.x_full) # this is -y x_full = N x (d+1)
-        grad = np.multiply(t_inv[:,None], a) # this is N x (d+1)
+        grad = np.multiply(dlog[:,None], a) # this is N x (d+1)
         grad = np.sum(grad, axis=0) # need to take column sum, now grad should be d x 1
         return grad
 
@@ -64,28 +64,42 @@ class LogisticRegression:
             return 0
 
     # compute the classification error rate for a given dataset
-    def classificationErrorRate(self, w_full):
+    def classificationErrorRate(self, w_full, verbose=False):
 
         (w_0,w) = self.splitW(w_full)
-        val = w_0 + np.dot(self.x, w_full)
-        val = np.multiply(y,val)
+        val = np.dot(self.x_full, w_full)
+        val = np.multiply(self.y,val)
 
         # any entries in val that are < 0 are missclassified
         missclasified = np.size(val[val < 0])
         missclassifiedRate = missclasified/(self.N*1.0)
 
+        if verbose:
+            print "number of entries missclassified"
+            print missclasified
+            print "missclassification rate"
+            print missclassifiedRate
+
         return missclassifiedRate, missclasified
 
-    def plotData(self):
+    def plotData(self, w_full=None):
         idx_pos = np.where(self.y > 0)
         idx_neg = np.where(self.y < 0)
         plt.scatter(self.x[idx_pos,0], self.x[idx_pos,1], color='b', marker='o', facecolors='none')
         plt.scatter(self.x[idx_neg,0], self.x[idx_neg,1], color='r', marker='o', facecolors='none')
 
+        if w_full is not None:
+            x_1_grid = np.linspace(np.min(self.x[:,0]),np.max(self.x[:,0]), 100)
+            x_2_grid = -1.0/w_full[2]*(w_full[0] + w_full[1]*x_1_grid)
+            plt.plot(x_1_grid, x_2_grid, color='g')
+
+        plt.show()
+
     def constructGradientDescentObject(self, lam=0):
         f = lambda w_full: self.NLL_Reg(w_full, lam)
         grad = lambda w_full: self.NLL_Reg_grad(w_full, lam)
         gradDescent = gd(f,grad=grad)
+        return gradDescent
 
 
 
