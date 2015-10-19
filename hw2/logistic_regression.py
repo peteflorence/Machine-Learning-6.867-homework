@@ -1,9 +1,12 @@
 __author__ = 'manuelli'
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.io
 import sys
+
 sys.path.append("../hw1")
 from gradient_descent import GradientDescent as gd
+
 
 class LogisticRegression:
 
@@ -16,6 +19,7 @@ class LogisticRegression:
         self.x_full = np.zeros((self.N,self.d+1))
         self.x_full[:,0] = np.ones(self.N)
         self.x_full[:,1:] = self.x
+        self.titanicData = False
 
 
     def splitW(self,w_full):
@@ -75,14 +79,16 @@ class LogisticRegression:
         missclassifiedRate = missclasified/(self.N*1.0)
 
         if verbose:
-            print "number of entries missclassified"
-            print missclasified
-            print "missclassification rate"
-            print missclassifiedRate
+            print "number of entries missclassified = " + str(missclasified)
+            print "missclassification rate  = " + str(missclassifiedRate)
 
         return missclassifiedRate, missclasified
 
     def plotData(self, w_full=None):
+        if self.titanicData:
+            print "can't plot the titanic data, it's high dimensional"
+            return
+
         idx_pos = np.where(self.y > 0)
         idx_neg = np.where(self.y < 0)
         plt.scatter(self.x[idx_pos,0], self.x[idx_pos,1], color='b', marker='o', facecolors='none')
@@ -101,6 +107,39 @@ class LogisticRegression:
         gradDescent = gd(f,grad=grad)
         return gradDescent
 
+    def computeDecisionBoundary(self, w_full, lam, stepSize=0.01, maxFunctionCalls=10000, printSummary=True,
+                                plot=False, plotIter=False, useGradientCriterion=False):
+        gd = self.constructGradientDescentObject(lam)
+        gd.stepSize = stepSize
+
+        storeIterValues=False
+        if plotIter:
+            storeIterValues=True
+
+        sol = gd.computeMin(w_full, maxFunctionCalls=maxFunctionCalls, printSummary=printSummary, storeIterValues=storeIterValues,
+                            useGradientCriterion=useGradientCriterion)
+        w_star = sol[0];
+        w_star_normalized = 1/np.linalg.norm(w_star)*w_star
+
+        if printSummary:
+            print "--- Classification Summary ---"
+            print "w_full = " + str(w_star)
+            print "w_full normalized = " + str(w_star_normalized)
+            print "lambda = " + str(lam)
+            self.classificationErrorRate(w_star, verbose=True)
+            print "------------------"
+            print ""
+
+
+
+        if plot:
+            self.plotData(w_star)
+
+        if plotIter:
+            gd.plotIterValues()
+
+        return w_star
+
 
 
     @staticmethod
@@ -112,6 +151,22 @@ class LogisticRegression:
         lr = LogisticRegression(X,Y)
 
         return lr
+
+    @staticmethod
+    def fromTitanic(type="train"):
+        filename = "hw2_resources/data/data_titanic_" + type + ".csv"
+        T = scipy.io.loadmat(filename)['data']
+        X = np.array(T[:,0:-1])
+        Y = np.array(T[:,-1])
+        lr = LogisticRegression(X,Y)
+        lr.titanicData = True
+        return lr
+
+
+
+
+
+
 
 
 
