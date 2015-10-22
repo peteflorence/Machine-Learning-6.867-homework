@@ -89,6 +89,8 @@
 
 \section{Logistic Regression}
 
+
+
 We used our gradient descent code from Homework 1 to solve this problem. In particular we supplied the optimizer with analytic gradients. If we define $\tilde{x}$ to be $[1,x]^T$ then the gradient of the regularized NLL objective can be written as
 %
 %
@@ -97,7 +99,19 @@ We used our gradient descent code from Homework 1 to solve this problem. In part
 \end{equation}
 %
 %
-Using a step size of $\eta = 1e-4$ our gradient descent implementation converged nicely. 
+As was shown in lecture, the objective function for logistic regression is convex. Thus gradient descent should, with the appropriate step size and convergence threshold, converge to the global minimum. For almost all the subsequent optimizations we used a step size of $\eta = 1e-4$ and an initial guess of $w_{initial} = [0,0,0]$. A few optimizations (in particular those for very large $\lambda$) required a smaller step size, approximately $\eta = 1e-6$.
+
+\subsection{$\lambda = 0$}
+
+First we present the results for $\lambda = 0$. Define $\tilde{w} = [w_0,w]$ to be the full weight vector For the datasets stdev1, stdev2, stdev4 the gradient descent method converges to solution. The stdev1 dataset is linearly separable. This presents a problem for the optimizer since given a weight $\tilde{w}$ that separates the data, we can arbitrarily increase the value of the likelihood by considering new weights $c \tilde{w}$ where $c > 1$ is a constant. In practice our gradient descent method always terminates because either the termination criterion is reached (e.g. difference in function values on successive steps is smaller than a threshold) or we reach the maximum number of function calls. As an illustration if we run the optimizer with termination criterion $\epsilon = 1e-4$ we get $||\tilde{w}||| = 7.9$. If we increase the tolerance to $\epsilon = 1e-10$ then the norm of the solution weights increases to $||\tilde{w}||| = 14.7$. This illustrates the weights ``running off to infinty''. Since the training data is linearly separable the classification error rate is zero. Also as can be seen from the plots the classification error rate on the validation data is also zero.
+
+The other datasets (other than stdev1) are not linearly separable. Hence we don't have the ``weights running off to infinity'' problem that we had with stdev1. Since the stdev of the points in these datasets is larger (making them non-separable) we also expect the classfication error rate to be larger as well. This can be seen in Table \todo{include table}. 
+
+\subsection{$\lambda > 0$}
+Now we analyze the results for different values of the regularizer $\lambda$. Figure \todo{include figures} shows the result of running logistic regression on the stdev2 dataset for different values of $\lambda$. The thing to note is that for different values of $\lambda$ the actual decision boundary, plotted in green, looks very similar. In fact what seems to be happening is that as $\lambda$ increases the optimal weight $w(\lambda)$ are just scaled down to zero. In fact if we define $\overline{w}(\lambda) = \frac{w(\lambda)}{||w(\lambda)||}$ then $\overline{w}(\lambda)$ is very similar across different values of $\lambda$. Thus the regularizer $\lambda$ is forcing the weights toward zero, i.e. $||w(\lambda)||$ is decreasing in $\lambda$, but the scaled weights $\overline{w}(\lambda)$ are staying essentially the same. This explains why the decision boundaries look the same across the three plots in Figure \todo{include reference} since $w_0 + w_1 x_1 + w_2 x_2 = 0$ and $c w_0 + c w_1 x_1 + c w_2 x_2 = 0$ (where $c > 0$ is a constant) define the same hyperplane. Thus in this case the regularizer $\lambda$ just serves to drive the weights toward zero, but does so in a way that doesn't significantly affect the classification boundary. \todo{talk about nonsep data}
+
+For the nonseparable data the results look fairly identical. Not sure if we should expect something different . . . 
+
 
 \end{document} 
 

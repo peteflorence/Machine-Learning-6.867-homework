@@ -108,7 +108,7 @@ class LogisticRegression:
         return gradDescent
 
     def computeDecisionBoundary(self, w_full, lam, stepSize=0.01, maxFunctionCalls=10000, printSummary=True,
-                                plot=False, plotIter=False, useGradientCriterion=False):
+                                plot=False, plotIter=False, useGradientCriterion=False, tol=1e-4):
         gd = self.constructGradientDescentObject(lam)
         gd.stepSize = stepSize
 
@@ -116,7 +116,8 @@ class LogisticRegression:
         if plotIter:
             storeIterValues=True
 
-        sol = gd.computeMin(w_full, maxFunctionCalls=maxFunctionCalls, printSummary=printSummary, storeIterValues=storeIterValues,
+        sol = gd.computeMin(w_full, maxFunctionCalls=maxFunctionCalls, printSummary=printSummary,
+                            storeIterValues=storeIterValues, tol=tol,
                             useGradientCriterion=useGradientCriterion)
         w_star = sol[0];
         w_star_normalized = 1/np.linalg.norm(w_star)*w_star
@@ -125,6 +126,7 @@ class LogisticRegression:
             print "--- Classification Summary ---"
             print "w_full = " + str(w_star)
             print "w_full normalized = " + str(w_star_normalized)
+            print "norm of w_full = " + str(np.linalg.norm(w_star))
             print "lambda = " + str(lam)
             self.classificationErrorRate(w_star, verbose=True)
             print "------------------"
