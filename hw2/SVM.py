@@ -13,21 +13,23 @@ from plotBoundary import plotDecisionBoundary
 
 class SVM:
 
-    def __init__(self, x, y, kernel='linear', C=1):
+    def __init__(self, x, y, kernel='linear', C=1, bandwidth=1):
         self.N = np.size(y)
+
         self.y = np.reshape(y,(self.N,))
         self.x = x
         self.d = np.shape(x)[1] # this is the size of w
-        # pad with ones at the beginning
-        self.x_full = np.zeros((self.N,self.d+1))
-        self.x_full[:,0] = np.ones(self.N)
-        self.x_full[:,1:] = self.x
 
         if kernel == 'linear':
             def k_linear(x,xprime):
                 return np.inner(x,xprime)
             self.kernel = k_linear
             self.kernel_type = 'linear'
+        elif kernel == 'Gaussian':
+            def k_gaussian(x,xprime):
+                return np.exp(-np.linalg.norm(x-xprime)**2/(2*bandwidth))
+            self.kernel = k_gaussian
+            self.kernel_type = 'gaussian'
         else: 
             self.kernel = kernel
             self.kernel_type = 'not linear'
