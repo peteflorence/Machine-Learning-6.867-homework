@@ -7,6 +7,8 @@ import cvxopt
 from cvxopt.blas import dot
 sys.path.append("../hw1")
 from gradient_descent import GradientDescent as gd
+sys.path.append("./hw2_resources/")
+from plotBoundary import plotDecisionBoundary
 
 
 class SVM:
@@ -25,10 +27,14 @@ class SVM:
             def k_linear(x,xprime):
                 return np.inner(x,xprime)
             self.kernel = k_linear
+            self.kernel_type = 'linear'
         else: 
             self.kernel = kernel
+            self.kernel_type = 'not linear'
 
+        self.a = None
         self.C = C
+        self.theta = None
 
     def computeSolution(self):
         K = self.computeGramMatrix(self.x)
@@ -62,8 +68,32 @@ class SVM:
         
         self.a = np.array(solution['x'])
 
-        return np.array(solution['x'])
+        self.computeSupportVectors()
+        self.computeB()
+        self.computeTheta()
 
+
+    def computeSupportVectors(self, threshold=1e-6):
+        self.supportVectorsIdx = np.where(self.a > threshold)[0]
+        self.supportVectors = self.a[self.supportVectorsIdx][:,0]
+        self.NsupportVectors = self.supportVectorsIdx.size
+
+    def computeB(self, threshold=1e-6):
+        sum_over_n = 0
+        for n in range(self.NsupportVectors):
+            sum_over_m = 0
+            for m in range(self.NsupportVectors):
+                sum_over_m += self.supportVectors[m]*self.y[self.supportVectorsIdx[m]]*self.kernel(self.x[self.supportVectorsIdx[n]],self.x[self.supportVectorsIdx[m]])
+
+            sum_over_n += self.y[self.supportVectorsIdx[n]] - sum_over_m
+
+        self.b = sum_over_n / self.NsupportVectors
+
+    def computeTheta(self):
+        sum_over_n = 0
+        for n in range(self.NsupportVectors):
+            sum_over_n += self.supportVectors[n] * self.y[self.supportVectorsIdx[n]] * self.x[self.supportVectorsIdx[n]]
+        self.theta = sum_over_n
 
 
     def computeGramMatrix(self, X):
@@ -102,7 +132,15 @@ class SVM:
         w = w_full[1:]
         return (w_0,w)
 
+    def predictorFunction(self, x):
+        sum_over_n = 0
+        for n in range(self.NsupportVectors):
+            sum_over_n += self.supportVectors[n] * self.y[self.supportVectorsIdx[n]] * self.kernel(x,self.x[self.supportVectorsIdx[n]])
 
+        val = sum_over_n + self.b        
+        return val
+
+    
     def predict(self, w_full, x):
         w_0 = w_full[0]
         w = w[1:]
@@ -114,17 +152,22 @@ class SVM:
             return 0
 
 
-    def plotData(self, w_full=None):
+    def plotData(self):
 
         idx_pos = np.where(self.y > 0)
         idx_neg = np.where(self.y < 0)
         plt.scatter(self.x[idx_pos,0], self.x[idx_pos,1], color='b', marker='o', facecolors='none')
         plt.scatter(self.x[idx_neg,0], self.x[idx_neg,1], color='r', marker='o', facecolors='none')
 
-        if w_full is not None:
+        if (self.theta is not None) and (self.kernel_type == 'linear'):
+            w_full = np.zeros((self.d+1,1))[:,0]
+            w_full[0] = self.b
+            w_full[1:] = self.theta
             x_1_grid = np.linspace(np.min(self.x[:,0]),np.max(self.x[:,0]), 100)
             x_2_grid = -1.0/w_full[2]*(w_full[0] + w_full[1]*x_1_grid)
             plt.plot(x_1_grid, x_2_grid, color='g')
+        elif self.a is not None:
+            plotDecisionBoundary(self.x, self.y, self.predictorFunction, 0, title = "")
 
         plt.show()
 
