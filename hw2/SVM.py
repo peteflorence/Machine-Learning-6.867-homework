@@ -28,10 +28,7 @@ class SVM:
         else: 
             self.kernel = kernel
 
-        self.a = np.zeros((self.N, 1))[:,0] # variable for dual form optimizaiton
         self.C = C
-
-        self.A = cvxopt.matrix(self.y, (1, self.N))
 
     def computeSolution(self):
         K = self.computeGramMatrix(self.x)
@@ -62,7 +59,12 @@ class SVM:
 
         # find the solution 
         solution = cvxopt.solvers.qp(P, q, G, h, A, b)
+        
+        self.a = np.array(solution['x'])
+
         return np.array(solution['x'])
+
+
 
     def computeGramMatrix(self, X):
         K = np.zeros((self.N, self.N))
