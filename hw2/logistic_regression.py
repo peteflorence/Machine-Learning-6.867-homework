@@ -91,14 +91,17 @@ class LogisticRegression:
 
         idx_pos = np.where(self.y > 0)
         idx_neg = np.where(self.y < 0)
-        plt.scatter(self.x[idx_pos,0], self.x[idx_pos,1], color='b', marker='o', facecolors='none')
-        plt.scatter(self.x[idx_neg,0], self.x[idx_neg,1], color='r', marker='o', facecolors='none')
+        plt.scatter(self.x[idx_pos,0], self.x[idx_pos,1], color='b', marker='o', facecolors='none', label=' = +1')
+        plt.scatter(self.x[idx_neg,0], self.x[idx_neg,1], color='r', marker='o', facecolors='none', label=' = -1')
 
         if w_full is not None:
             x_1_grid = np.linspace(np.min(self.x[:,0]),np.max(self.x[:,0]), 100)
             x_2_grid = -1.0/w_full[2]*(w_full[0] + w_full[1]*x_1_grid)
-            plt.plot(x_1_grid, x_2_grid, color='g')
+            plt.plot(x_1_grid, x_2_grid, color='g', label=' = bdry')
 
+        plt.xlabel('x_1')
+        plt.ylabel('x_2')
+        plt.legend(loc='best')
         plt.show()
 
     def constructGradientDescentObject(self, lam=0):
@@ -155,14 +158,44 @@ class LogisticRegression:
         return lr
 
     @staticmethod
-    def fromTitanic(type="train"):
+    def fromTitanic(type="train", rescale=False, rescaleMethod="interval"):
         filename = "hw2_resources/data/data_titanic_" + type + ".csv"
         T = scipy.io.loadmat(filename)['data']
         X = np.array(T[:,0:-1])
         Y = np.array(T[:,-1])
+        if rescale:
+            X = LogisticRegression.rescaleFeatures(X, method=rescaleMethod)
+
         lr = LogisticRegression(X,Y)
         lr.titanicData = True
         return lr
+
+    @staticmethod
+    # applies feature normalization to the matrix Phi
+    def rescaleFeatures(phi, method="interval"):
+
+
+        if method == "unit length":
+            columnNorm = np.linalg.norm(phi, ord=2, axis=0)
+
+            # need to be careful and remove any norms that are zero
+            eps = 1e-4
+            idx = np.where(columnNorm < eps)
+            columnNorm[idx] = 1.0
+            phiRescale = phi/columnNorm[None,:]
+
+        if method == "interval":
+            columnMin = np.min(phi, axis=0)
+            columnMax = np.max(phi, axis=0)
+            columnDiff = columnMax - columnMin
+
+            eps=1e-4
+            idx = np.where(columnDiff < eps)
+            columnDiff[idx] = 1.0
+            phiRescale = (phi - columnMin[None,:])/columnDiff[None,:]
+
+
+        return phiRescale
 
 
 
