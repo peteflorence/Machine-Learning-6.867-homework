@@ -16,8 +16,8 @@ class SVM:
     def __init__(self, x, y, kernel='linear', C=1, bandwidth=1):
         self.N = np.size(y)
 
-        self.y = np.reshape(y,(self.N,))
-        self.x = x
+        self.y = np.reshape(y,(self.N,)) * 1.0
+        self.x = x * 1.0
         self.d = np.shape(x)[1] # this is the size of w
 
         if kernel == 'linear':
@@ -37,6 +37,8 @@ class SVM:
         self.a = None
         self.C = C
         self.theta = None
+
+        self.titanicData = False
 
     def computeSolution(self):
         K = self.computeGramMatrix(self.x)
@@ -142,7 +144,35 @@ class SVM:
         val = sum_over_n + self.b        
         return val
 
-    
+    # compute the classification error rate for a given dataset
+    def classificationErrorRate(self, x, y, verbose=False):
+
+        # calculate predictor function for each x
+        predict_x = x[:,0] * 0.0
+        for i in range(len(x)):
+            predict_x[i] = self.predictorFunction(x[i])
+        val = np.multiply(y,predict_x)
+
+        # any entries in val that are < 0 are missclassified
+        missclasified = np.size(val[val < 0])
+        missclassifiedRate = missclasified/(self.N*1.0)
+
+        if verbose:
+            print "number of entries missclassified = " + str(missclasified)
+            print "missclassification rate  = " + str(missclassifiedRate)
+
+        return missclassifiedRate, missclasified
+
+    def CER_type(self,type="train", rescale=False, verbose=False, rescaleMethod="interval"):
+        filename = "hw2_resources/data/data_titanic_" + type + ".csv"
+        T = scipy.io.loadmat(filename)['data']
+        X = np.array(T[:,0:-1])
+        Y = np.array(T[:,-1])
+        if rescale:
+            X = SVM.rescaleFeatures(X, method=rescaleMethod)
+        missclassifiedRate, missclasified = self.classificationErrorRate(x=X, y=Y, verbose=verbose)
+        return missclassifiedRate, missclasified
+
     def predict(self, w_full, x):
         w_0 = w_full[0]
         w = w[1:]
@@ -155,6 +185,9 @@ class SVM:
 
 
     def plotData(self):
+        if self.titanicData:
+            print "can't plot the titanic data, it's high dimensional"
+            return
 
         idx_pos = np.where(self.y > 0)
         idx_neg = np.where(self.y < 0)
@@ -185,8 +218,44 @@ class SVM:
 
         return svm
 
+    @staticmethod
+    def fromTitanic(type="train", rescale=False, rescaleMethod="interval", kernel="linear", C=1.0, bandwidth=1.0):
+        filename = "hw2_resources/data/data_titanic_" + type + ".csv"
+        T = scipy.io.loadmat(filename)['data']
+        X = np.array(T[:,0:-1])
+        Y = np.array(T[:,-1])
+        if rescale:
+            X = SVM.rescaleFeatures(X, method=rescaleMethod)
+        svm = SVM(X,Y,kernel=kernel, C=C, bandwidth=bandwidth)
+        svm.titanicData = True
+        return svm
+
+    @staticmethod
+    # applies feature normalization to the matrix Phi
+    def rescaleFeatures(phi, method="interval"):
 
 
+        if method == "unit length":
+            columnNorm = np.linalg.norm(phi, ord=2, axis=0)
+
+            # need to be careful and remove any norms that are zero
+            eps = 1e-4
+            idx = np.where(columnNorm < eps)
+            columnNorm[idx] = 1.0
+            phiRescale = phi/columnNorm[None,:]
+
+        if method == "interval":
+            columnMin = np.min(phi, axis=0)
+            columnMax = np.max(phi, axis=0)
+            columnDiff = columnMax - columnMin
+
+            eps=1e-4
+            idx = np.where(columnDiff < eps)
+            columnDiff[idx] = 1.0
+            phiRescale = (phi - columnMin[None,:])/columnDiff[None,:]
+
+
+        return phiRescale
 
 
 
