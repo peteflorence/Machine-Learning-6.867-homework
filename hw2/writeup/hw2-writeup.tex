@@ -210,7 +210,141 @@ $1000$ & $0.00067$ \\ \hline
 For the nonseparable data the results look fairly identical. Not sure if we should expect something different . . . 
 
 
-\section*{Titanic}
+\section{Support Vector Machine (SVM)}
+
+We implemented the dual form of Soft-SVMs.  Our implementation is general and capable of handling linear, Gaussian, or other user-specified kernels or Gram matrices, and allows the user to additionally specify $C$ (the variable that adjusts the relative penalty on the slack variables) and any special kernel-dependent variables (including the bandwidth for the Gaussian kernel).  
+
+A description of the implementation is as follows.  Given a kernel function, $k(\cdot,\cdot)$, a set of N data points $\{x^{(i)}, y^{(i)}\}$ where each each $\mathbf{x} \in \mathbb{R}^d$ is paired with a a target label $t \in \{-1,1\}$, and $C$ as mentioned above, we can solve the dual form Soft-SVM optimization problem:
+%
+\begin{equation}
+\begin{aligned}
+& \underset{\alpha \in \mathbb{R}^N}{\text{maximize}} && \sum_{n=1}^N a_n - \frac{1}{2} \sum_{n=1}^N \sum_{m=1}^N a_na_mt_nt_mk(\mathbf{x}_n, \mathbf{x}_m)\\
+& \text{subject to}
+&& 0 \le a_n \le C \\
+&&&\sum_{n=1}^N a_nt_n = 0
+\end{aligned}
+\end{equation}
+%
+The decision variables in the optimization are the elements $a_i$ of $\mathbf{a} \in \mathbb{R}^N$.  As the objective is quadratic and the constraints are linear inequalities and a linear equality, we solve the problem as a QP (Quadratic Program), using CVXOPT, a free software package for convex optimization.  The QP interface to CVXOPT accepts problems in the form:
+\begin{equation}
+\begin{aligned}
+& \text{minimize} && \frac{1}{2}a^TPa + q^Ta\\
+& \text{subject to}
+&& Ga \le h \\
+&&& Aa = b
+\end{aligned}
+\end{equation}
+A correct formulation of our Soft-SVM for the CVXOPT interface is accordingly: $P = \mathbf{t}\mathbf{t}^T K$ (where $K$ is the Gram matrix for the kernel), $q$ is a vector of length $N$ with each element $-1$, $G$ is a vertically stacked block matrix $[G_0; G_C]$ where $G_0$ and $G_C$ are both $N \times N$ diagonal matrices with, respectively, $-1$ and $1$ down the diagonals,  $H$ is a vector of length $2N$ where the first $N$ elements are zero and the last $N$ elements are each $C$, $A$ is $\mathbf{t}^T$, and $b = 0$.
+
+\textbf{What should I write down for the constraints and objective for the 2D problem given?  Should I actually show each $P,q,G,h,A,b$?}
+
+
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{svm_toy.png}
+\label{svm_toy}
+\caption{Soft-SVM solution for decision boundary of simple 2D dataset with $C=1$}
+\end{figure}
+
+The additional important details of the implementation are in transforming the optimal vector $\mathbf{a}$ into a form that nicely represents the decision boundary.  The first step is to compute $b$ as follows:
+
+\begin{equation}
+\begin{aligned}
+b = \frac{1}{N_\mathcal{S}} \sum_{n \in \mathcal{S}} \bigg(t_n  - \sum_{m \in \mathcal{S}} a_mt_mk(\mathbf{x}_n, \mathbf{x}_m) \bigg)
+\end{aligned}
+\end{equation}
+
+where $\mathcal{S}$ denotes the set of indices of the support vectors, and $N_{\mathcal{S}}$ is the number of support vectors.  The support vector indices can be determined by finding the indices of $\mathbf{a}$ that are non-zero. With $b$, the predictor function is then simply: 
+\begin{equation}
+\begin{aligned}
+y(\mathbf{x}) = \sum_{n=1}^N a_nt_nk(\mathbf{x},\mathbf{x}_n) + b
+\end{aligned}
+\end{equation}
+and $y(\cdot)=0$ is the decision boundary.  It is also useful to compute the weight vector $\mathbf{w} \in \mathbb{R}^d$, which for the linear kernel is $\mathbf{w} = \sum_{n=1}^{N} a_n t_n \mathbf{x_n} $ (not including $w_0$) and $w_0 = b$.
+
+
+We now examine the performance of the SVM classifiers on the same datasets analyzed in Part 1 for logistic regression.  The results of the misclassification rates, with a linear kernel $k(x,x') = x^Tx'$ are shown in Table \ref{C_0}.  
+
+\begin{table}[H]
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Dataset} & \textbf{Misslassification rate} \\ \hline
+stdev1 train & $0$\\ \hline
+stdev1 val & $0$\\ \hline
+stdev2 train & $0.0925$\\ \hline
+stdev2 val & $0.085$\\ \hline
+stdev4 train & $0.265$\\ \hline
+stdev4 val & $0.2375$\\ \hline
+nonsep train & $0.49$\\ \hline
+nonsep val & $0.515$\\ \hline
+\end{tabular}
+\label{C_0}
+\caption{SVM misclassification rates on different datasets for $C$=0.}
+\end{table}
+
+Comparing the results of Tables \ref{lam_0} and \ref{C_0}, we see that the performance of the logistic regression and SVM classifiers are almost identical on these 2D datasets.  The plots of the decision boundary together with the data also closely match those from Part 1.  \textbf{What else can be said?  It says to report/explain the decision boundary and classification error rate??}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{svm_stdev1_train.png}
+\label{svm_toy}
+\caption{Soft-SVM solution for decision boundary of "stdev1" training dataset with $C=1$ and a linear kernel}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{svm_stdev1_val.png}
+\label{svm_toy}
+\caption{Soft-SVM solution for decision boundary of "stdev1" validation dataset with $C=1$ and a linear kernel}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{svm_stdev2_train.png}
+\label{svm_toy}
+\caption{Soft-SVM solution for decision boundary of "stdev2" training dataset with $C=1$ and a linear kernel}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{svm_stdev2_val.png}
+\label{svm_toy}
+\caption{Soft-SVM solution for decision boundary of "stdev2" validation dataset with $C=1$ and a linear kernel}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{svm_stdev4_train.png}
+\label{svm_toy}
+\caption{Soft-SVM solution for decision boundary of "stdev4" training dataset with $C=1$ and a linear kernel}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{svm_stdev4_val.png}
+\label{svm_toy}
+\caption{Soft-SVM solution for decision boundary of "stdev4" validation dataset with $C=1$ and a linear kernel}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{svm_nonsep_train.png}
+\label{svm_toy}
+\caption{Soft-SVM solution for decision boundary of "nonsep" training dataset with $C=1$ and a linear kernel}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{svm_nonsep_val.png}
+\label{svm_toy}
+\caption{Soft-SVM solution for decision boundary of "nonsep" validation dataset with $C=1$ and a linear kernel}
+\end{figure}
+
+
+The Gaussian kernel offers an interesting alternative to the linear kernel for classification.  The formulation of the SVM is exactly the same as the linear kernel except the kernel is now:
+\begin{equation}
+\begin{aligned}
+k(x,x') = \exp\big( - \frac{1}{2 \sigma^2} ||x-x'||_2^2  \big)
+\end{aligned}
+\end{equation}
+where $\sigma$ is termed the bandwidth.
+
+
+\section{Titanic}
 
 \begin{enumerate}
 \item We perform ``interval'' type feature rescaling. Namely we rescale all the features so that they lie in $[0,1]$. The performance is shown in Figure \ref{titanic_logit}. Performing model selection leads us to choose $\lambda = 2.5$.

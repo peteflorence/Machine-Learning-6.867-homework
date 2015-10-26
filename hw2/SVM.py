@@ -27,7 +27,7 @@ class SVM:
             self.kernel_type = 'linear'
         elif kernel == 'Gaussian':
             def k_gaussian(x,xprime):
-                return np.exp(-np.linalg.norm(x-xprime)**2/(2*bandwidth))
+                return np.exp(-np.linalg.norm(x-xprime)**2/(2*bandwidth**2))
             self.kernel = k_gaussian
             self.kernel_type = 'gaussian'
         else: 
@@ -99,6 +99,8 @@ class SVM:
             sum_over_n += self.supportVectors[n] * self.y[self.supportVectorsIdx[n]] * self.x[self.supportVectorsIdx[n]]
         self.theta = sum_over_n
 
+    def computeGeomMargin(self):
+        self.GeomMargin = 1.0 / np.linalg.norm(self.theta) 
 
     def computeGramMatrix(self, X):
         K = np.zeros((self.N, self.N))
@@ -163,11 +165,17 @@ class SVM:
 
         return missclassifiedRate, missclasified
 
-    def CER_type(self,type="train", rescale=False, verbose=False, rescaleMethod="interval"):
-        filename = "hw2_resources/data/data_titanic_" + type + ".csv"
-        T = scipy.io.loadmat(filename)['data']
-        X = np.array(T[:,0:-1])
-        Y = np.array(T[:,-1])
+    def CER_type(self,type="train", rescale=False, verbose=False, rescaleMethod="interval", file="stdev1"):
+        if self.titanicData ==True:
+            filename = "hw2_resources/data/data_titanic_" + type + ".csv"
+            T = scipy.io.loadmat(filename)['data']
+            X = np.array(T[:,0:-1])
+            Y = np.array(T[:,-1])
+        else:
+            filename = "hw2_resources/data/data_" + file + "_" + type + ".csv"
+            train = np.loadtxt(filename)
+            X = np.array(train[:,0:2]) * 1.0
+            Y = np.array(train[:,2:3])[:,0] * 1.0
         if rescale:
             X = SVM.rescaleFeatures(X, method=rescaleMethod)
         missclassifiedRate, missclasified = self.classificationErrorRate(x=X, y=Y, verbose=verbose)
@@ -191,8 +199,8 @@ class SVM:
 
         idx_pos = np.where(self.y > 0)
         idx_neg = np.where(self.y < 0)
-        plt.scatter(self.x[idx_pos,0], self.x[idx_pos,1], color='b', marker='o', facecolors='none')
-        plt.scatter(self.x[idx_neg,0], self.x[idx_neg,1], color='r', marker='o', facecolors='none')
+        plt.scatter(self.x[idx_pos,0], self.x[idx_pos,1], color='b', marker='o', facecolors='none', label=' = +1')
+        plt.scatter(self.x[idx_neg,0], self.x[idx_neg,1], color='r', marker='o', facecolors='none', label=' = -1')
 
         if (self.theta is not None) and (self.kernel_type == 'linear'):
             w_full = np.zeros((self.d+1,1))[:,0]
@@ -200,9 +208,14 @@ class SVM:
             w_full[1:] = self.theta
             x_1_grid = np.linspace(np.min(self.x[:,0]),np.max(self.x[:,0]), 100)
             x_2_grid = -1.0/w_full[2]*(w_full[0] + w_full[1]*x_1_grid)
-            plt.plot(x_1_grid, x_2_grid, color='g')
+            plt.plot(x_1_grid, x_2_grid, color='g', label=' = bdry')
         elif self.a is not None:
             plotDecisionBoundary(self.x, self.y, self.predictorFunction, 0, title = "")
+
+        plt.xlabel(r'$x_1$')
+        plt.ylabel(r'$x_2$')
+        plt.legend(loc='best')
+        plt.show()
 
         plt.show()
 
@@ -253,6 +266,8 @@ class SVM:
             idx = np.where(columnDiff < eps)
             columnDiff[idx] = 1.0
             phiRescale = (phi - columnMin[None,:])/columnDiff[None,:]
+
+            print "yes I rescaled"
 
 
         return phiRescale
