@@ -236,7 +236,7 @@ The decision variables in the optimization are the elements $a_i$ of $\mathbf{a}
 \end{equation}
 A correct formulation of our Soft-SVM for the CVXOPT interface is accordingly: $P = \mathbf{t}\mathbf{t}^T K$ (where $K$ is the Gram matrix for the kernel), $q$ is a vector of length $N$ with each element $-1$, $G$ is a vertically stacked block matrix $[G_0; G_C]$ where $G_0$ and $G_C$ are both $N \times N$ diagonal matrices with, respectively, $-1$ and $1$ down the diagonals,  $H$ is a vector of length $2N$ where the first $N$ elements are zero and the last $N$ elements are each $C$, $A$ is $\mathbf{t}^T$, and $b = 0$.
 
-\textbf{What should I write down for the constraints and objective for the 2D problem given?  Should I actually show each $P,q,G,h,A,b$?}
+\todo{What should I write down for the constraints and objective for the 2D problem given?  Should I actually show each $P,q,G,h,A,b$?}
 
 
 
@@ -285,48 +285,48 @@ nonsep val & $0.515$\\ \hline
 
 Comparing the results of Tables \ref{lam_0} and \ref{C_0}, we see that the performance of the logistic regression and SVM classifiers are almost identical on these 2D datasets.  The plots of the decision boundary together with the data also closely match those from Part 1.  \textbf{What else can be said?  It says to report/explain the decision boundary and classification error rate??}
 
-\begin{figure}
-\centering
-\includegraphics[scale=0.5]{svm_stdev1_train.png}
-\label{svm_toy}
-\caption{Soft-SVM solution for decision boundary of "stdev1" training dataset with $C=1$ and a linear kernel}
-\end{figure}
+%\begin{figure}
+%\centering
+%\includegraphics[scale=0.5]{svm_stdev1_train.png}
+%\label{svm_toy}
+%\caption{Soft-SVM solution for decision boundary of "stdev1" training dataset with $C=1$ and a linear kernel}
+%\end{figure}
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{svm_stdev1_val.png}
 \label{svm_toy}
 \caption{Soft-SVM solution for decision boundary of "stdev1" validation dataset with $C=1$ and a linear kernel}
 \end{figure}
-\begin{figure}
-\centering
-\includegraphics[scale=0.5]{svm_stdev2_train.png}
-\label{svm_toy}
-\caption{Soft-SVM solution for decision boundary of "stdev2" training dataset with $C=1$ and a linear kernel}
-\end{figure}
+%\begin{figure}
+%\centering
+%\includegraphics[scale=0.5]{svm_stdev2_train.png}
+%\label{svm_toy}
+%\caption{Soft-SVM solution for decision boundary of "stdev2" training dataset with $C=1$ and a linear kernel}
+%\end{figure}
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{svm_stdev2_val.png}
 \label{svm_toy}
 \caption{Soft-SVM solution for decision boundary of "stdev2" validation dataset with $C=1$ and a linear kernel}
 \end{figure}
-\begin{figure}
-\centering
-\includegraphics[scale=0.5]{svm_stdev4_train.png}
-\label{svm_toy}
-\caption{Soft-SVM solution for decision boundary of "stdev4" training dataset with $C=1$ and a linear kernel}
-\end{figure}
-\begin{figure}
-\centering
-\includegraphics[scale=0.5]{svm_stdev4_val.png}
-\label{svm_toy}
-\caption{Soft-SVM solution for decision boundary of "stdev4" validation dataset with $C=1$ and a linear kernel}
-\end{figure}
-\begin{figure}
-\centering
-\includegraphics[scale=0.5]{svm_nonsep_train.png}
-\label{svm_toy}
-\caption{Soft-SVM solution for decision boundary of "nonsep" training dataset with $C=1$ and a linear kernel}
-\end{figure}
+%\begin{figure}
+%\centering
+%\includegraphics[scale=0.5]{svm_stdev4_train.png}
+%\label{svm_toy}
+%\caption{Soft-SVM solution for decision boundary of "stdev4" training dataset with $C=1$ and a linear kernel}
+%\end{figure}
+%\begin{figure}
+%\centering
+%\includegraphics[scale=0.5]{svm_stdev4_val.png}
+%\label{svm_toy}
+%\caption{Soft-SVM solution for decision boundary of "stdev4" validation dataset with $C=1$ and a linear kernel}
+%\end{figure}
+%\begin{figure}
+%\centering
+%\includegraphics[scale=0.5]{svm_nonsep_train.png}
+%\label{svm_toy}
+%\caption{Soft-SVM solution for decision boundary of "nonsep" training dataset with $C=1$ and a linear kernel}
+%\end{figure}
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{svm_nonsep_val.png}
@@ -341,8 +341,48 @@ The Gaussian kernel offers an interesting alternative to the linear kernel for c
 k(x,x') = \exp\big( - \frac{1}{2 \sigma^2} ||x-x'||_2^2  \big)
 \end{aligned}
 \end{equation}
-where $\sigma$ is termed the bandwidth.
+where $\sigma$ is termed the bandwidth.  We can adjust both the $C$ (relative penalty on the slack variables) and bandwidth, $\sigma$, in order to tune our classifier to the data.
 
+The values of the geometric margin, $\frac{1}{||\mathbf{w}||}$, for Soft-SVMs with the Gaussian kernel are shown for the different datasets and for $C = \{ 0.01, 0.1, 1, 10, 100 \}$.
+
+% \begin{table}[H]
+% \begin{tabular}{|c|c|c|c|c|c|}
+% \hline
+%Dataset & $C = 0.01$ & 0.1 & 1 & 10 & 100  \\ \hline
+%stdev1 & $0.090$ & $0.035$ & $0.024$ & $0.024$ & $0.024$ \\ \hline
+%stdev2 & $0.088$ & $0.016$ & $0.008$ & $0.008$ & $0.007$ \\ \hline
+%stdev4 & $0.090$ & $0.035$ & $0.024$ & $0.024$ & $0.024$ \\ \hline
+%nonsep & $0.090$ & $0.035$ & $0.024$ & $0.024$ & $0.024$ \\ \hline
+%  \end{tabular}
+% \caption{Geometric margin $\frac{1}{||\mathbf{w}||}$ for various values of $C$, for each of the provided 2D datasets.}
+% \label{weights}
+% \end{table}
+ 
+  \begin{table}[H]
+ \begin{tabular}{|c|c|c|c|c|c|}
+ \hline
+Dataset & $C = 0.01$ & 0.1 & 1 & 10 & 100  \\ \hline
+stdev1 & $0.09$ & $0.0875$ & $0.0825$ & $0.075$ & $0.07$ \\ \hline
+stdev2 & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
+stdev4 & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
+nonsep & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
+  \end{tabular}
+ \caption{Training data misclassification rates for various values of $C$, for each of the provided 2D datasets.}
+ \label{weights}
+ \end{table}
+
+  \begin{table}[H]
+ \begin{tabular}{|c|c|c|c|c|c|}
+ \hline
+Dataset & $C = 0.01$ & 0.1 & 1 & 10 & 100  \\ \hline
+stdev1 & $0.07$ & $0.07$ & $0.0775$ & $0.0875$ & $0.0925$ \\ \hline
+stdev2 & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
+stdev4 & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
+nonsep & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
+  \end{tabular}
+ \caption{Validation data misclassification rates for various values of $C$, for each of the provided 2D datasets.}
+ \label{weights}
+ \end{table}
 
 \section{Titanic}
 

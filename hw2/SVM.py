@@ -110,7 +110,6 @@ class SVM:
                 K[i, j] = self.kernel(x_i, x_j)
         return K
 
-
     def softDualFormObjective(self, a, x, y, kernel):
         sum_of_a = np.sum(a)
 
@@ -150,10 +149,11 @@ class SVM:
     def classificationErrorRate(self, x, y, verbose=False):
 
         # calculate predictor function for each x
-        predict_x = x[:,0] * 0.0
+        predict_y = y * 0.0
+
         for i in range(len(x)):
-            predict_x[i] = self.predictorFunction(x[i])
-        val = np.multiply(y,predict_x)
+            predict_y[i] = self.predictorFunction(x[i])
+        val = np.multiply(y,predict_y)
 
         # any entries in val that are < 0 are missclassified
         missclasified = np.size(val[val < 0])
@@ -165,14 +165,14 @@ class SVM:
 
         return missclassifiedRate, missclasified
 
-    def CER_type(self,type="train", rescale=False, verbose=False, rescaleMethod="interval", file="stdev1"):
+    def CER_type(self,typef="train", rescale=False, verbose=False, rescaleMethod="interval", filef="stdev1"):
         if self.titanicData ==True:
-            filename = "hw2_resources/data/data_titanic_" + type + ".csv"
+            filename = "hw2_resources/data/data_titanic_" + typef + ".csv"
             T = scipy.io.loadmat(filename)['data']
-            X = np.array(T[:,0:-1])
-            Y = np.array(T[:,-1])
+            X = np.array(T[:,0:-1]) * 1.0
+            Y = np.array(T[:,-1]) * 1.0
         else:
-            filename = "hw2_resources/data/data_" + file + "_" + type + ".csv"
+            filename = "hw2_resources/data/data_" + filef + "_" + typef + ".csv"
             train = np.loadtxt(filename)
             X = np.array(train[:,0:2]) * 1.0
             Y = np.array(train[:,2:3])[:,0] * 1.0
@@ -232,8 +232,8 @@ class SVM:
         return svm
 
     @staticmethod
-    def fromTitanic(type="train", rescale=False, rescaleMethod="interval", kernel="linear", C=1.0, bandwidth=1.0):
-        filename = "hw2_resources/data/data_titanic_" + type + ".csv"
+    def fromTitanic(typef="train", rescale=False, rescaleMethod="interval", kernel="linear", C=1.0, bandwidth=1.0):
+        filename = "hw2_resources/data/data_titanic_" + typef + ".csv"
         T = scipy.io.loadmat(filename)['data']
         X = np.array(T[:,0:-1])
         Y = np.array(T[:,-1])

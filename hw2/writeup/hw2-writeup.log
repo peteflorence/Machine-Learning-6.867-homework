@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  26 OCT 2015 13:25
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  26 OCT 2015 16:17
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -670,6 +670,12 @@ LaTeX Warning: Label `svm_toy' multiply defined.
 
 LaTeX Warning: Label `svm_toy' multiply defined.
 
+
+LaTeX Warning: Label `weights' multiply defined.
+
+
+LaTeX Warning: Label `weights' multiply defined.
+
 )
 \openout1 = `hw2-writeup.aux'.
 
@@ -849,6 +855,25 @@ Package pdftex.def Info: nonsep_train_lam_1000.png used on input line 205.
 (pdftex.def)             Requested size: 192.71953pt x 136.50966pt.
  [2 <./stdev4_train_lam_0.png> <./stdev4_val_lam_0.png> <./nonsep_train_lam_0.p
 ng> <./nonsep_train_lam_10.png>]
+Overfull \hbox (6.79855pt too wide) in paragraph at lines 239--239
+\OML/cmm/m/it/10 P; q; G; h; A; b$\OT1/ptm/m/n/10 ?  
+ []
+
+
+Overfull \hbox (6.79855pt too wide) in paragraph at lines 239--239
+\OML/cmm/m/it/10 P; q; G; h; A; b$\OT1/ptm/m/n/10 ?  
+ []
+
+
+Overfull \hbox (6.79855pt too wide) in paragraph at lines 239--239
+\OML/cmm/m/it/10 P; q; G; h; A; b$\OT1/ptm/m/n/10 ?  
+ []
+
+
+Overfull \hbox (6.79855pt too wide) in paragraph at lines 239--239
+\OML/cmm/m/it/10 P; q; G; h; A; b$\OT1/ptm/m/n/10 ?  
+ []
+
 <svm_toy.png, id=68, 385.44pt x 274.02374pt>
 File: svm_toy.png Graphic file (type png)
  <use svm_toy.png>
@@ -864,100 +889,76 @@ Package xcolor Warning: Incompatible color definition on input line 286.
 
 Package xcolor Warning: Incompatible color definition on input line 286.
 
-<svm_stdev1_train.png, id=86, 383.4325pt x 284.06125pt>
-File: svm_stdev1_train.png Graphic file (type png)
-
-<use svm_stdev1_train.png>
-Package pdftex.def Info: svm_stdev1_train.png used on input line 290.
-(pdftex.def)             Requested size: 191.71577pt x 142.03026pt.
-
 <svm_stdev1_val.png, id=87, 383.4325pt x 284.06125pt>
 File: svm_stdev1_val.png Graphic file (type png)
  <use svm_stdev1_val.png>
 Package pdftex.def Info: svm_stdev1_val.png used on input line 296.
 (pdftex.def)             Requested size: 191.71577pt x 142.03026pt.
 
-<svm_stdev2_train.png, id=88, 383.4325pt x 284.06125pt>
-File: svm_stdev2_train.png Graphic file (type png)
-
-<use svm_stdev2_train.png>
-Package pdftex.def Info: svm_stdev2_train.png used on input line 302.
-(pdftex.def)             Requested size: 191.71577pt x 142.03026pt.
-
-<svm_stdev2_val.png, id=89, 383.4325pt x 284.06125pt>
+<svm_stdev2_val.png, id=88, 383.4325pt x 284.06125pt>
 File: svm_stdev2_val.png Graphic file (type png)
  <use svm_stdev2_val.png>
 Package pdftex.def Info: svm_stdev2_val.png used on input line 308.
 (pdftex.def)             Requested size: 191.71577pt x 142.03026pt.
 
-<svm_stdev4_train.png, id=90, 390.45876pt x 284.06125pt>
-File: svm_stdev4_train.png Graphic file (type png)
-
-<use svm_stdev4_train.png>
-Package pdftex.def Info: svm_stdev4_train.png used on input line 314.
-(pdftex.def)             Requested size: 195.2289pt x 142.03026pt.
-
-<svm_stdev4_val.png, id=91, 390.45876pt x 284.06125pt>
-File: svm_stdev4_val.png Graphic file (type png)
-
-<use svm_stdev4_val.png>
-Package pdftex.def Info: svm_stdev4_val.png used on input line 320.
-(pdftex.def)             Requested size: 195.2289pt x 142.03026pt.
-
-<svm_nonsep_train.png, id=92, 383.4325pt x 284.06125pt>
-File: svm_nonsep_train.png Graphic file (type png)
-
-<use svm_nonsep_train.png>
-Package pdftex.def Info: svm_nonsep_train.png used on input line 326.
-(pdftex.def)             Requested size: 191.71577pt x 142.03026pt.
-
-<svm_nonsep_val.png, id=93, 383.4325pt x 284.06125pt>
+<svm_nonsep_val.png, id=89, 383.4325pt x 284.06125pt>
 File: svm_nonsep_val.png Graphic file (type png)
  <use svm_nonsep_val.png>
 Package pdftex.def Info: svm_nonsep_val.png used on input line 332.
 (pdftex.def)             Requested size: 191.71577pt x 142.03026pt.
 
-[4 <./svm_toy.png> <./svm_stdev1_train.png> <./svm_stdev1_val.png> <./svm_stdev
-2_train.png>] [5 <./svm_stdev2_val.png> <./svm_stdev4_train.png> <./svm_stdev4_
-val.png> <./svm_nonsep_train.png> <./svm_nonsep_val.png>]
+[4 <./svm_toy.png> <./svm_stdev1_val.png> <./svm_stdev2_val.png> <./svm_nonsep_
+val.png>]
+Underfull \hbox (badness 1163) in paragraph at lines 346--347
+\OT1/ptm/m/n/10 with the Gaus-sian ker-nel are shown for the dif-fer-ent
+ []
 
-Package xcolor Warning: Incompatible color definition on input line 350.
 
-<titanic_logit.png, id=124, 392.46625pt x 272.01625pt>
+Overfull \hbox (2.19691pt too wide) in paragraph at lines 362--370
+[][] 
+ []
+
+
+Overfull \hbox (7.19693pt too wide) in paragraph at lines 375--383
+[][] 
+ []
+
+
+Package xcolor Warning: Incompatible color definition on input line 390.
+
+<titanic_logit.png, id=106, 392.46625pt x 272.01625pt>
 File: titanic_logit.png Graphic file (type png)
  <use titanic_logit.png>
-Package pdftex.def Info: titanic_logit.png used on input line 353.
+Package pdftex.def Info: titanic_logit.png used on input line 393.
 (pdftex.def)             Requested size: 196.23264pt x 136.00778pt.
 
-Underfull \hbox (badness 1205) in paragraph at lines 355--355
+Underfull \hbox (badness 1205) in paragraph at lines 395--395
 [][][]\OT1/ptm/m/n/9 Results of lo-gis-tic re-gres-sion clas-si-fier on Ti-tani
 c
  []
 
 
-Package xcolor Warning: Incompatible color definition on input line 360.
+Package xcolor Warning: Incompatible color definition on input line 400.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 386.
-[6
-
- <./titanic_logit.png>]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 386.
+[5 <./titanic_logit.png>]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 426.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 426.
  (./hw2-writeup.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 386.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 386.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 426.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 426.
 Package rerunfilecheck Info: File `hw2-writeup.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
 
 
 LaTeX Warning: There were multiply-defined labels.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 386.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 426.
  ) 
 Here is how much of TeX's memory you used:
- 17324 strings out of 493117
- 319763 string characters out of 6135433
- 392436 words of memory out of 5000000
- 20390 multiletter control sequences out of 15000+600000
+ 17301 strings out of 493117
+ 319287 string characters out of 6135433
+ 392517 words of memory out of 5000000
+ 20375 multiletter control sequences out of 15000+600000
  22629 words of font info for 62 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  62i,12n,76p,1465b,695s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -979,10 +980,10 @@ dist/fonts/type1/public/amsfonts/symbols/msbm7.pfb></usr/local/texlive/2014/tex
 mf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2014/texmf-dist/fo
 nts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/
 urw/times/utmr8a.pfb>
-Output written on hw2-writeup.pdf (6 pages, 777528 bytes).
+Output written on hw2-writeup.pdf (5 pages, 553485 bytes).
 PDF statistics:
- 205 PDF objects out of 1000 (max. 8388607)
- 142 compressed objects within 2 object streams
- 44 named destinations out of 1000 (max. 500000)
- 103 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 188 PDF objects out of 1000 (max. 8388607)
+ 136 compressed objects within 2 object streams
+ 41 named destinations out of 1000 (max. 500000)
+ 78 words of extra memory for PDF output out of 10000 (max. 10000000)
 
