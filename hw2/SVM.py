@@ -9,6 +9,7 @@ sys.path.append("../hw1")
 from gradient_descent import GradientDescent as gd
 sys.path.append("./hw2_resources/")
 from plotBoundary import plotDecisionBoundary
+import math
 
 
 class SVM:
@@ -82,6 +83,11 @@ class SVM:
         self.supportVectors = self.a[self.supportVectorsIdx][:,0]
         self.NsupportVectors = self.supportVectorsIdx.size
 
+        self.supportVectorsStrictIdx = np.where(np.logical_and(self.a < self.C - threshold, self.a > threshold))[0]
+        self.supportVectorsInsideMarginIdx = np.where(self.a > self.C - threshold)[0]
+        # self.supportVectorsInsideMargin = self.a[self.supportVectorsInsideMarginIdx][:,0]
+        # self.NsupportVectorsInsideMargin = self.supportVectorsInsideMarginIdx
+
     def computeB(self, threshold=1e-6):
         sum_over_n = 0
         for n in range(self.NsupportVectors):
@@ -93,6 +99,24 @@ class SVM:
 
         self.b = sum_over_n / self.NsupportVectors
 
+        # Lucas
+        # first sum over support vectors inside the margin
+        sum_over_n = 0
+        for idx_n in self.supportVectorsStrictIdx:
+            sum_over_m = 0
+            for idx_m in self.supportVectorsIdx:
+                sum_over_m += self.a[idx_m]*self.y[idx_m]*self.kernel(self.x[idx_n,:], self.x[idx_m,:])
+
+            sum_over_n += self.y[idx_n] - sum_over_m
+
+        if np.size(self.supportVectorsStrictIdx) == 0:
+            self.b = 0
+        else:
+            self.b = 1.0/np.size(self.supportVectorsStrictIdx)*sum_over_n
+
+
+
+
     def computeTheta(self):
         sum_over_n = 0
         for n in range(self.NsupportVectors):
@@ -100,7 +124,16 @@ class SVM:
         self.theta = sum_over_n
 
     def computeGeomMargin(self):
-        self.GeomMargin = 1.0 / np.linalg.norm(self.theta) 
+        if self.kernel_type == 'linear':
+            self.GeomMargin = 1.0 / np.linalg.norm(self.theta) 
+        else:
+            w_2norm_squared = 0
+            for i in range(self.NsupportVectors):
+                for j in range(self.NsupportVectors):
+                    w_2norm_squared += self.supportVectors[i]*self.y[self.supportVectorsIdx[i]]*self.supportVectors[j]*self.y[self.supportVectorsIdx[j]]*self.kernel(self.x[self.supportVectorsIdx[i]],self.x[self.supportVectorsIdx[j]])
+            w_2norm = math.sqrt(w_2norm_squared)
+            self.GeomMargin = 1.0 / w_2norm
+
 
     def computeGramMatrix(self, X):
         K = np.zeros((self.N, self.N))
@@ -152,12 +185,12 @@ class SVM:
         predict_y = y * 0.0
 
         for i in range(len(x)):
-            predict_y[i] = self.predictorFunction(x[i])
+            predict_y[i] = self.predictorFunction(x[i,:])
         val = np.multiply(y,predict_y)
 
         # any entries in val that are < 0 are missclassified
         missclasified = np.size(val[val < 0])
-        missclassifiedRate = missclasified/(self.N*1.0)
+        missclassifiedRate = missclasified/(np.size(y)*1.0)
 
         if verbose:
             print "number of entries missclassified = " + str(missclasified)
@@ -202,6 +235,17 @@ class SVM:
         plt.scatter(self.x[idx_pos,0], self.x[idx_pos,1], color='b', marker='o', facecolors='none', label=' = +1')
         plt.scatter(self.x[idx_neg,0], self.x[idx_neg,1], color='r', marker='o', facecolors='none', label=' = -1')
 
+        # intersect idx_pos and supportVectorsIdx
+        idx_pos_supportVecs = np.intersect1d(idx_pos,self.supportVectorsStrictIdx)
+        idx_pos_supportVecsStrict = np.intersect1d(idx_pos,self.supportVectorsInsideMarginIdx)
+        plt.scatter(self.x[idx_pos_supportVecs,0], self.x[idx_pos_supportVecs,1], color='b', marker='x', s=200, facecolors='none', label=' = +1')
+        plt.scatter(self.x[idx_pos_supportVecsStrict,0], self.x[idx_pos_supportVecsStrict,1], color='b', marker='v', s=200, facecolors='none', label=' = +1')
+
+        idx_neg_supportVecs = np.intersect1d(idx_neg,self.supportVectorsStrictIdx)
+        idx_neg_supportVecsStrict = np.intersect1d(idx_neg,self.supportVectorsInsideMarginIdx)
+        plt.scatter(self.x[idx_neg_supportVecs,0], self.x[idx_neg_supportVecs,1], color='r', marker='x', s=200, facecolors='none', label=' = -1')
+        plt.scatter(self.x[idx_neg_supportVecsStrict,0], self.x[idx_neg_supportVecsStrict,1], color='r', marker='v', s=200, facecolors='none', label=' = +1')
+
         if (self.theta is not None) and (self.kernel_type == 'linear'):
             w_full = np.zeros((self.d+1,1))[:,0]
             w_full[0] = self.b
@@ -209,6 +253,7 @@ class SVM:
             x_1_grid = np.linspace(np.min(self.x[:,0]),np.max(self.x[:,0]), 100)
             x_2_grid = -1.0/w_full[2]*(w_full[0] + w_full[1]*x_1_grid)
             plt.plot(x_1_grid, x_2_grid, color='g', label=' = bdry')
+
         elif self.a is not None:
             plotDecisionBoundary(self.x, self.y, self.predictorFunction, 0, title = "")
 
