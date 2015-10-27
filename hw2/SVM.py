@@ -89,15 +89,15 @@ class SVM:
         # self.NsupportVectorsInsideMargin = self.supportVectorsInsideMarginIdx
 
     def computeB(self, threshold=1e-6):
-        sum_over_n = 0
-        for n in range(self.NsupportVectors):
-            sum_over_m = 0
-            for m in range(self.NsupportVectors):
-                sum_over_m += self.supportVectors[m]*self.y[self.supportVectorsIdx[m]]*self.kernel(self.x[self.supportVectorsIdx[n]],self.x[self.supportVectorsIdx[m]])
+        # sum_over_n = 0
+        # for n in range(self.NsupportVectors):
+        #     sum_over_m = 0
+        #     for m in range(self.NsupportVectors):
+        #         sum_over_m += self.supportVectors[m]*self.y[self.supportVectorsIdx[m]]*self.kernel(self.x[self.supportVectorsIdx[n]],self.x[self.supportVectorsIdx[m]])
 
-            sum_over_n += self.y[self.supportVectorsIdx[n]] - sum_over_m
+        #     sum_over_n += self.y[self.supportVectorsIdx[n]] - sum_over_m
 
-        self.b = sum_over_n / self.NsupportVectors
+        # #self.b = sum_over_n / self.NsupportVectors
 
         # Lucas
         # first sum over support vectors inside the margin
@@ -238,13 +238,13 @@ class SVM:
         # intersect idx_pos and supportVectorsIdx
         idx_pos_supportVecs = np.intersect1d(idx_pos,self.supportVectorsStrictIdx)
         idx_pos_supportVecsStrict = np.intersect1d(idx_pos,self.supportVectorsInsideMarginIdx)
-        plt.scatter(self.x[idx_pos_supportVecs,0], self.x[idx_pos_supportVecs,1], color='b', marker='x', s=200, facecolors='none', label=' = +1')
-        plt.scatter(self.x[idx_pos_supportVecsStrict,0], self.x[idx_pos_supportVecsStrict,1], color='b', marker='v', s=200, facecolors='none', label=' = +1')
+        plt.scatter(self.x[idx_pos_supportVecs,0], self.x[idx_pos_supportVecs,1], color='b', marker='x', s=200, facecolors='none')
+        plt.scatter(self.x[idx_pos_supportVecsStrict,0], self.x[idx_pos_supportVecsStrict,1], color='b', marker='v', s=200, facecolors='none')
 
         idx_neg_supportVecs = np.intersect1d(idx_neg,self.supportVectorsStrictIdx)
         idx_neg_supportVecsStrict = np.intersect1d(idx_neg,self.supportVectorsInsideMarginIdx)
-        plt.scatter(self.x[idx_neg_supportVecs,0], self.x[idx_neg_supportVecs,1], color='r', marker='x', s=200, facecolors='none', label=' = -1')
-        plt.scatter(self.x[idx_neg_supportVecsStrict,0], self.x[idx_neg_supportVecsStrict,1], color='r', marker='v', s=200, facecolors='none', label=' = +1')
+        plt.scatter(self.x[idx_neg_supportVecs,0], self.x[idx_neg_supportVecs,1], color='r', marker='x', s=200, facecolors='none')
+        plt.scatter(self.x[idx_neg_supportVecsStrict,0], self.x[idx_neg_supportVecsStrict,1], color='r', marker='v', s=200, facecolors='none')
 
         if (self.theta is not None) and (self.kernel_type == 'linear'):
             w_full = np.zeros((self.d+1,1))[:,0]

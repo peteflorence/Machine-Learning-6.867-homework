@@ -107,7 +107,7 @@ First we present the results for $\lambda = 0$ in Table \ref{lam_0}
 \begin{table}[H]
 \begin{tabular}{|c|c|}
 \hline
-dataset & misslassification rate \\ \hline
+\textbf{Dataset} & \textbf{Misslassification rate} \\ \hline
 stdev1 train & $0$\\ \hline
 stdev1 val & $0$\\ \hline
 stdev2 train & $0.0925$\\ \hline
@@ -212,7 +212,7 @@ For the nonseparable data the results look fairly identical. Not sure if we shou
 
 \section{Support Vector Machine (SVM)}
 
-We implemented the dual form of Soft-SVMs.  Our implementation is general and capable of handling linear, Gaussian, or other user-specified kernels or Gram matrices, and allows the user to additionally specify $C$ (the variable that adjusts the relative penalty on the slack variables) and any special kernel-dependent variables (including the bandwidth for the Gaussian kernel).  
+%We implemented the dual form of Soft-SVMs.  Our implementation is general and capable of handling linear, Gaussian, or other user-specified kernels or Gram matrices, and allows the user to additionally specify $C$ (the variable that adjusts the relative penalty on the slack variables) and any special kernel-dependent variables (including the bandwidth for the Gaussian kernel).  
 
 A description of the implementation is as follows.  Given a kernel function, $k(\cdot,\cdot)$, a set of N data points $\{x^{(i)}, y^{(i)}\}$ where each each $\mathbf{x} \in \mathbb{R}^d$ is paired with a a target label $t \in \{-1,1\}$, and $C$ as mentioned above, we can solve the dual form Soft-SVM optimization problem:
 %
@@ -225,7 +225,7 @@ A description of the implementation is as follows.  Given a kernel function, $k(
 \end{aligned}
 \end{equation}
 %
-The decision variables in the optimization are the elements $a_i$ of $\mathbf{a} \in \mathbb{R}^N$.  As the objective is quadratic and the constraints are linear inequalities and a linear equality, we solve the problem as a QP (Quadratic Program), using CVXOPT, a free software package for convex optimization.  The QP interface to CVXOPT accepts problems in the form:
+The decision variables in the optimization are the elements $a_i, i =0,1,...,n$.  As the objective is quadratic and the constraints are linear inequalities and a linear equality, we solve the problem as a QP (Quadratic Program), using CVXOPT.  The QP interface to CVXOPT accepts problems in the form:
 \begin{equation}
 \begin{aligned}
 & \text{minimize} && \frac{1}{2}a^TPa + q^Ta\\
@@ -236,34 +236,49 @@ The decision variables in the optimization are the elements $a_i$ of $\mathbf{a}
 \end{equation}
 A correct formulation of our Soft-SVM for the CVXOPT interface is accordingly: $P = \mathbf{t}\mathbf{t}^T K$ (where $K$ is the Gram matrix for the kernel), $q$ is a vector of length $N$ with each element $-1$, $G$ is a vertically stacked block matrix $[G_0; G_C]$ where $G_0$ and $G_C$ are both $N \times N$ diagonal matrices with, respectively, $-1$ and $1$ down the diagonals,  $H$ is a vector of length $2N$ where the first $N$ elements are zero and the last $N$ elements are each $C$, $A$ is $\mathbf{t}^T$, and $b = 0$.
 
-\todo{What should I write down for the constraints and objective for the 2D problem given?  Should I actually show each $P,q,G,h,A,b$?}
-
-
-
-\begin{figure}
-\centering
-\includegraphics[scale=0.5]{svm_toy.png}
-\label{svm_toy}
-\caption{Soft-SVM solution for decision boundary of simple 2D dataset with $C=1$}
-\end{figure}
-
-The additional important details of the implementation are in transforming the optimal vector $\mathbf{a}$ into a form that nicely represents the decision boundary.  The first step is to compute $b$ as follows:
+For the example of 4 data points given, our $P$ matrix will be given by exactly:
 
 \begin{equation}
 \begin{aligned}
-b = \frac{1}{N_\mathcal{S}} \sum_{n \in \mathcal{S}} \bigg(t_n  - \sum_{m \in \mathcal{S}} a_mt_mk(\mathbf{x}_n, \mathbf{x}_m) \bigg)
+& t = \begin{bmatrix} 1 & 1 & -1 & -1 \end{bmatrix}^T \\
+& K = \begin{bmatrix} 
+5 & 6 & 0 & 4  \\
+6 & 8 & 0 & 2  \\
+0 & 0 & 0 & 0  \\
+4 & 2 & 0 & 13  \\
+\end{bmatrix} \\
+& P =  \mathbf{t}\mathbf{t}^T K\\
+\end{aligned}
+\end{equation}
+The Gram matrix $K$ is computed by pairwise dot product between points.  For the rest of the optimization matrices and vectors, $q$, $G$, and $h$ are simply constructed to be the right size, with $N=4$, as explained above, $A$ is $\mathbf{t}^T$, and $b$ still $0$.
+
+%\begin{figure}
+%\centering
+%\includegraphics[scale=0.5]{svm_toy.png}
+%\label{svm_toy}
+%\caption{Soft-SVM solution for decision boundary of simple 2D dataset with $C=1$}
+%\end{figure}
+
+For the prediction function, we must first compute $b$ as follows:
+
+\begin{equation}
+\begin{aligned}
+b = \frac{1}{N_\mathcal{M}} \sum_{n \in \mathcal{M}} \bigg(t_n  - \sum_{m \in \mathcal{S}} a_mt_mk(\mathbf{x}_n, \mathbf{x}_m) \bigg)
 \end{aligned}
 \end{equation}
 
-where $\mathcal{S}$ denotes the set of indices of the support vectors, and $N_{\mathcal{S}}$ is the number of support vectors.  The support vector indices can be determined by finding the indices of $\mathbf{a}$ that are non-zero. With $b$, the predictor function is then simply: 
+where $\mathcal{S}$ denotes the set of indices of the support vectors, $\mathcal{M}$ denotes the set of indices of the strict support vectors (those that lie on the margin), and $N_{\mathcal{M}}$ is the number of strict support vectors.  The set $\mathcal{S}$ can be determined by finding the indices of $\mathbf{a}$ that are non-zero, and $\mathcal{M}$ are those $n$ that additionally are $a_n < C$. With $b$, the prediction function is then simply: 
 \begin{equation}
 \begin{aligned}
 y(\mathbf{x}) = \sum_{n=1}^N a_nt_nk(\mathbf{x},\mathbf{x}_n) + b
 \end{aligned}
 \end{equation}
-and $y(\cdot)=0$ is the decision boundary.  It is also useful to compute the weight vector $\mathbf{w} \in \mathbb{R}^d$, which for the linear kernel is $\mathbf{w} = \sum_{n=1}^{N} a_n t_n \mathbf{x_n} $ (not including $w_0$) and $w_0 = b$.
-
-
+and $y(\cdot)=0$ is the decision boundary.  It is also useful to compute the weight vector $\mathbf{w} \in \mathbb{R}^d$, which for the linear kernel is $\mathbf{w} = \sum_{n=1}^{N} a_n t_n \mathbf{x_n} $ (not including $w_0$) and $w_0 = b$.  Although for the Gaussian kernel we cannot compute the elements of $\mathbf{w}$ easily, we can compute the magnitude $||\mathbf{w}||$ as:
+\begin{equation}
+\begin{aligned}
+||\mathbf{w}||=\big(\sum_{i,j}a_it^{(i)}a_jt^{(j)} k(x^{(i)}, x^{(j)}) \big)^{1/2}
+\end{aligned}
+\end{equation}
 We now examine the performance of the SVM classifiers on the same datasets analyzed in Part 1 for logistic regression.  The results of the misclassification rates, with a linear kernel $k(x,x') = x^Tx'$ are shown in Table \ref{C_0}.  
 
 \begin{table}[H]
@@ -272,43 +287,45 @@ We now examine the performance of the SVM classifiers on the same datasets analy
 \textbf{Dataset} & \textbf{Misslassification rate} \\ \hline
 stdev1 train & $0$\\ \hline
 stdev1 val & $0$\\ \hline
-stdev2 train & $0.0925$\\ \hline
-stdev2 val & $0.085$\\ \hline
-stdev4 train & $0.265$\\ \hline
-stdev4 val & $0.2375$\\ \hline
-nonsep train & $0.49$\\ \hline
-nonsep val & $0.515$\\ \hline
+stdev2 train & $0.095$\\ \hline
+stdev2 val & $0.08$\\ \hline
+stdev4 train & $0.255$\\ \hline
+stdev4 val & $0.235$\\ \hline
+nonsep train & $0.2975$\\ \hline
+nonsep val & $0.305$\\ \hline
 \end{tabular}
 \label{C_0}
 \caption{SVM misclassification rates on different datasets for $C$=0.}
 \end{table}
 
-Comparing the results of Tables \ref{lam_0} and \ref{C_0}, we see that the performance of the logistic regression and SVM classifiers are almost identical on these 2D datasets.  The plots of the decision boundary together with the data also closely match those from Part 1.  \textbf{What else can be said?  It says to report/explain the decision boundary and classification error rate??}
 
-%\begin{figure}
-%\centering
-%\includegraphics[scale=0.5]{svm_stdev1_train.png}
-%\label{svm_toy}
-%\caption{Soft-SVM solution for decision boundary of "stdev1" training dataset with $C=1$ and a linear kernel}
-%\end{figure}
+
+Comparing the results of Tables \ref{lam_0} and \ref{C_0}, we see that the performance of the logistic regression and SVM classifiers are almost identical for the stdev1, stdev2, and stdev4 datasets.  For the nonsep dataset, however, the linear-kernel SVM is able to find an optimal solution significantly better than the logistic regression classifier.  Whereas logistic regression drew a line right down the middle of the symmetric dataset and only got roughly 50\% correct, the SVM classifier is able to adjust so that is gets about 70\% of the data correct.
+
 \begin{figure}
 \centering
-\includegraphics[scale=0.5]{svm_stdev1_val.png}
-\label{svm_toy}
-\caption{Soft-SVM solution for decision boundary of "stdev1" validation dataset with $C=1$ and a linear kernel}
+\includegraphics[scale=0.5]{svm_stdev1_train.png}
+\label{svm_stdev1}
+\caption{Soft-SVM solution for decision boundary of "stdev1" training dataset with $C=1$ and a linear kernel.  'X' marks support vectors that are on the margin, whereas the triangle marks support vectors that are inside the margin.}
 \end{figure}
 %\begin{figure}
 %\centering
-%\includegraphics[scale=0.5]{svm_stdev2_train.png}
+%\includegraphics[scale=0.5]{svm_stdev1_val.png}
 %\label{svm_toy}
-%\caption{Soft-SVM solution for decision boundary of "stdev2" training dataset with $C=1$ and a linear kernel}
+%\caption{Soft-SVM solution for decision boundary of "stdev1" validation dataset with $C=1$ and a linear kernel}
 %\end{figure}
 \begin{figure}
 \centering
-\includegraphics[scale=0.5]{svm_stdev2_val.png}
-\label{svm_toy}
-\caption{Soft-SVM solution for decision boundary of "stdev2" validation dataset with $C=1$ and a linear kernel}
+\includegraphics[scale=0.5]{svm_stdev2_train.png}
+\label{svm_stdev2}
+\caption{Soft-SVM solution for decision boundary of "stdev2" training dataset with $C=1$ and a linear kernel.  'X' marks support vectors that are on the margin, whereas the triangle marks support vectors that are inside the margin.}
 \end{figure}
+%\begin{figure}
+%\centering
+%\includegraphics[scale=0.5]{svm_stdev2_val.png}
+%\label{svm_toy}
+%\caption{Soft-SVM solution for decision boundary of "stdev2" validation dataset with $C=1$ and a linear kernel}
+%\end{figure}
 %\begin{figure}
 %\centering
 %\includegraphics[scale=0.5]{svm_stdev4_train.png}
@@ -330,59 +347,65 @@ Comparing the results of Tables \ref{lam_0} and \ref{C_0}, we see that the perfo
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{svm_nonsep_val.png}
-\label{svm_toy}
-\caption{Soft-SVM solution for decision boundary of "nonsep" validation dataset with $C=1$ and a linear kernel}
+\label{svm_nonsep}
+\caption{Soft-SVM solution for decision boundary of "nonsep" validation dataset with $C=1$ and a linear kernel.}
+\end{figure}
+
+The Gaussian kernel offers an interesting alternative to the linear kernel for classification.  The formulation of the SVM is exactly the same as the linear kernel except the kernel is now $k(x,x') = \exp\big( - \frac{1}{2 \sigma^2} ||x-x'||_2^2  \big)$
+where $\sigma$ is termed the bandwidth.  %We can adjust both the $C$ (relative penalty on the slack variables) and bandwidth, $\sigma$, in order to tune our classifier to the data.
+
+For both the linear kernel and the Gaussian kernel, we vary $C$ in the range $[0.0001, 500]$ and observe the effects on the classifier solution.  Increasing $C$ in general decreases $\frac{1}{||\mathbf{w}||}$, the geometric margin.  This makes sense because as $C$ is increased, the Soft-SVM formulation becomes closer to Hard-SVM, where separability of the data is required.  Plots for the values of the geometric margin, for each dataset, are provided for both the linear kernel and the Gaussian kernel over the range $[0.0001, 500]$ are provided in Figures \ref{geom_lin} and \ref{geom_gauss}.
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{geom_lin.png}
+\label{geom_lin}
+\caption{Geometric margin for 40 values of C between .001 and 500.  Computed with a linear kernel SVM.}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{geom_gauss.png}
+\label{geom_gauss}
+\caption{Geometric margin for 40 values of C between .001 and 500.  Computed with a Gaussian kernel SVM, $\sigma=1$.}
+\end{figure}
+
+For linearly separable data, with a linear kernel, then as $C$ is increased the number of support vectors decreases to the minimum number that is required to separate the data.  This corresponds to the weights $||\mathbf{w}||$ going to infinity as the SVM becomes increasingly ``Hard''.  An example of linearly separable data with a large ($1e9$) $C$ is provided in Figure \ref{highC}, where there are zero support vectors inside the margin.  The situation is less clean, however, for data that is not linearly separable.  This can be explained by the increasing of $C$ causing new vectors to be misclassified even if it will overall decrease the sum of the slack variables.
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{svm_highC_stdev1.png}
+\label{highC}
+\caption{Soft-SVM solution for decision boundary of "stdev1" training dataset with $C=1e9$ and a linear kernel.  'X' marks support vectors that are on the margin, whereas the triangle marks support vectors that are inside the margin.}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{supportvectors.png}
+\label{supportvectors}
+\caption{Number of support vectors as a function of $C$ for various values the range $[0.0001, 500]$ Computed with a Gaussian kernel SVM, $\sigma=1$}
+\end{figure}
+
+Although maximizing the geometric margin is a noble goal for an SVM classifier, it is not always the best objective function for determining the optimal $C$ to employ.  In the limit, a $C$ of $0$ will allow the SVM to misclassify as many points as needed in order to maximize the margin.  Additionally, as seen in Figure \ref{supportvectors}, small $C$ values may cause each point to become a support vector, which completely eliminates the "sparsity" advantage that SVMs may have over other classification techniques. An alternative, preferable objective for determining the optimal $C$ could be to minimize the misclassification error in cross-validation.  For consideration, the classification error rate is plotted for the validation datasets in Figure \ref{cer_svm}.
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{cer_svm.png}
+\label{cer_svm}
+\caption{Classification error rates on the validation data sets, as a function of C for various values in the range $[0.0001, 500]$ Computed with a Gaussian kernel SVM, $\sigma=1$}
+\end{figure}
+
+Two additional comments on the Gaussian kernel.  First, it is nice to examine the Gaussian-kernel SVM's ability to easily classify the ``nonsep'' dataset.  With $C=\sigma=1$, for example, a misclassification error rate of $0.0475$ is achieved, which is an order of magnitude better than the linear kernel (see Figure \ref{nonsep_gaussian}).  Second, we note that for the Gaussian kernel, decreasing the bandwidth allows the classifier to perfectly overfit the training data, while increasing the bandwidth causes the decision boundary to be more smooth.  Very high bandwidth gives almost an almost linear decision boundary. The optimal bandwidth often lies somewhere in between these extremes, as can be seen in Figure \ref{bandwidth_cer}.
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{nonsep_gaussian.png}
+\label{nonsep_gaussian}
+\caption{Gaussian-kernel SVM ($C=\sigma=1$) able to nicely separate the validation data for the ``nonsep'' dataset.  Classification error rate is 0.0475.}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{bandwidth_cer.png}
+\label{bandwidth_cer}
+\caption{Validation datasets misclassification rates for various bandwidths, $\sigma$.  Gaussian kernel and $C=1$ are used.}
 \end{figure}
 
 
-The Gaussian kernel offers an interesting alternative to the linear kernel for classification.  The formulation of the SVM is exactly the same as the linear kernel except the kernel is now:
-\begin{equation}
-\begin{aligned}
-k(x,x') = \exp\big( - \frac{1}{2 \sigma^2} ||x-x'||_2^2  \big)
-\end{aligned}
-\end{equation}
-where $\sigma$ is termed the bandwidth.  We can adjust both the $C$ (relative penalty on the slack variables) and bandwidth, $\sigma$, in order to tune our classifier to the data.
-
-The values of the geometric margin, $\frac{1}{||\mathbf{w}||}$, for Soft-SVMs with the Gaussian kernel are shown for the different datasets and for $C = \{ 0.01, 0.1, 1, 10, 100 \}$.
-
-% \begin{table}[H]
-% \begin{tabular}{|c|c|c|c|c|c|}
-% \hline
-%Dataset & $C = 0.01$ & 0.1 & 1 & 10 & 100  \\ \hline
-%stdev1 & $0.090$ & $0.035$ & $0.024$ & $0.024$ & $0.024$ \\ \hline
-%stdev2 & $0.088$ & $0.016$ & $0.008$ & $0.008$ & $0.007$ \\ \hline
-%stdev4 & $0.090$ & $0.035$ & $0.024$ & $0.024$ & $0.024$ \\ \hline
-%nonsep & $0.090$ & $0.035$ & $0.024$ & $0.024$ & $0.024$ \\ \hline
-%  \end{tabular}
-% \caption{Geometric margin $\frac{1}{||\mathbf{w}||}$ for various values of $C$, for each of the provided 2D datasets.}
-% \label{weights}
-% \end{table}
- 
-  \begin{table}[H]
- \begin{tabular}{|c|c|c|c|c|c|}
- \hline
-Dataset & $C = 0.01$ & 0.1 & 1 & 10 & 100  \\ \hline
-stdev1 & $0.09$ & $0.0875$ & $0.0825$ & $0.075$ & $0.07$ \\ \hline
-stdev2 & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
-stdev4 & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
-nonsep & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
-  \end{tabular}
- \caption{Training data misclassification rates for various values of $C$, for each of the provided 2D datasets.}
- \label{weights}
- \end{table}
-
-  \begin{table}[H]
- \begin{tabular}{|c|c|c|c|c|c|}
- \hline
-Dataset & $C = 0.01$ & 0.1 & 1 & 10 & 100  \\ \hline
-stdev1 & $0.07$ & $0.07$ & $0.0775$ & $0.0875$ & $0.0925$ \\ \hline
-stdev2 & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
-stdev4 & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
-nonsep & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
-  \end{tabular}
- \caption{Validation data misclassification rates for various values of $C$, for each of the provided 2D datasets.}
- \label{weights}
- \end{table}
 
 \section{Titanic}
 
@@ -392,29 +415,38 @@ nonsep & $0$ & $0$ & $0$ & $0$ & $0$ \\ \hline
  \centering
  \includegraphics[scale=0.5]{titanic_logit.png}
  \label{titanic_logit}
- \caption{Results of logistic regression classifier on Titanic dataset for different value of $\lambda$.}
+ \caption{Results of logistic regression classifier on the Titanic dataset for different value of $\lambda$.}
+ \end{figure}
+ 
+
+
+ \item The performance of the SVM classifier is shown in Figure \ref{titanic_svm}.  Performing model selection leads us to choose $C=0.046$,
+ 
+   \begin{figure}
+ \centering
+ \includegraphics[scale=0.5]{titanic_svm.png}
+ \label{titanic_svm}
+ \caption{Results of the linear-kernel SVM classifier on the Titanic dataset for different value of $C$.}
  \end{figure}
 
- \item 
-
- \item The classifiers (resulting from model selection in parts 1 and 2) for logistic regression (LR) and SVM are detailed in Table \ref{weights}. For LR we see that the most important features are which class you are in, your sex, and your age. Sex is by far the most important of those.
+ \item The classifiers (resulting from model selection in parts 1 and 2) for logistic regression (LR) and SVM are detailed in Table \ref{weights}. For LR we see that the most important features are which class you are in, your sex, and your age. For both LR and SVM, sex is the most important feature.  SVM has similar relative importance between weights, although age is not as important as it is for LR.
  %
  \begin{table}[H]
  \begin{tabular}{|c|c|c|}
  \hline
  Meaning & LR & SVM \\ \hline
- $w_0$ & $-0.854$ & \\ \hline
- 1st Class & $0.35$ & \\ \hline
- 2nd Class & $0.33$ & \\ \hline
- 3rd Class & $-0.69$ & \\ \hline
- Sex  & $1.65$ & \\ \hline
- Age & $-0.267$ & \\ \hline
- \# Siblings/Spouses & $-0.004$ & \\ \hline
- \# Parents/Children & $0.23$ & \\ \hline
- Fare & $0.16$ & \\ \hline
- Southampton & $-0.255$ & \\ \hline
- Cherbourg & $0.23$ & \\ \hline
- Queenstown & $0.026$ & \\ \hline
+ $w_0$ & $-0.854$ & $-0.785$ \\ \hline
+ 1st Class & $0.35$ & $0.032$\\ \hline
+ 2nd Class & $0.33$ & $0.19$\\ \hline
+ 3rd Class & $-0.69$ & $-0.22$\\ \hline
+ Sex  & $1.65$ & $1.27$\\ \hline
+ Age & $-0.267$ & $-0.008$\\ \hline
+ \# Siblings/Spouses & $-0.004$ & $-0.11$ \\ \hline
+ \# Parents/Children & $0.23$ & $0.18$\\ \hline
+ Fare & $0.16$ & $0.006$\\ \hline
+ Southampton & $-0.255$ & $-0.08$ \\ \hline
+ Cherbourg & $0.23$ & $0.12$\\ \hline
+ Queenstown & $0.026$ & $-0.039$\\ \hline
  \end{tabular}
  \caption{Classification weights}
  \label{weights}
