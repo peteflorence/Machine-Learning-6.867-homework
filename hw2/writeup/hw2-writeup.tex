@@ -117,25 +117,28 @@ stdev4 val & $0.25$\\ \hline
 nonsep train & $0.485$\\ \hline
 nonsep val & $0.5025$\\ \hline
 \end{tabular}
-\label{lam_0}
+
 \caption{Results on different dataset for $\lambda = 0$}
+\label{lam_0}
 \end{table}
 
 
- Define $\tilde{w} = [w_0,w]$ to be the full weight vector. For the datasets stdev1, stdev2, stdev4 the gradient descent method converges to solution. The stdev1 dataset is linearly separable. This presents a problem for the optimizer since given a weight $\tilde{w}$ that separates the data, we can arbitrarily increase the value of the likelihood by considering new weights $c \tilde{w}$ where $c > 1$ is a constant. In practice our gradient descent method always terminates because either the termination criterion is reached (e.g. difference in function values on successive steps is smaller than a threshold) or we reach the maximum number of function calls. As an illustration if we run the optimizer with termination criterion $\epsilon = 1e-4$ we get $||\tilde{w}||| = 7.9$. If we increase the tolerance to $\epsilon = 1e-10$ then the norm of the solution weights increases to $||\tilde{w}||| = 14.7$. This illustrates the weights ``running off to infinty''. Since the training data is linearly separable the classification error rate is zero, see Figure \ref{stdev1_train_lam_0}. Also as can be seen from Figure \ref{stdev1_val_lam_0} the classification error rate on the validation data is also zero.
+ Define $\tilde{w} = [w_0,w]$ to be the full weight vector. For the datasets stdev1, stdev2, stdev4 the gradient descent method converges to solution. The stdev1 dataset is linearly separable. This presents a problem for the optimizer since given a weight $\tilde{w}$ that separates the data, we can arbitrarily increase the value of the likelihood by considering new weights $c \tilde{w}$ where $c > 1$ is a constant. In practice our gradient descent method always terminates because either the termination criterion is reached (e.g. difference in function values on successive steps is smaller than a threshold) or we reach the maximum number of function calls. As an illustration if we run the optimizer with termination criterion $\epsilon = 1e-4$ we get $||\tilde{w}||| = 7.9$. If we increase the tolerance to $\epsilon = 1e-10$ then the norm of the solution weights increases to $||\tilde{w}||| = 14.7$. This illustrates the weights ``running off to infinty''. Since the training data is linearly separable the classification error rate is zero. Also as can be seen from Figure \ref{stdev1_val_lam_0} the classification error rate on the validation data is also zero.
 
-\begin{figure}
- \centering
- \includegraphics[scale=0.5]{stdev1_train_lam_0.png}
- \label{stdev1_train_lam_0}
- \caption{$\lambda = 0$, stdev1 train dataset}
- \end{figure}
+% \begin{figure}
+%  \centering
+%  \includegraphics[scale=0.5]{stdev1_train_lam_0.png}
+%  \label{stdev1_train_lam_0}
+%  \caption{$\lambda = 0$, stdev1 train dataset}
+%  \label{stdev1_train_lam_0}
+%  \end{figure}
 
 \begin{figure}
  \centering
  \includegraphics[scale=0.5]{stdev1_val_lam_0.png}
- \label{stdev1_val_lam_0}
+ 
  \caption{$\lambda = 0$, stdev1 validation dataset}
+ \label{stdev1_val_lam_0}
  \end{figure}
  % \quad
  % \subfloat[Run 2]{%
@@ -149,15 +152,17 @@ The other datasets (other than stdev1) are not linearly separable. Hence we don'
 \begin{figure}
  \centering
  \includegraphics[scale=0.5]{stdev4_train_lam_0.png}
- \label{stdev4_train_lam_0}
+ 
  \caption{$\lambda = 0$, stdev4 train dataset}
+ \label{stdev4_train_lam_0}
  \end{figure}
 
 \begin{figure}
  \centering
  \includegraphics[scale=0.5]{stdev4_val_lam_0.png}
- \label{stdev4_val_lam_0}
+ 
  \caption{$\lambda = 0$, stdev4 validation dataset}
+ \label{stdev4_val_lam_0}
  \end{figure}
  %
  %
@@ -165,15 +170,16 @@ The other datasets (other than stdev1) are not linearly separable. Hence we don'
 \begin{figure}
  \centering
  \includegraphics[scale=0.5]{nonsep_train_lam_0.png}
- \label{nonsep_train_lam_0}
+ 
  \caption{$\lambda = 0$, nonsep train dataset}
+ \label{nonsep_train_lam_0}
  \end{figure}
 
  Interestingly, even with the regularizer $\lambda$ set to $0$ the performance across the training and validation sets for a given dataset (e.g. stdev2) are comparable. This can be seen by the similar missclassification rates across corresponding training and validation sets in Table \ref{lam_0}. This means that our logistic regression classifier is generalizing fairly well.
 
 
 \subsection{$\lambda > 0$}
-Now we analyze the results for different values of the regularizer $\lambda$. Figures \ref{nonsep_train_lam_10}, \ref{nonsep_train_lam_100}, \ref{nonsep_train_lam_1000} shows the result of running logistic regression on the nonsep dataset for different values of $\lambda$. The thing to note is that for different values of $\lambda$ the actual decision boundary, plotted in green, looks very similar. In fact what seems to be happening is that as $\lambda$ increases the optimal weight $w(\lambda)$ are just scaled down to zero. In fact if we define $\overline{w}(\lambda) = \frac{w(\lambda)}{||w(\lambda)||}$ then $\overline{w}(\lambda)$ is very similar across different values of $\lambda$. Thus the regularizer $\lambda$ is forcing the weights toward zero, i.e. $||w(\lambda)||$ is decreasing in $\lambda$, but the scaled weights $\overline{w}(\lambda)$ are staying essentially the same. This explains why the decision boundaries look the same across the three plots in Figure \todo{include reference} since $w_0 + w_1 x_1 + w_2 x_2 = 0$ and $c w_0 + c w_1 x_1 + c w_2 x_2 = 0$ (where $c > 0$ is a constant) define the same hyperplane. Thus in this case the regularizer $\lambda$ just serves to drive the weights toward zero, but does so in a way that doesn't significantly affect the classification boundary. Table \ref{w_lam_norm} shows how $||\tilde{w}(\lambda)|| \to 0$ as we increase $\lambda$.
+Now we analyze the results for different values of the regularizer $\lambda$. Figures \ref{nonsep_train_lam_10}, \ref{nonsep_train_lam_100}, \ref{nonsep_train_lam_1000} shows the result of running logistic regression on the nonsep dataset for different values of $\lambda$. The thing to note is that for different values of $\lambda$ the actual decision boundary, plotted in green, looks very similar. In fact what seems to be happening is that as $\lambda$ increases the optimal weight $w(\lambda)$ are just scaled down to zero. In fact if we define $\overline{w}(\lambda) = \frac{w(\lambda)}{||w(\lambda)||}$ then $\overline{w}(\lambda)$ is very similar across different values of $\lambda$. Thus the regularizer $\lambda$ is forcing the weights toward zero, i.e. $||w(\lambda)||$ is decreasing in $\lambda$, but the scaled weights $\overline{w}(\lambda)$ are staying essentially the same. This explains why the decision boundaries look the same across the three plots in Figure \ref{nonsep_train_lam_10}, \ref{nonsep_train_lam_100} and \ref{nonsep_train_lam_1000} since $w_0 + w_1 x_1 + w_2 x_2 = 0$ and $c w_0 + c w_1 x_1 + c w_2 x_2 = 0$ (where $c > 0$ is a constant) define the same hyperplane. Thus in this case the regularizer $\lambda$ just serves to drive the weights toward zero, but does so in a way that doesn't significantly affect the classification boundary. Table \ref{w_lam_norm} shows how $||\tilde{w}(\lambda)|| \to 0$ as we increase $\lambda$.
 
 \begin{table}[H]
 \begin{tabular}{|c|c|}
@@ -184,30 +190,31 @@ $10$ & $0.0329$ \\ \hline
 $100$ & $0.0242$ \\ \hline
 $1000$ & $0.00067$ \\ \hline
 \end{tabular}
-\label{w_lam_norm}
+
 \caption{Norm of $\tilde{w}(\lambda)$ for different values of $\lambda$ on nonsep train dataset.}
+\label{w_lam_norm}
 \end{table}
 
 \begin{figure}
  \centering
  \includegraphics[scale=0.5]{nonsep_train_lam_10.png}
- \label{nonsep_train_lam_10}
  \caption{$\lambda = 10$, nonsep train dataset}
+  \label{nonsep_train_lam_10}
  \end{figure}
  \begin{figure}
  \centering
  \includegraphics[scale=0.5]{nonsep_train_lam_100.png}
- \label{nonsep_train_lam_100}
  \caption{$\lambda = 100$, nonsep train dataset}
+ \label{nonsep_train_lam_100}
  \end{figure}
  \begin{figure}
  \centering
  \includegraphics[scale=0.5]{nonsep_train_lam_1000.png}
- \label{nonsep_train_lam_1000}
  \caption{$\lambda = 1000$, nonsep train dataset}
+ \label{nonsep_train_lam_1000}
  \end{figure}
 
-For the nonseparable data the results look fairly identical. Not sure if we should expect something different . . . 
+
 
 
 \section{Support Vector Machine (SVM)}
@@ -267,7 +274,7 @@ b = \frac{1}{N_\mathcal{M}} \sum_{n \in \mathcal{M}} \bigg(t_n  - \sum_{m \in \m
 \end{aligned}
 \end{equation}
 
-where $\mathcal{S}$ denotes the set of indices of the support vectors, $\mathcal{M}$ denotes the set of indices of the strict support vectors (those that lie on the margin), and $N_{\mathcal{M}}$ is the number of strict support vectors.  The set $\mathcal{S}$ can be determined by finding the indices of $\mathbf{a}$ that are non-zero, and $\mathcal{M}$ are those $n$ that additionally are $a_n < C$. With $b$, the prediction function is then simply: 
+where $\mathcal{S}$ denotes the set of indices of the support vectors, $\mathcal{M}$ denotes the set of indices of the strict support vectors (those that lie on the margin), and $N_{\mathcal{M}}$ is the number of strict support vectors.  The set $\mathcal{S} = \{n : a_n > 0\}$ and $\mathcal{M} =\{n : 0 < a_n < C\}$. With $b$, the prediction function is then simply: 
 \begin{equation}
 \begin{aligned}
 y(\mathbf{x}) = \sum_{n=1}^N a_nt_nk(\mathbf{x},\mathbf{x}_n) + b
@@ -294,8 +301,8 @@ stdev4 val & $0.235$\\ \hline
 nonsep train & $0.2975$\\ \hline
 nonsep val & $0.305$\\ \hline
 \end{tabular}
-\label{C_0}
 \caption{SVM misclassification rates on different datasets for $C$=0.}
+\label{C_0}
 \end{table}
 
 
@@ -305,8 +312,9 @@ Comparing the results of Tables \ref{lam_0} and \ref{C_0}, we see that the perfo
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{svm_stdev1_train.png}
-\label{svm_stdev1}
 \caption{Soft-SVM solution for decision boundary of "stdev1" training dataset with $C=1$ and a linear kernel.  'X' marks support vectors that are on the margin, whereas the triangle marks support vectors that are inside the margin.}
+\label{svm_stdev1}
+
 \end{figure}
 %\begin{figure}
 %\centering
@@ -317,8 +325,9 @@ Comparing the results of Tables \ref{lam_0} and \ref{C_0}, we see that the perfo
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{svm_stdev2_train.png}
-\label{svm_stdev2}
 \caption{Soft-SVM solution for decision boundary of "stdev2" training dataset with $C=1$ and a linear kernel.  'X' marks support vectors that are on the margin, whereas the triangle marks support vectors that are inside the margin.}
+\label{svm_stdev2}
+
 \end{figure}
 %\begin{figure}
 %\centering
@@ -347,62 +356,63 @@ Comparing the results of Tables \ref{lam_0} and \ref{C_0}, we see that the perfo
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{svm_nonsep_val.png}
-\label{svm_nonsep}
 \caption{Soft-SVM solution for decision boundary of "nonsep" validation dataset with $C=1$ and a linear kernel.}
+\label{svm_nonsep}
 \end{figure}
 
 The Gaussian kernel offers an interesting alternative to the linear kernel for classification.  The formulation of the SVM is exactly the same as the linear kernel except the kernel is now $k(x,x') = \exp\big( - \frac{1}{2 \sigma^2} ||x-x'||_2^2  \big)$
 where $\sigma$ is termed the bandwidth.  %We can adjust both the $C$ (relative penalty on the slack variables) and bandwidth, $\sigma$, in order to tune our classifier to the data.
 
-For both the linear kernel and the Gaussian kernel, we vary $C$ in the range $[0.0001, 500]$ and observe the effects on the classifier solution.  Increasing $C$ in general decreases $\frac{1}{||\mathbf{w}||}$, the geometric margin.  This makes sense because as $C$ is increased, the Soft-SVM formulation becomes closer to Hard-SVM, where separability of the data is required.  Plots for the values of the geometric margin, for each dataset, are provided for both the linear kernel and the Gaussian kernel over the range $[0.0001, 500]$ are provided in Figures \ref{geom_lin} and \ref{geom_gauss}.
+For both the linear kernel and the Gaussian kernel, we vary $C$ in the range $[0.0001, 500]$ and observe the effects on the classifier solution.  Increasing $C$ in general decreases $\frac{1}{||\mathbf{w}||}$, the geometric margin.  This makes sense because as $C$ is increased, the Soft-SVM formulation becomes closer to Hard-SVM, where separability of the data is required.  Plots for the values of the geometric margin, for each dataset are provided, for both the linear kernel and the Gaussian kernel over the range $[0.0001, 500]$, in Figures \ref{geom_lin} and \ref{geom_gauss}.
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{geom_lin.png}
-\label{geom_lin}
 \caption{Geometric margin for 40 values of C between .001 and 500.  Computed with a linear kernel SVM.}
+\label{geom_lin}
 \end{figure}
 
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{geom_gauss.png}
-\label{geom_gauss}
 \caption{Geometric margin for 40 values of C between .001 and 500.  Computed with a Gaussian kernel SVM, $\sigma=1$.}
+\label{geom_gauss}
 \end{figure}
 
 For linearly separable data, with a linear kernel, then as $C$ is increased the number of support vectors decreases to the minimum number that is required to separate the data.  This corresponds to the weights $||\mathbf{w}||$ going to infinity as the SVM becomes increasingly ``Hard''.  An example of linearly separable data with a large ($1e9$) $C$ is provided in Figure \ref{highC}, where there are zero support vectors inside the margin.  The situation is less clean, however, for data that is not linearly separable.  This can be explained by the increasing of $C$ causing new vectors to be misclassified even if it will overall decrease the sum of the slack variables.
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{svm_highC_stdev1.png}
-\label{highC}
 \caption{Soft-SVM solution for decision boundary of "stdev1" training dataset with $C=1e9$ and a linear kernel.  'X' marks support vectors that are on the margin, whereas the triangle marks support vectors that are inside the margin.}
+\label{highC}
 \end{figure}
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{supportvectors.png}
-\label{supportvectors}
 \caption{Number of support vectors as a function of $C$ for various values the range $[0.0001, 500]$ Computed with a Gaussian kernel SVM, $\sigma=1$}
+\label{supportvectors}
 \end{figure}
 
 Although maximizing the geometric margin is a noble goal for an SVM classifier, it is not always the best objective function for determining the optimal $C$ to employ.  In the limit, a $C$ of $0$ will allow the SVM to misclassify as many points as needed in order to maximize the margin.  Additionally, as seen in Figure \ref{supportvectors}, small $C$ values may cause each point to become a support vector, which completely eliminates the "sparsity" advantage that SVMs may have over other classification techniques. An alternative, preferable objective for determining the optimal $C$ could be to minimize the misclassification error in cross-validation.  For consideration, the classification error rate is plotted for the validation datasets in Figure \ref{cer_svm}.
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{cer_svm.png}
-\label{cer_svm}
+
 \caption{Classification error rates on the validation data sets, as a function of C for various values in the range $[0.0001, 500]$ Computed with a Gaussian kernel SVM, $\sigma=1$}
+\label{cer_svm}
 \end{figure}
 
 Two additional comments on the Gaussian kernel.  First, it is nice to examine the Gaussian-kernel SVM's ability to easily classify the ``nonsep'' dataset.  With $C=\sigma=1$, for example, a misclassification error rate of $0.0475$ is achieved, which is an order of magnitude better than the linear kernel (see Figure \ref{nonsep_gaussian}).  Second, we note that for the Gaussian kernel, decreasing the bandwidth allows the classifier to perfectly overfit the training data, while increasing the bandwidth causes the decision boundary to be more smooth.  Very high bandwidth gives almost an almost linear decision boundary. The optimal bandwidth often lies somewhere in between these extremes, as can be seen in Figure \ref{bandwidth_cer}.
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{nonsep_gaussian.png}
-\label{nonsep_gaussian}
 \caption{Gaussian-kernel SVM ($C=\sigma=1$) able to nicely separate the validation data for the ``nonsep'' dataset.  Classification error rate is 0.0475.}
+\label{nonsep_gaussian}
 \end{figure}
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{bandwidth_cer.png}
-\label{bandwidth_cer}
 \caption{Validation datasets misclassification rates for various bandwidths, $\sigma$.  Gaussian kernel and $C=1$ are used.}
+\label{bandwidth_cer}
 \end{figure}
 
 
@@ -410,12 +420,12 @@ Two additional comments on the Gaussian kernel.  First, it is nice to examine th
 \section{Titanic}
 
 \begin{enumerate}
-\item We perform ``interval'' type feature rescaling. Namely we rescale all the features so that they lie in $[0,1]$. The performance is shown in Figure \ref{titanic_logit}. Performing model selection leads us to choose $\lambda = 2.5$.
+\item We perform ``interval'' type feature rescaling. Namely we rescale all the features so that they lie in $[0,1]$. The performance of logistic regression is shown in Figure \ref{titanic_logit}. Performing model selection leads us to choose $\lambda = 2.5$.
  \begin{figure}
  \centering
  \includegraphics[scale=0.5]{titanic_logit.png}
- \label{titanic_logit}
  \caption{Results of logistic regression classifier on the Titanic dataset for different value of $\lambda$.}
+  \label{titanic_logit}
  \end{figure}
  
 
@@ -425,11 +435,11 @@ Two additional comments on the Gaussian kernel.  First, it is nice to examine th
    \begin{figure}
  \centering
  \includegraphics[scale=0.5]{titanic_svm.png}
- \label{titanic_svm}
  \caption{Results of the linear-kernel SVM classifier on the Titanic dataset for different value of $C$.}
+  \label{titanic_svm}
  \end{figure}
 
- \item The classifiers (resulting from model selection in parts 1 and 2) for logistic regression (LR) and SVM are detailed in Table \ref{weights}. For LR we see that the most important features are which class you are in, your sex, and your age. For both LR and SVM, sex is the most important feature.  SVM has similar relative importance between weights, although age is not as important as it is for LR.
+ \item The classifiers (resulting from model selection in parts 1 and 2) for logistic regression (LR) and SVM are detailed in Table \ref{weights}. For LR we see that the most important features are which class you are in, your sex, and your age. For both LR and SVM, sex is the most important feature.  SVM has similar relative importance between weights, although age is not as important as it is for LR. Thus overall we see that logistic regression and SVM arrive at similar solutions. In particular the solutions make sense from a practical standpoint. Women were given preference to get on the lifeboats (hence the large coefficient on sex) and being in third class lowers your chances of survival. Hence both SVM and logistic regression produce sensible results for classifying the Titanic dataset.
  %
  \begin{table}[H]
  \begin{tabular}{|c|c|c|}
