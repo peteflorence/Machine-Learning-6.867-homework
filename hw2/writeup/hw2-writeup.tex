@@ -101,7 +101,7 @@ We used our gradient descent code from Homework 1 to solve this problem. In part
 %
 As was shown in lecture, the objective function for logistic regression is convex. Thus gradient descent should, with the appropriate step size and convergence threshold, converge to the global minimum. For almost all the subsequent optimizations we used a step size of $\eta = 1e-4$ and an initial guess of $w_{initial} = [0,0,0]$. A few optimizations (in particular those for very large $\lambda$) required a smaller step size, approximately $\eta = 1e-6$.
 
-\subsection{$\lambda = 0$}
+\subsection*{Results for $\lambda = 0$}
 
 First we present the results for $\lambda = 0$ in Table \ref{lam_0}
 \begin{table}[H]
@@ -123,7 +123,7 @@ nonsep val & $0.5025$\\ \hline
 \end{table}
 
 
- Define $\tilde{w} = [w_0,w]$ to be the full weight vector. For the datasets stdev1, stdev2, stdev4 the gradient descent method converges to solution. The stdev1 dataset is linearly separable. This presents a problem for the optimizer since given a weight $\tilde{w}$ that separates the data, we can arbitrarily increase the value of the likelihood by considering new weights $c \tilde{w}$ where $c > 1$ is a constant. In practice our gradient descent method always terminates because either the termination criterion is reached (e.g. difference in function values on successive steps is smaller than a threshold) or we reach the maximum number of function calls. As an illustration if we run the optimizer with termination criterion $\epsilon = 1e-4$ we get $||\tilde{w}||| = 7.9$. If we increase the tolerance to $\epsilon = 1e-10$ then the norm of the solution weights increases to $||\tilde{w}||| = 14.7$. This illustrates the weights ``running off to infinty''. Since the training data is linearly separable the classification error rate is zero. Also as can be seen from Figure \ref{stdev1_val_lam_0} the classification error rate on the validation data is also zero.
+ Define $\tilde{w} = [w_0,w]$ to be the full weight vector. For the datasets stdev1, stdev2, stdev4 the gradient descent method converges to solution. The stdev1 dataset is linearly separable. This presents a problem for the optimizer since given a weight $\tilde{w}$ that separates the data, we can arbitrarily increase the value of the likelihood by considering new weights $c \tilde{w}$ where $c > 1$ is a constant. In practice our gradient descent method always terminates because either the termination criterion is reached (e.g. difference in function values on successive steps is smaller than a threshold) or we reach the maximum number of function calls. As an illustration if we run the optimizer with termination criterion $\epsilon = 1e-4$ we get $||\tilde{w}|| = 7.9$. If we increase the tolerance to $\epsilon = 1e-10$ then the norm of the solution weights increases to $||\tilde{w}|| = 14.7$. This illustrates the weights ``running off to infinty''. Since the training data is linearly separable the classification error rate is zero. Also as can be seen from Figure \ref{stdev1_val_lam_0} the classification error rate on the validation data is also zero.
 
 % \begin{figure}
 %  \centering
@@ -153,7 +153,7 @@ The other datasets (other than stdev1) are not linearly separable. Hence we don'
  \centering
  \includegraphics[scale=0.5]{stdev4_train_lam_0.png}
  
- \caption{$\lambda = 0$, stdev4 train dataset}
+ \caption{Results for $\lambda = 0$, stdev4 train dataset}
  \label{stdev4_train_lam_0}
  \end{figure}
 
@@ -178,18 +178,23 @@ The other datasets (other than stdev1) are not linearly separable. Hence we don'
  Interestingly, even with the regularizer $\lambda$ set to $0$ the performance across the training and validation sets for a given dataset (e.g. stdev2) are comparable. This can be seen by the similar missclassification rates across corresponding training and validation sets in Table \ref{lam_0}. This means that our logistic regression classifier is generalizing fairly well.
 
 
-\subsection{$\lambda > 0$}
+\subsection*{Results for $\lambda > 0$}
 Now we analyze the results for different values of the regularizer $\lambda$. Figures \ref{nonsep_train_lam_10}, \ref{nonsep_train_lam_100}, \ref{nonsep_train_lam_1000} shows the result of running logistic regression on the nonsep dataset for different values of $\lambda$. The thing to note is that for different values of $\lambda$ the actual decision boundary, plotted in green, looks very similar. In fact what seems to be happening is that as $\lambda$ increases the optimal weight $w(\lambda)$ are just scaled down to zero. In fact if we define $\overline{w}(\lambda) = \frac{w(\lambda)}{||w(\lambda)||}$ then $\overline{w}(\lambda)$ is very similar across different values of $\lambda$. Thus the regularizer $\lambda$ is forcing the weights toward zero, i.e. $||w(\lambda)||$ is decreasing in $\lambda$, but the scaled weights $\overline{w}(\lambda)$ are staying essentially the same. This explains why the decision boundaries look the same across the three plots in Figure \ref{nonsep_train_lam_10}, \ref{nonsep_train_lam_100} and \ref{nonsep_train_lam_1000} since $w_0 + w_1 x_1 + w_2 x_2 = 0$ and $c w_0 + c w_1 x_1 + c w_2 x_2 = 0$ (where $c > 0$ is a constant) define the same hyperplane. Thus in this case the regularizer $\lambda$ just serves to drive the weights toward zero, but does so in a way that doesn't significantly affect the classification boundary. Table \ref{w_lam_norm} shows how $||\tilde{w}(\lambda)|| \to 0$ as we increase $\lambda$.
 
+The results on the other datasets (stdev1, stdev2, stdev4) are very similar. We see that as $\lamba$ increases the decision boundary stays almost the same, but the norm of the weights $||\tilde{w}(\lambda)||$ tends to zero. 
+
 \begin{table}[H]
-\begin{tabular}{|c|c|}
+\begin{tabular}{|c|c|c|}
 \hline
-$\lambda$ & $||\tilde{w}(\lambda)||$\\ \hline
-$0$ & $0.034$ \\ \hline
-$10$ & $0.0329$ \\ \hline
-$100$ & $0.0242$ \\ \hline
-$1000$ & $0.00067$ \\ \hline
+$\lambda$ & $||\tilde{w}(\lambda)||$ & CER on Validation Data\\ \hline
+$0$ & $0.034$ & $0.5075$ \\ \hline
+$10$ & $0.0329$ & $0.5075$ \\ \hline
+$100$ & $0.0242$ & $0.505$\\ \hline
+$1000$ & $0.00067$ & $0.505$ \\ \hline
 \end{tabular}
+%
+%
+
 
 \caption{Norm of $\tilde{w}(\lambda)$ for different values of $\lambda$ on nonsep train dataset.}
 \label{w_lam_norm}
@@ -257,7 +262,7 @@ For the example of 4 data points given, our $P$ matrix will be given by exactly:
 & P =  \mathbf{t}\mathbf{t}^T K\\
 \end{aligned}
 \end{equation}
-The Gram matrix $K$ is computed by pairwise dot product between points.  For the rest of the optimization matrices and vectors, $q$, $G$, and $h$ are simply constructed to be the right size, with $N=4$, as explained above, $A$ is $\mathbf{t}^T$, and $b$ still $0$.
+The Gram matrix $K$ is computed by pairwise dot product between points.  For the rest of the optimization matrices and vectors, $q$, $G$, and $h$ (note that $G,h,a,b$ correspond to the constraints) are simply constructed to be the right size, with $N=4$, as explained above, $A$ is $\mathbf{t}^T$, and $b$ still $0$.
 
 %\begin{figure}
 %\centering
@@ -363,7 +368,7 @@ Comparing the results of Tables \ref{lam_0} and \ref{C_0}, we see that the perfo
 The Gaussian kernel offers an interesting alternative to the linear kernel for classification.  The formulation of the SVM is exactly the same as the linear kernel except the kernel is now $k(x,x') = \exp\big( - \frac{1}{2 \sigma^2} ||x-x'||_2^2  \big)$
 where $\sigma$ is termed the bandwidth.  %We can adjust both the $C$ (relative penalty on the slack variables) and bandwidth, $\sigma$, in order to tune our classifier to the data.
 
-For both the linear kernel and the Gaussian kernel, we vary $C$ in the range $[0.0001, 500]$ and observe the effects on the classifier solution.  Increasing $C$ in general decreases $\frac{1}{||\mathbf{w}||}$, the geometric margin.  This makes sense because as $C$ is increased, the Soft-SVM formulation becomes closer to Hard-SVM, where separability of the data is required.  Plots for the values of the geometric margin, for each dataset are provided, for both the linear kernel and the Gaussian kernel over the range $[0.0001, 500]$, in Figures \ref{geom_lin} and \ref{geom_gauss}.
+For both the linear kernel and the Gaussian kernel, we vary $C$ in the range $[0.0001, 500]$ and observe the effects on the classifier solution.  Increasing $C$ in general decreases $\frac{1}{||\mathbf{w}||}$, the geometric margin.  This makes sense because as $C$ is increased, the Soft-SVM formulation becomes closer to Hard-SVM, where separability of the data is required. The objective of the primal form of soft-SVM is $\frac{1}{2} ||w||^2 + C \sum_i \xi_i$. In the limit as $C \to 0$ is is clear that this objective converges to $\frac{1}{2}||w||$. Hence for very small $C$ all we care about is minimizing $||w||$ and don't care about missclassification (i.e. we don't care about the term $C \sum_i \xi_i$ since it is tending to zero). Thus $||w|| \to 0$ as $C \to 0$ which implies that $\frac{1}{||w||} \to \infty$ as $C \to 0$, as can be seen in Figures \ref{geom_lin} and \ref{geom_gauss}. 
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{geom_lin.png}
@@ -419,8 +424,10 @@ Two additional comments on the Gaussian kernel.  First, it is nice to examine th
 
 \section{Titanic}
 
+We provide below each of the required 3 questions regarding our Logistic Regression and linear-kernel SVMs on the Titanic dataset.  Before we discuss them, however, we also note for fun that we were able to achieve superior results with a Gaussian-kernel SVM: with $\sigma=10, C=100$, we achieved a misclassification rate of 0.19 on the test set and 0.12 on the validation set.
+
 \begin{enumerate}
-\item We perform ``interval'' type feature rescaling. Namely we rescale all the features so that they lie in $[0,1]$. The performance of logistic regression is shown in Figure \ref{titanic_logit}. Performing model selection leads us to choose $\lambda = 2.5$.
+\item For Logistic Regression (LR), we perform ``interval'' type feature rescaling. Namely we rescale all the features so that they lie in $[0,1]$. The performance of LR is shown in Figure \ref{titanic_logit}. Performing model selection leads us to choose $\lambda = 2.5$.
  \begin{figure}
  \centering
  \includegraphics[scale=0.5]{titanic_logit.png}
@@ -430,7 +437,7 @@ Two additional comments on the Gaussian kernel.  First, it is nice to examine th
  
 
 
- \item The performance of the SVM classifier is shown in Figure \ref{titanic_svm}.  Performing model selection leads us to choose $C=0.046$,
+ \item The performance of the SVM classifier is shown in Figure \ref{titanic_svm}.  Performing model selection leads us to choose $C=0.046$.  Feature scaling was also implemented, although in practice did not help as much as it did for the gradient-descent-based LR classifier.
  
    \begin{figure}
  \centering
