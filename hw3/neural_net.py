@@ -40,6 +40,9 @@ class NeuralNet:
     def g(self, z):
         return 1 / (1 + np.exp(-z))
 
+    def g_grad(self, z):
+        return self.g(z)(1-self.g(z))
+
     
     def initializeWeights(self):
         self.W1 = np.ones((self.M,self.D+1))
@@ -76,9 +79,21 @@ class NeuralNet:
         # compute output of each unit via activation function
         self.y = self.g(self.a_outputs)
 
+
     def calcOutputDelta(self, t):
         self.outputDelta = self.y - t
- 
+
+    def backProp(self, xsample):
+        
+        # SECOND LAYER
+
+        self.deltaHidden = np.multiply(self.g_grad(self.a_hidden) , np.dot(self.W2.T,self.outputDelta))
+
+
+
+        # FIRST LAYER
+
+
 
 
     @staticmethod
