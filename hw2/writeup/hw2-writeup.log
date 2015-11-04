@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  27 OCT 2015 00:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  27 OCT 2015 16:25
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -734,239 +734,242 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
 Package xcolor Warning: Incompatible color definition on input line 106.
 
 
-Package xcolor Warning: Incompatible color definition on input line 125.
+Package xcolor Warning: Incompatible color definition on input line 126.
 
-
-Package xcolor Warning: Incompatible color definition on input line 125.
-
-<stdev1_train_lam_0.png, id=10, 388.45125pt x 273.02pt>
-File: stdev1_train_lam_0.png Graphic file (type png)
-
-<use stdev1_train_lam_0.png>
-Package pdftex.def Info: stdev1_train_lam_0.png used on input line 129.
-(pdftex.def)             Requested size: 194.22514pt x 136.50966pt.
-
-<stdev1_val_lam_0.png, id=12, 385.44pt x 273.02pt>
+<stdev1_val_lam_0.png, id=9, 385.44pt x 273.02pt>
 File: stdev1_val_lam_0.png Graphic file (type png)
  <use stdev1_val_lam_0.png>
-Package pdftex.def Info: stdev1_val_lam_0.png used on input line 136.
+Package pdftex.def Info: stdev1_val_lam_0.png used on input line 138.
 (pdftex.def)             Requested size: 192.71953pt x 136.50966pt.
 
 
-Package xcolor Warning: Incompatible color definition on input line 148.
+Package xcolor Warning: Incompatible color definition on input line 151.
 
 
-Package xcolor Warning: Incompatible color definition on input line 148.
+Package xcolor Warning: Incompatible color definition on input line 151.
 
-<stdev4_train_lam_0.png, id=15, 394.47375pt x 273.02pt>
+<stdev4_train_lam_0.png, id=13, 394.47375pt x 273.02pt>
 File: stdev4_train_lam_0.png Graphic file (type png)
 
 <use stdev4_train_lam_0.png>
-Package pdftex.def Info: stdev4_train_lam_0.png used on input line 151.
+Package pdftex.def Info: stdev4_train_lam_0.png used on input line 154.
 (pdftex.def)             Requested size: 197.23639pt x 136.50966pt.
 
-<stdev4_val_lam_0.png, id=16, 394.47375pt x 273.02pt>
+<stdev4_val_lam_0.png, id=14, 394.47375pt x 273.02pt>
 File: stdev4_val_lam_0.png Graphic file (type png)
 
 <use stdev4_val_lam_0.png>
-Package pdftex.def Info: stdev4_val_lam_0.png used on input line 158.
+Package pdftex.def Info: stdev4_val_lam_0.png used on input line 162.
 (pdftex.def)             Requested size: 197.23639pt x 136.50966pt.
 
-<nonsep_train_lam_0.png, id=17, 385.44pt x 273.02pt>
+<nonsep_train_lam_0.png, id=15, 385.44pt x 273.02pt>
 File: nonsep_train_lam_0.png Graphic file (type png)
 
 <use nonsep_train_lam_0.png>
-Package pdftex.def Info: nonsep_train_lam_0.png used on input line 167.
+Package pdftex.def Info: nonsep_train_lam_0.png used on input line 172.
 (pdftex.def)             Requested size: 192.71953pt x 136.50966pt.
 
-
-Package xcolor Warning: Incompatible color definition on input line 172.
-
-
-Package xcolor Warning: Incompatible color definition on input line 176.
-
-
-Package xcolor Warning: Incompatible color definition on input line 176.
-
-
-Package xcolor Warning: Incompatible color definition on input line 176.
-
-
-Package xcolor Warning: Incompatible color definition on input line 176.
-
-
-Underfull \vbox (badness 1484) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [1
 
 
 
 {/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./stdev
-1_train_lam_0.png> <./stdev1_val_lam_0.png>]
-<nonsep_train_lam_10.png, id=48, 385.44pt x 273.02pt>
+1_val_lam_0.png> <./stdev4_train_lam_0.png>]
+
+Package xcolor Warning: Incompatible color definition on input line 178.
+
+
+Package xcolor Warning: Incompatible color definition on input line 182.
+
+
+Package xcolor Warning: Incompatible color definition on input line 182.
+
+
+Package xcolor Warning: Incompatible color definition on input line 182.
+
+
+Package xcolor Warning: Incompatible color definition on input line 182.
+
+
+Package xcolor Warning: Incompatible color definition on input line 182.
+
+
+Package xcolor Warning: Incompatible color definition on input line 182.
+
+
+Package xcolor Warning: Incompatible color definition on input line 182.
+
+<nonsep_train_lam_10.png, id=49, 385.44pt x 273.02pt>
 File: nonsep_train_lam_10.png Graphic file (type png)
 
 <use nonsep_train_lam_10.png>
-Package pdftex.def Info: nonsep_train_lam_10.png used on input line 193.
+Package pdftex.def Info: nonsep_train_lam_10.png used on input line 200.
 (pdftex.def)             Requested size: 192.71953pt x 136.50966pt.
 
-<nonsep_train_lam_100.png, id=49, 385.44pt x 273.02pt>
+<nonsep_train_lam_100.png, id=50, 385.44pt x 273.02pt>
 File: nonsep_train_lam_100.png Graphic file (type png)
 
 <use nonsep_train_lam_100.png>
-Package pdftex.def Info: nonsep_train_lam_100.png used on input line 199.
+Package pdftex.def Info: nonsep_train_lam_100.png used on input line 206.
 (pdftex.def)             Requested size: 192.71953pt x 136.50966pt.
 
-<nonsep_train_lam_1000.png, id=50, 385.44pt x 273.02pt>
+<nonsep_train_lam_1000.png, id=51, 385.44pt x 273.02pt>
 File: nonsep_train_lam_1000.png Graphic file (type png)
 
 <use nonsep_train_lam_1000.png>
-Package pdftex.def Info: nonsep_train_lam_1000.png used on input line 205.
+Package pdftex.def Info: nonsep_train_lam_1000.png used on input line 212.
 (pdftex.def)             Requested size: 192.71953pt x 136.50966pt.
- [2 <./stdev4_train_lam_0.png> <./stdev4_val_lam_0.png> <./nonsep_train_lam_0.p
-ng> <./nonsep_train_lam_10.png>] [3 <./nonsep_train_lam_100.png> <./nonsep_trai
-n_lam_1000.png>]
 
-Package xcolor Warning: Incompatible color definition on input line 282.
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [2 <./stdev4_val_lam_0.png> <./nonsep_train_lam_0.png> <./nonsep_train_lam_10.
+png> <./nonsep_train_lam_100.png>]
+
+Package xcolor Warning: Incompatible color definition on input line 289.
 
 
-Package xcolor Warning: Incompatible color definition on input line 303.
+Package xcolor Warning: Incompatible color definition on input line 310.
 
 
-Package xcolor Warning: Incompatible color definition on input line 303.
+Package xcolor Warning: Incompatible color definition on input line 310.
 
-<svm_stdev1_train.png, id=86, 386.44376pt x 274.02374pt>
+[3 <./nonsep_train_lam_1000.png>]
+<svm_stdev1_train.png, id=88, 386.44376pt x 274.02374pt>
 File: svm_stdev1_train.png Graphic file (type png)
 
 <use svm_stdev1_train.png>
-Package pdftex.def Info: svm_stdev1_train.png used on input line 307.
+Package pdftex.def Info: svm_stdev1_train.png used on input line 314.
 (pdftex.def)             Requested size: 193.2214pt x 137.01154pt.
 
-<svm_stdev2_train.png, id=87, 389.455pt x 274.02374pt>
+<svm_stdev2_train.png, id=89, 389.455pt x 274.02374pt>
 File: svm_stdev2_train.png Graphic file (type png)
 
 <use svm_stdev2_train.png>
-Package pdftex.def Info: svm_stdev2_train.png used on input line 319.
+Package pdftex.def Info: svm_stdev2_train.png used on input line 327.
 (pdftex.def)             Requested size: 194.72702pt x 137.01154pt.
 
-<svm_nonsep_val.png, id=88, 383.4325pt x 284.06125pt>
+<svm_nonsep_val.png, id=90, 383.4325pt x 284.06125pt>
 File: svm_nonsep_val.png Graphic file (type png)
  <use svm_nonsep_val.png>
-Package pdftex.def Info: svm_nonsep_val.png used on input line 349.
+Package pdftex.def Info: svm_nonsep_val.png used on input line 358.
 (pdftex.def)             Requested size: 191.71577pt x 142.03026pt.
 
 
-Package xcolor Warning: Incompatible color definition on input line 357.
+Package xcolor Warning: Incompatible color definition on input line 366.
 
 
-Package xcolor Warning: Incompatible color definition on input line 357.
+Package xcolor Warning: Incompatible color definition on input line 366.
 
-<geom_lin.png, id=91, 389.455pt x 277.035pt>
+<geom_lin.png, id=93, 389.455pt x 277.035pt>
 File: geom_lin.png Graphic file (type png)
  <use geom_lin.png>
-Package pdftex.def Info: geom_lin.png used on input line 360.
+Package pdftex.def Info: geom_lin.png used on input line 369.
 (pdftex.def)             Requested size: 194.72702pt x 138.51715pt.
- [4 <./svm_stdev1_train.png> <./svm_stdev2_train.png> <./svm_nonsep_val.png>]
-<geom_gauss.png, id=107, 389.455pt x 277.035pt>
+
+<geom_gauss.png, id=94, 389.455pt x 277.035pt>
 File: geom_gauss.png Graphic file (type png)
  <use geom_gauss.png>
-Package pdftex.def Info: geom_gauss.png used on input line 367.
+Package pdftex.def Info: geom_gauss.png used on input line 376.
 (pdftex.def)             Requested size: 194.72702pt x 138.51715pt.
 
 
-Package xcolor Warning: Incompatible color definition on input line 372.
+Package xcolor Warning: Incompatible color definition on input line 381.
 
-<svm_highC_stdev1.png, id=109, 386.44376pt x 274.02374pt>
+<svm_highC_stdev1.png, id=96, 386.44376pt x 274.02374pt>
 File: svm_highC_stdev1.png Graphic file (type png)
 
 <use svm_highC_stdev1.png>
-Package pdftex.def Info: svm_highC_stdev1.png used on input line 375.
+Package pdftex.def Info: svm_highC_stdev1.png used on input line 384.
 (pdftex.def)             Requested size: 193.2214pt x 137.01154pt.
 
-<supportvectors.png, id=110, 396.48125pt x 277.035pt>
+<supportvectors.png, id=97, 396.48125pt x 277.035pt>
 File: supportvectors.png Graphic file (type png)
  <use supportvectors.png>
-Package pdftex.def Info: supportvectors.png used on input line 381.
+Package pdftex.def Info: supportvectors.png used on input line 390.
 (pdftex.def)             Requested size: 198.24013pt x 138.51715pt.
 
+[4 <./svm_stdev1_train.png> <./svm_stdev2_train.png> <./svm_nonsep_val.png> <./
+geom_lin.png> <./geom_gauss.png>]
 
-Package xcolor Warning: Incompatible color definition on input line 386.
+Package xcolor Warning: Incompatible color definition on input line 395.
 
 
-Package xcolor Warning: Incompatible color definition on input line 386.
+Package xcolor Warning: Incompatible color definition on input line 395.
 
-<cer_svm.png, id=113, 399.4925pt x 277.035pt>
+<cer_svm.png, id=115, 399.4925pt x 277.035pt>
 File: cer_svm.png Graphic file (type png)
  <use cer_svm.png>
-Package pdftex.def Info: cer_svm.png used on input line 389.
+Package pdftex.def Info: cer_svm.png used on input line 398.
 (pdftex.def)             Requested size: 199.74576pt x 138.51715pt.
 
-Underfull \vbox (badness 1789) has occurred while \output is active []
-
- [5 <./geom_lin.png> <./geom_gauss.png> <./svm_highC_stdev1.png> <./supportvect
-ors.png>]
-
-Package xcolor Warning: Incompatible color definition on input line 394.
+Underfull \vbox (badness 1902) has occurred while \output is active []
 
 
-Package xcolor Warning: Incompatible color definition on input line 394.
 
-<nonsep_gaussian.png, id=128, 383.4325pt x 284.06125pt>
+Package xcolor Warning: Incompatible color definition on input line 404.
+
+
+Package xcolor Warning: Incompatible color definition on input line 404.
+
+<nonsep_gaussian.png, id=118, 383.4325pt x 284.06125pt>
 File: nonsep_gaussian.png Graphic file (type png)
 
 <use nonsep_gaussian.png>
-Package pdftex.def Info: nonsep_gaussian.png used on input line 397.
+Package pdftex.def Info: nonsep_gaussian.png used on input line 407.
 (pdftex.def)             Requested size: 191.71577pt x 142.03026pt.
- <bandwidth_cer.png, id=129, 393.47pt x 277.035pt>
+ <bandwidth_cer.png, id=119, 393.47pt x 277.035pt>
 File: bandwidth_cer.png Graphic file (type png)
 
 <use bandwidth_cer.png>
-Package pdftex.def Info: bandwidth_cer.png used on input line 403.
+Package pdftex.def Info: bandwidth_cer.png used on input line 413.
 (pdftex.def)             Requested size: 196.73451pt x 138.51715pt.
-
-
-Package xcolor Warning: Incompatible color definition on input line 413.
-
-<titanic_logit.png, id=131, 392.46625pt x 272.01625pt>
-File: titanic_logit.png Graphic file (type png)
- <use titanic_logit.png>
-Package pdftex.def Info: titanic_logit.png used on input line 416.
-(pdftex.def)             Requested size: 196.23264pt x 136.00778pt.
 
 
 Package xcolor Warning: Incompatible color definition on input line 423.
 
-<titanic_svm.png, id=133, 399.4925pt x 277.035pt>
+<titanic_logit.png, id=121, 392.46625pt x 272.01625pt>
+File: titanic_logit.png Graphic file (type png)
+ <use titanic_logit.png>
+Package pdftex.def Info: titanic_logit.png used on input line 426.
+(pdftex.def)             Requested size: 196.23264pt x 136.00778pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [5 <./svm_highC_stdev1.png> <./supportvectors.png> <./cer_svm.png> <./nonsep_g
+aussian.png>]
+
+Package xcolor Warning: Incompatible color definition on input line 433.
+
+<titanic_svm.png, id=136, 399.4925pt x 277.035pt>
 File: titanic_svm.png Graphic file (type png)
  <use titanic_svm.png>
-Package pdftex.def Info: titanic_svm.png used on input line 427.
+Package pdftex.def Info: titanic_svm.png used on input line 437.
 (pdftex.def)             Requested size: 199.74576pt x 138.51715pt.
 
 
-Package xcolor Warning: Incompatible color definition on input line 432.
+Package xcolor Warning: Incompatible color definition on input line 442.
 
-[6 <./cer_svm.png> <./nonsep_gaussian.png> <./bandwidth_cer.png> <./titanic_log
-it.png>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 458.
- [7
+[6 <./bandwidth_cer.png> <./titanic_logit.png> <./titanic_svm.png>]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 468.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 468.
 
- <./titanic_svm.png>]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 458.
- (./hw2-writeup.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 458.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 458.
+(./hw2-writeup.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 468.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 468.
 Package rerunfilecheck Info: File `hw2-writeup.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 458.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 468.
  ) 
 Here is how much of TeX's memory you used:
- 17348 strings out of 493117
- 320068 string characters out of 6135433
- 392620 words of memory out of 5000000
- 20408 multiletter control sequences out of 15000+600000
+ 17276 strings out of 493117
+ 318405 string characters out of 6135433
+ 393562 words of memory out of 5000000
+ 20340 multiletter control sequences out of 15000+600000
  22629 words of font info for 62 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 62i,13n,76p,1465b,695s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 62i,13n,56p,1506b,424s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2014/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/te
 xlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/local/texl
@@ -986,10 +989,10 @@ t/fonts/type1/public/amsfonts/symbols/msbm7.pfb></usr/local/texlive/2014/texmf-
 dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2014/texmf-dist/fonts
 /type1/urw/times/utmr8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/urw
 /times/utmr8a.pfb>
-Output written on hw2-writeup.pdf (7 pages, 699370 bytes).
+Output written on hw2-writeup.pdf (6 pages, 668833 bytes).
 PDF statistics:
- 230 PDF objects out of 1000 (max. 8388607)
- 161 compressed objects within 2 object streams
- 48 named destinations out of 1000 (max. 500000)
- 113 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 222 PDF objects out of 1000 (max. 8388607)
+ 156 compressed objects within 2 object streams
+ 45 named destinations out of 1000 (max. 500000)
+ 108 words of extra memory for PDF output out of 10000 (max. 10000000)
 
