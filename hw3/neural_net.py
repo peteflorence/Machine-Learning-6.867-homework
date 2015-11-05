@@ -67,18 +67,23 @@ class NeuralNet:
         #need to grad descent
 
 
-        #need to batch over all samples
-        
-        xsample = self.X[0,:]
-        tsample = self.T[0,:]
+        #batch over all samples
+        self.W1derivs = 0  # note that the derivs get summed over the for loop, but nothing else
+        self.W2derivs = 0
+        for i in range(self.N):
+            xsample = self.X[i,:]
+            tsample = self.T[i,:]
 
-        self.forwardProp(xsample)
-        self.calcOutputDelta(tsample)
-        self.backProp()
-        print np.shape(self.deltaHidden)
-        self.evalDerivs(xsample)
-        print np.shape(self.W1derivs)
-        print np.shape(self.W2derivs)
+            
+            self.forwardProp(xsample)
+            self.calcOutputDelta(tsample)
+            self.backProp()
+            print np.shape(self.deltaHidden)
+            self.evalDerivs(xsample)
+            print np.shape(self.W1derivs)
+            print np.shape(self.W2derivs)
+
+        # grad descent update
 
 
     def forwardProp(self, xsample, W1=None, W2=None):
@@ -157,11 +162,24 @@ class NeuralNet:
         self.deltaOutput = np.zeros(self.K)
 
 
+    def evalCost(self):
 
+        # only works right now if have already forward propagated
 
+        self.loss = 0
+        sum_over_n = 0
+        for i in range(self.N):
+            sum_over_k = 0
+            for k in range(self.K):
+                sum_over_k += - self.T[i,k] * np.log(self.y) - (1 - self.T[i,k]) * np.log(1 - self.y)
+            sum_over_n += sum_over_k
 
+        self.loss = sum_over_n
 
+        regTerm = self.lam * (np.linalg.norm(self.W1, ord='fro') + np.linalg.norm(self.W2, ord='fro'))
+        self.J = self.loss + regTerm
 
+    
 
     @staticmethod
     def fromMAT(file, type="train"):
