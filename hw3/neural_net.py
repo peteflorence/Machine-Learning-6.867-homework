@@ -89,16 +89,11 @@ class NeuralNet:
         if W2 is None:
             W2 = self.W2
 
-        
-        #LUCAS: Why are we storing these as class attributes?
-
         # FIRST LAYER
-
         n = np.shape(xsample)[1]
         # compute activations from weights, should be size M x n
         self.a_hidden = np.dot(W1,xsample)
 
-        # LUCAS: should be vstack???
         # compute output of each unit via activation function
         # should be size (M+1) x n
         self.z = np.vstack((np.ones(n),self.g(self.a_hidden)))
