@@ -35,13 +35,12 @@ class NeuralNet:
         self.initializeHiddenUnits()
         self.initializeOutputs()
 
-
     # activation function = sigmoid
     def g(self, z):
         return 1 / (1 + np.exp(-z))
 
     def g_grad(self, z):
-        return self.g(z)(1-self.g(z))
+        return np.multiply(self.g(z),(1-self.g(z)))
 
     
     def initializeWeights(self):
@@ -58,6 +57,20 @@ class NeuralNet:
         self.a_outputs = np.zeros((self.K,1))  # activations for each unit
         self.y         = np.zeros((self.K,1))  # 'unit outputs'
 
+
+
+    def train(self, numiter=1):
+        
+        xsample = self.X[0,:]
+        tsample = self.T[0,:]
+
+        self.forwardProp(xsample)
+        self.calcOutputDelta(tsample)
+        self.backProp()
+        print np.shape(self.deltaHidden)
+        self.evalDerivs(xsample)
+        print np.shape(self.W1derivs)
+        print np.shape(self.W2derivs)
 
 
     def forwardProp(self, xsample):
@@ -80,18 +93,22 @@ class NeuralNet:
         self.y = self.g(self.a_outputs)
 
 
-    def calcOutputDelta(self, t):
-        self.outputDelta = self.y - t
+    def calcOutputDelta(self, tsample):
+        self.outputDelta = self.y - tsample
 
-    def backProp(self, xsample):
+    def backProp(self):
+
+        self.deltaHidden = np.multiply(self.g_grad(self.a_hidden) , np.dot(self.W2[:,1:].T,self.outputDelta))
+
+
+    def evalDerivs(self, xsample):
+
+        self.W1derivs = np.outer(xsample,self.deltaHidden)
         
-        # SECOND LAYER
-
-        self.deltaHidden = np.multiply(self.g_grad(self.a_hidden) , np.dot(self.W2.T,self.outputDelta))
+        self.W2derivs = np.outer(self.z,self.outputDelta)
 
 
 
-        # FIRST LAYER
 
 
 
