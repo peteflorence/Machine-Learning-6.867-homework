@@ -112,15 +112,17 @@ class NeuralNet:
 
         self.deltaHidden = np.multiply(self.g_grad(self.a_hidden) , np.dot(self.W2[:,1:].T,self.outputDelta))
 
-
     def evalDerivs(self, xsample):
 
         self.W1derivs += np.outer(xsample,self.deltaHidden).T + 2*self.lam*self.W1
         self.W2derivs += np.outer(self.z,self.outputDelta).T + 2*self.lam*self.W2
 
-    def evalCost(self):
+    
+    def evalCost(self, weights_list):
 
         # only works right now if have already forward propagated
+
+        
 
         self.loss = 0
         sum_over_n = 0
@@ -132,8 +134,17 @@ class NeuralNet:
 
         self.loss = sum_over_n
 
-        regTerm = self.lam * (np.linalg.norm(self.W1, ord='fro') + np.linalg.norm(self.W2, ord='fro'))
+        regTerm = self.lam * (np.linalg.norm(self.W1, ord='fro')**2 + np.linalg.norm(self.W2, ord='fro')**2)
         self.J = self.loss + regTerm
+
+    def evalGrad(self, weights_list):
+
+        self.forwardProp(xsample)
+        self.calcOutputDelta(tsample)
+        self.backProp()
+        self.evalDerivs(xsample)
+
+
 
     
 
