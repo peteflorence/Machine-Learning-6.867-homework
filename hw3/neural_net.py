@@ -30,7 +30,7 @@ class NeuralNet:
         # augment the input data with ones.  this allows the bias weights to be vectorized
 
         ones = np.ones((self.N,1))
-        self.X = np.hstack((ones,self.x))
+        self.X = np.hstack((ones,self.x)).T #note, I transposed this to make some other computation easier
 
         self.initializeWeights()
         self.initializeHiddenUnits()
@@ -52,7 +52,7 @@ class NeuralNet:
 
     def initializeHiddenUnits(self):
         self.a_hidden = np.zeros((self.M,1))  # activations for each unit
-        self.z        = np.zeros((self.M+1,1))  # 'unit outputs
+        self.z        = np.zeros((self.M+1,1))  # 'unit outputs'
 
     def initializeOutputs(self):
         self.a_outputs = np.zeros((self.K,1))  # activations for each unit
@@ -60,6 +60,7 @@ class NeuralNet:
 
 
 
+    # not sure that this works anymore . . .
     def train(self, numiter=1):
 
 
@@ -85,38 +86,81 @@ class NeuralNet:
         # grad descent update
 
 
-    def forwardProp(self, xsample):
-        
-        # FIRST LAYER
+    def forwardProp(self, xsample, W1=None, W2=None):
 
-        # compute activations from weights
-        self.a_hidden = np.dot(self.W1,xsample)
+        if W1 is None:
+            W1 = self.W1
+
+        if W2 is None:
+            W2 = self.W2
+
+        # FIRST LAYER
+        n = np.shape(xsample)[1]
+        # compute activations from weights, should be size M x n
+        self.a_hidden = np.dot(W1,xsample)
 
         # compute output of each unit via activation function
-        self.z = np.hstack((1.0,self.g(self.a_hidden)))
+        # should be size (M+1) x n
+        self.z = np.vstack((np.ones(n),self.g(self.a_hidden)))
 
 
         # SECOND LAYER
 
         # compute activations from weights
-        self.a_outputs = np.dot(self.W2,self.z)
+        # size K x 1
+        self.a_outputs = np.dot(W2,self.z)
 
         # compute output of each unit via activation function
+        # size K x 1
         self.y = self.g(self.a_outputs)
 
 
-    def calcOutputDelta(self, tsample):
-        self.outputDelta = self.y - tsample
 
-    def backProp(self):
+    def backPropSingle(self, a_hidden):
+        return np.multiply(self.g_grad(a_hidden), self.deltaOutputTimesW2)
 
-        self.deltaHidden = np.multiply(self.g_grad(self.a_hidden) , np.dot(self.W2[:,1:].T,self.outputDelta))
+    def backPropFull(self):
+        n = np.shape(self.a_hidden)[1]
+        self.deltaHidden = np.zeros((self.M,n))
+        for idx in range(0,n):
+            self.deltaHidden[:,idx] = self.backPropSingle(self.a_hidden[:,idx])
 
 
-    def evalDerivs(self, xsample):
+    def evalDerivs(self, W1, W2, idx=None, lam=None):
 
-        self.W1derivs += np.outer(xsample,self.deltaHidden).T + 2*self.lam*self.W1
-        self.W2derivs += np.outer(self.z,self.outputDelta).T + 2*self.lam*self.W2
+        if lam is None:
+            lam = self.lam
+
+        if idx is not None:
+            n = np.size(idx)
+            xsample = self.X[:,idx]
+            xsample = np.reshape(xsample, (self.D+1,n))
+
+        else:
+            xsample = self.X
+            n = self.N
+
+
+        self.forwardProp(xsample, W1=W1, W2=W2) # should populate a_hidden, z, a_output, y
+        self.computeDeltaOutput(idx) # should populate deltaOutput
+        self.deltaOutputTimesW2 = np.dot(self.W2[:,1:].T, self.deltaOutput)
+        self.backPropFull()
+
+        W1_grad = 2*lam*W1
+        W2_grad = 2*lam*W2
+
+        for i in range(0,n):
+            W1_grad += np.outer(self.deltaHidden[:,i], xsample[:,i])
+            W2_grad += np.outer(self.deltaOutput, self.z[:,i])
+
+
+        return [W1_grad, W2_grad]
+
+
+    # need to fill this in, will depend on the indices we are looking at
+    def computeDeltaOutput(self, idx):
+        self.deltaOutput = np.zeros(self.K)
+
 
     def evalCost(self):
 
