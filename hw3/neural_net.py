@@ -14,6 +14,7 @@ class NeuralNet:
         self.N = np.size(t)
 
         self.M = int(self.N /10)            # by default, have 1/10th number of hidden units (besides bias unit) as number of training examples 
+        self.lam = 1
 
         self.t = np.reshape(t,(self.N,))
 
@@ -60,6 +61,12 @@ class NeuralNet:
 
 
     def train(self, numiter=1):
+
+
+        #need to grad descent
+
+
+        #need to batch over all samples
         
         xsample = self.X[0,:]
         tsample = self.T[0,:]
@@ -103,9 +110,9 @@ class NeuralNet:
 
     def evalDerivs(self, xsample):
 
-        self.W1derivs = np.outer(xsample,self.deltaHidden)
+        self.W1derivs = np.outer(xsample,self.deltaHidden).T + 2*self.lam*self.W1
         
-        self.W2derivs = np.outer(self.z,self.outputDelta)
+        self.W2derivs = np.outer(self.z,self.outputDelta).T + 2*self.lam*self.W2
 
 
 
