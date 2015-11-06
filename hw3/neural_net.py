@@ -5,12 +5,12 @@ import scipy.io
 import sys
 
 sys.path.append("../hw1")
-from gradient_descent import GradientDescent as gd
+from gradient_descent import GradientDescent
 
 
 class NeuralNet:
 
-    def __init__(self, x, t):
+    def __init__(self, x, t, useSoftmax=True):
         self.N = np.size(t)
 
         self.M = int(self.N /10)            # by default, have 1/10th number of hidden units (besides bias unit) as number of training examples 
@@ -20,9 +20,9 @@ class NeuralNet:
 
         # transform the k-description into a K-dimensional vector
         self.K = int(max(self.t))           # this assumes that the output labels are originally non-negative integers counting up from 1  (1, 2, ...) with no gaps
-        self.T = np.zeros((self.N,self.K))
+        self.T = np.zeros((self.K,self.N))
         for i in range(self.N):
-            self.T[ i , self.t[i] - 1 ] = 1
+            self.T[self.t[i] - 1, i] = 1
 
         self.x = x
         self.D = np.shape(x)[1]     # this is the dimension of the input data
@@ -36,12 +36,26 @@ class NeuralNet:
         self.initializeHiddenUnits()
         self.initializeOutputs()
 
+        self.useSoftmax = useSoftmax
+        if useSoftmax:
+            self.sigma = self.softmax
+        else:
+            self.sigma = g
+
+        if not self.useSoftmax:
+            raise Exception('Currently only support gradients for softmax')
+
     # activation function = sigmoid
     def g(self, z):
         return 1 / (1 + np.exp(-z))
 
     def g_grad(self, z):
         return np.multiply(self.g(z),(1-self.g(z)))
+
+    def softmax(self, z):
+        sftmax = np.exp(z)
+        sftmax = 1.0/np.sum(sftmax, axis=0)*sftmax
+        return sftmax
 
     
     def initializeWeights(self):
@@ -86,13 +100,17 @@ class NeuralNet:
         # grad descent update
 
 
-    def forwardProp(self, xsample, W1=None, W2=None):
+    def forwardProp(self, xsample=None, w_list=None):
 
-        if W1 is None:
+        if xsample is None:
+            xsample = self.X
+
+        if w_list is None:
             W1 = self.W1
-
-        if W2 is None:
             W2 = self.W2
+        else:
+            W1 = w_list[0]
+            W2 = w_list[1]
 
         # FIRST LAYER
         n = np.shape(xsample)[1]
@@ -107,12 +125,12 @@ class NeuralNet:
         # SECOND LAYER
 
         # compute activations from weights
-        # size K x 1
+        # size K x n
         self.a_outputs = np.dot(W2,self.z)
 
         # compute output of each unit via activation function
         # size K x 1
-        self.y = self.g(self.a_outputs)
+        self.y = self.sigma(self.a_outputs)
 
 
 
@@ -126,7 +144,9 @@ class NeuralNet:
             self.deltaHidden[:,idx] = self.backPropSingle(self.a_hidden[:,idx])
 
 
-    def evalDerivs(self, W1, W2, idx=None, lam=None):
+    def evalDerivs(self, w_list, idx=None, lam=None):
+        W1 = w_list[0]
+        W2 = w_list[1]
 
         if lam is None:
             lam = self.lam
@@ -141,7 +161,7 @@ class NeuralNet:
             n = self.N
 
 
-        self.forwardProp(xsample, W1=W1, W2=W2) # should populate a_hidden, z, a_output, y
+        self.forwardProp(xsample, w_list=[W1, W2]) # should populate a_hidden, z, a_output, y
         self.computeDeltaOutput(idx) # should populate deltaOutput
         self.deltaOutputTimesW2 = np.dot(self.W2[:,1:].T, self.deltaOutput)
         self.backPropFull()
@@ -158,27 +178,58 @@ class NeuralNet:
 
 
     # need to fill this in, will depend on the indices we are looking at
+    # delta output should only be of size K x 1
+    # turns out that this takes a very simply form, y - t, in Bishop notation
     def computeDeltaOutput(self, idx):
+        if not self.useSoftmax:
+            raise Exception('Currently only support gradients for softmax')
+
+        # need to iterate over idx
+        n = np.size(idx)
         self.deltaOutput = np.zeros(self.K)
 
+        self.a_outputs[:,idx] - self.T[:,idx]
 
-    def evalCost(self):
+    def evalCost(self, lam, idx=None, w_list=None):
 
-        # only works right now if have already forward propagated
+        # make sure we forward propagate if someone asks us to compute for specific indices
+        if idx is None:
+            idx = np.arange(0,self.N)
+            xsample = self.X
+        else:
+            xsample = self.X[:,idx]
 
-        self.loss = 0
-        sum_over_n = 0
-        for i in range(self.N):
-            sum_over_k = 0
-            for k in range(self.K):
-                sum_over_k += - self.T[i,k] * np.log(self.y) - (1 - self.T[i,k]) * np.log(1 - self.y)
-            sum_over_n += sum_over_k
+        if w_list is not None:
+            W1 = w_list[0]
+            W2 = w_list[1]
+        else:
+            W1 = self.W1
+            W2 = self.W2
 
-        self.loss = sum_over_n
+        # if the the user passed in an option, then we need to make sure we forward propagate in order to
+        # have up-to-date information
+        if (w_list is not None) or (idx is not None):
+            self.forwardProp(xsample, w_list=w_list)
 
-        regTerm = self.lam * (np.linalg.norm(self.W1, ord='fro') + np.linalg.norm(self.W2, ord='fro'))
-        self.J = self.loss + regTerm
+        loss = 0.0
+        for i in range(np.size(idx)):
+            loss += -np.dot(self.y[:,i], self.T[:,i])
 
+        regTerm = lam * (np.linalg.norm(W1, ord='fro') + np.linalg.norm(W2, ord='fro'))
+        loss = loss + regTerm
+
+        return loss
+
+
+    def constructGradDescentObject(self, lam=None):
+        if lam is None:
+            lam = self.lam
+
+
+        f = lambda w_list: self.evalCost(self.lam, w_list=w_list)
+        grad = lambda w_list: self.evalDerivs(w_list, lam=self.lam)
+        gd = GradientDescent(f, grad=grad)
+        return gd
     
 
     @staticmethod
