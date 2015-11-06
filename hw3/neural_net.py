@@ -10,11 +10,15 @@ from gradient_descent import GradientDescent
 
 class NeuralNet:
 
-    def __init__(self, x, t, useSoftmax=True):
+    def __init__(self, x, t, useSoftmax=True, lam=None):
         self.N = np.size(t)
 
-        self.M = int(self.N /10)            # by default, have 1/10th number of hidden units (besides bias unit) as number of training examples 
-        self.lam = 1
+        self.M = int(self.N /10) # by default, have 1/10th number of hidden units (besides bias unit) as number of training examples
+
+        if lam is None:
+            self.lam = 1
+        else:
+            self.lam = lam
 
         self.t = np.reshape(t,(self.N,))
 
@@ -137,12 +141,14 @@ class NeuralNet:
     def backPropSingle(self, a_hidden):
         return np.multiply(self.g_grad(a_hidden), self.deltaOutputTimesW2)
 
+
+    # what is this doing???
     def backPropFull(self):
+        self.deltaOutputTimesW2 = np.dot(self.W2[:,1:].T, self.deltaOutput)
         n = np.shape(self.a_hidden)[1]
         self.deltaHidden = np.zeros((self.M,n))
         for idx in range(0,n):
-            self.deltaHidden[:,idx] = self.backPropSingle(self.a_hidden[:,idx])
-
+            self.deltaHidden[:,idx] = np.multiply(self.g_grad(self.a_hidden[:,idx]), self.deltaOutputTimesW2[:,idx])
 
     def evalDerivs(self, w_list, idx=None, lam=None):
         W1 = w_list[0]
@@ -157,13 +163,13 @@ class NeuralNet:
             xsample = np.reshape(xsample, (self.D+1,n))
 
         else:
+            idx = np.arange(0,self.N)
             xsample = self.X
             n = self.N
 
 
         self.forwardProp(xsample, w_list=[W1, W2]) # should populate a_hidden, z, a_output, y
         self.computeDeltaOutput(idx) # should populate deltaOutput
-        self.deltaOutputTimesW2 = np.dot(self.W2[:,1:].T, self.deltaOutput)
         self.backPropFull()
 
         W1_grad = 2*lam*W1
@@ -171,7 +177,7 @@ class NeuralNet:
 
         for i in range(0,n):
             W1_grad += np.outer(self.deltaHidden[:,i], xsample[:,i])
-            W2_grad += np.outer(self.deltaOutput, self.z[:,i])
+            W2_grad += np.outer(self.deltaOutput[:,i], self.z[:,i])
 
 
         return [W1_grad, W2_grad]
@@ -185,10 +191,7 @@ class NeuralNet:
             raise Exception('Currently only support gradients for softmax')
 
         # need to iterate over idx
-        n = np.size(idx)
-        self.deltaOutput = np.zeros(self.K)
-
-        self.a_outputs[:,idx] - self.T[:,idx]
+        self.deltaOutput = self.y[:,idx] - self.T[:,idx]
 
     def evalCost(self, lam, idx=None, w_list=None):
 
@@ -230,16 +233,64 @@ class NeuralNet:
         grad = lambda w_list: self.evalDerivs(w_list, lam=self.lam)
         gd = GradientDescent(f, grad=grad)
         return gd
+
+    def plotData(self):
+        if self.D != 2:
+            print "can only plot data if x is two dimensional"
+            return
+
+
+        X_2D = self.X[1:, :]
+        for i in range(1,4):
+            if i==1:
+                color=[1,0,0]
+            if i==2:
+                color=[0,1,0]
+            if i==3:
+                color=[0,0,1]
+
+            idx = np.where(self.t == i)[0]
+            label = " = " + str(i)
+            plt.scatter(self.X[1,idx], self.X[2,idx], color=color, marker='o', facecolors='none', label=label)
+
+        plt.xlabel('x_1')
+        plt.ylabel('x_2')
+        plt.legend(loc='best')
+        plt.show()
+
+    def plotNN(self, w_list):
+        self.forwardProp(self.X, w_list=w_list)
+
+        for i in range(0,self.N):
+            classIdx = np.where(self.y[:,i] == np.max(self.y[:,i]))[0]
+
+            if classIdx==0:
+                color=[1,0,0]
+            if classIdx==1:
+                color=[0,1,0]
+            if classIdx==2:
+                color=[0,0,1]
+
+            plt.scatter(self.X[1,i], self.X[2,i], color=color, marker='o', facecolors='none')
+
+        plt.xlabel('x_1')
+        plt.ylabel('x_2')
+        # plt.legend(loc='best')
+        plt.show()
+
+
+
+
     
 
     @staticmethod
-    def fromMAT(file, type="train"):
+    def fromMAT(file, type="train", lam=None):
         filename = "hw3_resources/" + file + "_" + type + ".mat"
         alldata = scipy.io.loadmat(filename)['toy_data']
         X = np.array(alldata[:,0:-1])
         T = np.array(alldata[:,-1])
 
-        nn = NeuralNet(X,T)
+        nn = NeuralNet(X,T, lam=lam)
         return nn
 
 
