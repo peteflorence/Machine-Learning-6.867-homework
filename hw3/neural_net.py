@@ -88,6 +88,9 @@ class NeuralNet:
 
     def forwardProp(self, xsample, W1=None, W2=None):
 
+        if W_list is None:
+            W1 = W_list[0]
+
         if W1 is None:
             W1 = self.W1
 
@@ -114,7 +117,9 @@ class NeuralNet:
         # size K x 1
         self.y = self.g(self.a_outputs)
 
-
+    # need to fill this in, will depend on the indices we are looking at
+    def computeDeltaOutput(self, idx):
+        self.deltaOutput = np.zeros(self.K)
 
     def backPropSingle(self, a_hidden):
         return np.multiply(self.g_grad(a_hidden), self.deltaOutputTimesW2)
@@ -157,15 +162,12 @@ class NeuralNet:
         return [W1_grad, W2_grad]
 
 
-    # need to fill this in, will depend on the indices we are looking at
-    def computeDeltaOutput(self, idx):
-        self.deltaOutput = np.zeros(self.K)
+    
 
 
-    def evalCost(self):
+    def evalF(self):
 
         # only works right now if have already forward propagated
-
         self.loss = 0
         sum_over_n = 0
         for i in range(self.N):
