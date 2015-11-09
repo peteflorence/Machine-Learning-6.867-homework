@@ -157,9 +157,29 @@ g(z) = \frac{1}{1 + e^{-z}}
 \end{equation}
 %
 %
-To forward propagate through the second layer to the output units, we similarly use $A^{(2)} = W^{(2)} Z_{aug}^{(1)}$, where $Z^{(1)}$ has been augmented with a vector of 1s to include the bias unit, and so we have $W^{(2)}$ of dimension $K \times (M+1)$.  At this point we also note that in order to do our 1-of-K classification, we have to transform the output from the form they were given in...
+To forward propagate through the second layer to the output units, we similarly use $A^{(2)} = W^{(2)} Z_{aug}^{(1)}$, where $Z^{(1)}$ has been augmented with a vector of 1s to include the bias unit, and so we have $W^{(2)}$ of dimension $K \times (M+1)$.  At this point we also note that in order to do our 1-of-K classification, we have to transform the output from the form they were given in the assigned datasets, from a scalar $k$ to $\mathbf{e}_k$ where $\mathbf{e}_k$ is a vector of length $K = k_{max}$ and contains a 0 for every element except $k$, for example $e_3 = [0 \ 0 \  1]$.  Thus we consider $\mathbf{t}$ to be an $N \times K$ matrix.  Applying $Z^{(2)}_{ij} = g(A^{(2)}_{ij})$, we have our outputs and have completed forward propagation.
 
+\textit{2. Evaluate $\delta_k$ for the output units}
 
+With our softmax formulation.... 
+
+... we end up with:
+
+$\delta_{nk} = y_{nk} - t_{nk}$
+
+Which is simply vectorized by element-wise subtraction to give an $N \times K$ matrix
+
+\textit{3. Backpropagation of the $\delta$'s for each hidden unit}
+
+Having calculated the $\delta$'s for the output unit, we have only one step of backpropagation to perform, since we have only a 2-layer neural network.  We first provide the backpropagation formula, unvectorized:
+%
+%
+\begin{equation}
+\delta_j = h'(a_j)\sum_k w_{kj} \delta_k
+\end{equation}
+%
+%
+And note that we may vectorize this computation by 
 
 
 
