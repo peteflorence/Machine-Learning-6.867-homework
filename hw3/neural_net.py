@@ -142,6 +142,7 @@ class NeuralNet:
             lam = self.lam
 
         if idx is not None:
+            idx = np.array(idx)
             n = np.size(idx)
             xsample = self.X[:,idx]
             xsample = np.reshape(xsample, (self.D+1,n))
@@ -161,8 +162,8 @@ class NeuralNet:
         #    W1_grad += np.outer(self.deltaHidden[:,i], xsample[:,i])
         #    W2_grad += np.outer(self.deltaOutput[:,i], self.z[:,i])
 
-        W1_grad = np.dot(self.deltaOutput,self.z.T) # should be: KxN times Nx(M+1)
-        W2_grad = np.dot(self.deltaHidden,self.X.T) # should be: MxN times Nx(D+1)
+        W2_grad = np.dot(self.deltaOutput,self.z.T) # should be: KxN times Nx(M+1)
+        W1_grad = np.dot(self.deltaHidden,xsample.T) # should be: MxN times Nx(D+1)
 
         W1_grad += 2*lam*W1
         W2_grad += 2*lam*W2
@@ -177,37 +178,27 @@ class NeuralNet:
         if not self.useSoftmax:
             raise Exception('Currently only support gradients for softmax')
 
-        # need to iterate over idx
-        #self.deltaOutput = self.y[:,idx] - self.T[:,idx]
+        # need to iterate over idx, should still work even with new vectorization
+        self.deltaOutput = self.y[:,idx] - self.T[:,idx]
 
         # not sure how to make compatible with SGD
-        self.deltaOutput = self.y - self.T
+        # self.deltaOutput = self.y - self.T
 
-    def evalCost(self, lam, idx=None, w_list=None):
+    def evalCost(self, lam, w_list=None, skipForwardProp=False):
 
-        # make sure we forward propagate if someone asks us to compute for specific indices
-        if idx is None:
-            idx = np.arange(0,self.N)
-            xsample = self.X
-        else:
-            xsample = self.X[:,idx]
+        xsample = self.X
 
-        if w_list is not None:
-            W1 = w_list[0]
-            W2 = w_list[1]
-        else:
-            W1 = self.W1
-            W2 = self.W2
+        if w_list is None:
+            w_list = self.w_list
 
-        # if the the user passed in an option, then we need to make sure we forward propagate in order to
-        # have up-to-date information
-        if (w_list is not None) or (idx is not None):
+        W1 = w_list[0]
+        W2 = w_list[1]
+
+        # forwardProp by default, allow user to override if they know that they have just
+        # forwardProp'd with the weights they want
+        if not skipForwardProp:
             self.forwardProp(xsample, w_list=w_list)
 
-        #loss = 0.0
-
-        # for i in range(np.size(idx)):
-        #     loss += -np.dot(self.y[:,i], self.T[:,i])
 
         # not working for SGD
         loss = - np.sum(np.multiply(self.T,np.log(self.y)))
