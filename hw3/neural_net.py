@@ -11,12 +11,15 @@ from gradient_descent import GradientDescent
 
 class NeuralNet:
 
-    def __init__(self, x, t, useSoftmax=True, lam=None):
+    def __init__(self, x, t, useSoftmax=True, lam=None, M=None):
         self.filename = None
 
         self.N = np.size(t)
 
-        self.M = int(self.N /10) # by default, have 1/10th number of hidden units (besides bias unit) as number of training examples
+        if M is None:
+            self.M = int(self.N /10) # by default, have 1/10th number of hidden units (besides bias unit) as number of training examples
+        else:
+            self.M = M
 
         if lam is None:
             self.lam = 1
@@ -255,6 +258,8 @@ class NeuralNet:
             print "number of entries missclassified = " + str(missclassified)
             print "missclassification rate  = " + str(missclassifiedRate)
 
+        self.missclassifiedRate = missclassifiedRate
+
 
     def plotNN(self, w_list):
         self.computeClassPrediction(w_list=w_list)
@@ -307,11 +312,12 @@ class NeuralNet:
         plt.show()
 
 
-    def train(self, numiter=3000, w_list_initial='random', stepSize=0.001, maxFunctionCalls=3000):
-        start = time.time()
-        print "Actual data"
-        self.plotData()
-        print 'It took', time.time()-start, 'seconds to plot original data.'
+    def train(self, numiter=3000, w_list_initial='random', stepSize=0.001, maxFunctionCalls=3000, verbose=True):
+        if verbose: 
+            start = time.time()
+            print "Actual data"
+            self.plotData()
+            print 'It took', time.time()-start, 'seconds to plot original data.'
 
         
         start = time.time()
@@ -321,15 +327,20 @@ class NeuralNet:
         if w_list_initial =='random':
             w_initial = [np.random.random_sample(np.shape(self.W1)), np.random.random_sample(np.shape(self.W2))]
 
-        w_min, f_min, _, _ = gd.computeMin(w_initial, maxFunctionCalls=maxFunctionCalls, storeIterValues=True)    
+        w_min, f_min, _, _ = gd.computeMin(w_initial, maxFunctionCalls=maxFunctionCalls, storeIterValues=True, printSummary=verbose)    
 
-        gd.plotIterValues()
+        if verbose: 
+            gd.plotIterValues()
+
         print 'It took', time.time()-start, 'seconds to train.'
 
-        start = time.time()
-        print "Neural net classifier"
-        self.plotNN(w_min)
-        print 'It took', time.time()-start, 'seconds to plot classification predictions.'
+        if verbose: 
+            start = time.time()
+            print "Neural net classifier"
+            self.plotNN(w_min)
+            print 'It took', time.time()-start, 'seconds to plot classification predictions.'
+
+        self.classificationErrorRate(w_min, verbose=True)
 
         # Save optimal weights to the object variables
         self.W1 = w_min[0]
@@ -355,22 +366,30 @@ class NeuralNet:
         self.X = np.hstack((ones,self.x)).T #note, I transposed this to make some other computation easier
 
 
-    def test(self):
+    def test(self, verbose=True):
+        print "### TEST DATASET ###"
         start = time.time()
         
         filename = "hw3_resources/" + self.filename + "_" + "test" + ".mat"
         self.loadAnotherDataset(filename)
 
-        self.plotNN([self.W1, self.W2])
+        if verbose:
+            self.plotNN([self.W1, self.W2])
+        self.classificationErrorRate([self.W1, self.W2], verbose=True)
+
         print 'It took', time.time()-start, 'seconds to test.'
 
-    def validate(self):
+    def validate(self, verbose=True):
+        print "### VALIDATION DATASET ###"
         start = time.time()
         
         filename = "hw3_resources/" + self.filename + "_" + "validate" + ".mat"
         self.loadAnotherDataset(filename)
 
-        self.plotNN([self.W1, self.W2])
+        if verbose:
+            self.plotNN([self.W1, self.W2])
+        self.classificationErrorRate([self.W1, self.W2], verbose=True)
+
         print 'It took', time.time()-start, 'seconds to validate.'
 
     def reloadTrainingData(self):
@@ -380,13 +399,13 @@ class NeuralNet:
 
 
     @staticmethod
-    def fromMAT(file, type="train", lam=None):
+    def fromMAT(file, type="train", lam=None, M=None):
         filename = "hw3_resources/" + file + "_" + type + ".mat"
         alldata = scipy.io.loadmat(filename)['toy_data']
         X = np.array(alldata[:,0:-1])
         T = np.array(alldata[:,-1])
 
-        nn = NeuralNet(X,T, lam=lam)
+        nn = NeuralNet(X,T, lam=lam, M=M)
         nn.filename = file
         return nn
 
