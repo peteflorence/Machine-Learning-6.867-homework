@@ -126,8 +126,13 @@ class NeuralNet:
         self.deltaOutputTimesW2 = np.dot(self.W2[:,1:].T, self.deltaOutput)
         n = np.shape(self.a_hidden)[1]
         self.deltaHidden = np.zeros((self.M,n))
-        for idx in range(0,n):
-            self.deltaHidden[:,idx] = np.multiply(self.g_grad(self.a_hidden[:,idx]), self.deltaOutputTimesW2[:,idx])
+        
+        # need to vectorize
+        #for idx in range(0,n):
+        #    self.deltaHidden[:,idx] = np.multiply(self.g_grad(self.a_hidden[:,idx]), self.deltaOutputTimesW2[:,idx])
+
+        # vectorized but not for SGD
+        self.deltaHidden = np.multiply(self.g_grad(self.a_hidden), self.deltaOutputTimesW2)
 
     def evalDerivs(self, w_list, idx=None, lam=None):
         W1 = w_list[0]
@@ -151,13 +156,16 @@ class NeuralNet:
         self.computeDeltaOutput(idx) # should populate deltaOutput
         self.backPropFull()
 
-        W1_grad = 2*lam*W1
-        W2_grad = 2*lam*W2
 
-        for i in range(0,n):
-            W1_grad += np.outer(self.deltaHidden[:,i], xsample[:,i])
-            W2_grad += np.outer(self.deltaOutput[:,i], self.z[:,i])
+        #for i in range(0,n):
+        #    W1_grad += np.outer(self.deltaHidden[:,i], xsample[:,i])
+        #    W2_grad += np.outer(self.deltaOutput[:,i], self.z[:,i])
 
+        W1_grad = np.dot(self.deltaOutput,self.z.T) # should be: KxN times Nx(M+1)
+        W2_grad = np.dot(self.deltaHidden,self.X.T) # should be: MxN times Nx(D+1)
+
+        W1_grad += 2*lam*W1
+        W2_grad += 2*lam*W2
 
         return [W1_grad, W2_grad]
 
@@ -170,7 +178,10 @@ class NeuralNet:
             raise Exception('Currently only support gradients for softmax')
 
         # need to iterate over idx
-        self.deltaOutput = self.y[:,idx] - self.T[:,idx]
+        #self.deltaOutput = self.y[:,idx] - self.T[:,idx]
+
+        # not sure how to make compatible with SGD
+        self.deltaOutput = self.y - self.T
 
     def evalCost(self, lam, idx=None, w_list=None):
 
@@ -193,9 +204,13 @@ class NeuralNet:
         if (w_list is not None) or (idx is not None):
             self.forwardProp(xsample, w_list=w_list)
 
-        loss = 0.0
-        for i in range(np.size(idx)):
-            loss += -np.dot(self.y[:,i], self.T[:,i])
+        #loss = 0.0
+
+        # for i in range(np.size(idx)):
+        #     loss += -np.dot(self.y[:,i], self.T[:,i])
+
+        # not working for SGD
+        loss = - np.sum(np.multiply(self.T,np.log(self.y)))
 
         regTerm = lam * (np.linalg.norm(W1, ord='fro') + np.linalg.norm(W2, ord='fro'))
         loss = loss + regTerm
