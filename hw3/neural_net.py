@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io
 import sys
+import time
 
 sys.path.append("../hw1")
 from gradient_descent import GradientDescent
@@ -11,6 +12,8 @@ from gradient_descent import GradientDescent
 class NeuralNet:
 
     def __init__(self, x, t, useSoftmax=True, lam=None):
+        self.filename = None
+
         self.N = np.size(t)
 
         self.M = int(self.N /10) # by default, have 1/10th number of hidden units (besides bias unit) as number of training examples
@@ -75,26 +78,6 @@ class NeuralNet:
     def initializeOutputs(self):
         self.a_outputs = np.zeros((self.K,1))  # activations for each unit
         self.y         = np.zeros((self.K,1))  # 'unit outputs'
-
-
-
-    def train(self, numiter=3000, w_list_initial='random', stepSize=0.001, maxFunctionCalls=3000):
-        print "Actual data"
-        self.plotData()
-
-        gd = self.constructGradDescentObject()
-        gd.stepSize = stepSize
-        
-        if w_list_initial =='random':
-            w_initial = [np.random.random_sample(np.shape(self.W1)), np.random.random_sample(np.shape(self.W2))]
-
-        w_min, f_min, _, _ = gd.computeMin(w_initial, maxFunctionCalls=maxFunctionCalls, storeIterValues=True)    
-
-        gd.plotIterValues()
-
-        print "Neural net classifier"
-        self.plotNN(w_min)
-
 
 
     def forwardProp(self, xsample=None, w_list=None):
@@ -324,6 +307,60 @@ class NeuralNet:
         plt.show()
 
 
+    def train(self, numiter=3000, w_list_initial='random', stepSize=0.001, maxFunctionCalls=3000):
+        start = time.time()
+        print "Actual data"
+        self.plotData()
+        print 'It took', time.time()-start, 'seconds to plot original data.'
+
+        
+        start = time.time()
+        gd = self.constructGradDescentObject()
+        gd.stepSize = stepSize
+        
+        if w_list_initial =='random':
+            w_initial = [np.random.random_sample(np.shape(self.W1)), np.random.random_sample(np.shape(self.W2))]
+
+        w_min, f_min, _, _ = gd.computeMin(w_initial, maxFunctionCalls=maxFunctionCalls, storeIterValues=True)    
+
+        gd.plotIterValues()
+        print 'It took', time.time()-start, 'seconds to train.'
+
+        start = time.time()
+        print "Neural net classifier"
+        self.plotNN(w_min)
+        print 'It took', time.time()-start, 'seconds to plot classification predictions.'
+
+        # Save optimal weights to the object variables
+        self.W1 = w_min[0]
+        self.W2 = w_min[1]
+
+    def test(self):
+        filename = "hw3_resources/" + self.filename + "_" + "test" + ".mat"
+        alldata = scipy.io.loadmat(filename)['toy_data']
+        x = np.array(alldata[:,0:-1])
+        t = np.array(alldata[:,-1])
+
+        self.N = np.size(t)
+
+        self.t = np.reshape(t,(self.N,))
+
+        # transform the k-description into a K-dimensional vector
+        self.T = np.zeros((self.K,self.N))
+        for i in range(self.N):
+            self.T[self.t[i] - 1, i] = 1
+
+        self.x = x
+        self.D = np.shape(x)[1]     # this is the dimension of the input data
+
+        # augment the input data with ones.  this allows the bias weights to be vectorized
+
+        ones = np.ones((self.N,1))
+        self.X = np.hstack((ones,self.x)).T #note, I transposed this to make some other computation easier
+
+
+        self.plotNN([self.W1, self.W2])
+
 
 
     
@@ -336,6 +373,7 @@ class NeuralNet:
         T = np.array(alldata[:,-1])
 
         nn = NeuralNet(X,T, lam=lam)
+        nn.filename = file
         return nn
 
 
