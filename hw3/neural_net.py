@@ -312,7 +312,7 @@ class NeuralNet:
         plt.show()
 
 
-    def train(self, numiter=3000, w_list_initial='random', stepSize=0.001, maxFunctionCalls=3000, verbose=True):
+    def train(self, w_list_initial='random', stepSize=0.001, maxFunctionCalls=3000, verbose=True):
         if verbose: 
             start = time.time()
             print "Actual data"
