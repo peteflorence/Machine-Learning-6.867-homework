@@ -208,8 +208,13 @@ class NeuralNet:
             lam = self.lam
 
         f = lambda w_list: self.evalCost(self.lam, w_list=w_list)
-        grad = lambda w_list: self.evalDerivs(w_list, lam=self.lam)
+        grad = lambda w_list: self.evalDerivs(w_list, lam=lam)
         gd = GradientDescent(f, grad=grad)
+
+        def gradSGD(w_list, idx):
+            return self.evalDerivs(w_list, idx=idx, lam=lam)
+
+        gd.evalGradTraining = gradSGD
         return gd
 
     def plotData(self):

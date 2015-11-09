@@ -23,6 +23,11 @@ class GradientDescent:
         self.trainingData = None
         self.evalFTraining = None
         self.evalGradTraining = None
+
+    def initializeSGDParameters(self):
+        self.alpha = 0.01
+        self.beta = 50
+        self.gamma = 0.55
         
 
     def evalF(self,x):
@@ -37,9 +42,9 @@ class GradientDescent:
         self.numGradientCalls += 1
         return self.grad(x)
 
-    def evalGradientOnTrainingData(self, idx):
+    def evalGradientOnTrainingData(self, x, idx):
         self.numGradientCalls += 1
-        return self.evalGradTraining(idx)
+        return self.evalGradTraining(x, idx)
 
     def numericalGradient(self, x, dx=0.00001):
         grad = np.zeros(x.shape)
@@ -152,19 +157,23 @@ class GradientDescent:
 
         return (x_new, f_new)
 
-    def stochasticGradDescentUpdate(self, x_current, idx):
-        return 0
+    def stochasticGradDescebtLearningRate(self, numIterations):
 
-    def stochasticGradDescent(self, x_initial, maxFunctionCalls=10000, storeIterValues=False, storeIterX=False):
-        if (self.trainingData is None) or (self.evalFTraining is None) or (self.evalGradTraining is None):
-            raise Exception('you must specify the training values, and F, Grad functions before running stochastic gradient descent')
+        return self.alpha/(numIterations + self.beta)**self.gamma
 
-        if storeIterValues:
-            self.iterValues = np.zeros((maxFunctionCalls,1))
 
-        if storeIterX:
-            self.iterX = np.zeros((maxFunctionCalls,len(x_initial)))
-            self.iterX[0] = x_current
+    def stochasticGradDescentUpdate(self, x_current, idx, numIterations):
+        learningRate = self.stochasticGradDescebtLearningRate(self.numIterations)
+        x_new = x_current - learningRate*self.evalGradientOnTrainingData(x_current, idx)
+        f_new = self.evalF(x_new)
+
+        return (x_new, f_new)
+
+    def stochasticGradDescent(self, x_initial, maxFunctionCalls=10000, storeIterValues=False, printSummary=True, tol=None):
+        if (self.evalGradTraining is None):
+            raise Exception('you must specify evalGradTraining before running stochastic gradient descent')
+
+
 
 
         # columns of trainingX are the training points
@@ -178,33 +187,53 @@ class GradientDescent:
         self.numIterations = 0
 
         x_current = x_initial # note for neural net this will be a list of weights, each of which is a matrix
+        f_old = self.evalF(x_current)
+
+        if storeIterValues:
+            self.iterValues = np.zeros(maxFunctionCalls)
+            self.iterValues[0] = f_old
+
+        if tol is None:
+            tol = self.tol
+
 
         while(np.abs(eps) > tol):
             self.numIterations += 1
             # note I want this to be integer division, allows us to loop through the data multiple times
             idx = idxList[(self.numIterations-1)/N]
-            (x_current, f_current) = self.stochasticGradDescentUpdate(x_current, idx)
+            (x_current, f_current) = self.stochasticGradDescentUpdate(x_current, idx, self.numIterations)
             eps = f_current - f_old
             f_old = f_current
-
-
-            if useGradientCriterion:
-                eps = np.max(np.abs(self.evalGradient(x_current)))
 
             if storeIterValues:
                 self.iterValues[self.numIterations-1] = f_current
 
-            if storeIterX:
-                self.iterX[self.numIterations,:] = x_current
+            if self.numFunctionCalls >= maxFunctionCalls:
+                break
+
+
+
+        if printSummary == True:
 
             if self.numFunctionCalls >= maxFunctionCalls:
-                break;
+                print "WARNING: hit maximum number of function calls"
+
+            print " "
+            print "--- Minimization Summary --- "
+
+            if type(x_current) != list:
+                print "x_min is = " + str(x_current)
+
+            print "f_min is = " + str(f_current)
+            print "achieved tolerance = " + str(eps)
+            print "numFunctionCalls = " + str(self.numFunctionCalls)
+            print "---------------------------- "
+            print " "
 
 
-    def setTrainingData(self, trainingData):
-        self.trainingData = trainingData
 
-
+        # print out the results of the SGD . . .
+        return x_current, f_current
 
 
     @staticmethod
