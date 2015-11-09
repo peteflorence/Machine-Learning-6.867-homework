@@ -346,8 +346,8 @@ class NeuralNet:
         self.W1 = w_min[0]
         self.W2 = w_min[1]
 
-    def loadAnotherDataset(self, filename):
-        alldata = scipy.io.loadmat(filename)['toy_data']
+    def loadAnotherDataset(self, filename, varname):
+        alldata = scipy.io.loadmat(filename)[varname]
         x = np.array(alldata[:,0:-1])
         t = np.array(alldata[:,-1])
         self.N = np.size(t)
@@ -366,12 +366,12 @@ class NeuralNet:
         self.X = np.hstack((ones,self.x)).T #note, I transposed this to make some other computation easier
 
 
-    def test(self, verbose=True):
+    def test(self, verbose=True, varname='toy_data'):
         print "### TEST DATASET ###"
         start = time.time()
         
         filename = "hw3_resources/" + self.filename + "_" + "test" + ".mat"
-        self.loadAnotherDataset(filename)
+        self.loadAnotherDataset(filename, varname)
 
         if verbose:
             self.plotNN([self.W1, self.W2])
@@ -379,12 +379,12 @@ class NeuralNet:
 
         print 'It took', time.time()-start, 'seconds to test.'
 
-    def validate(self, verbose=True):
+    def validate(self, verbose=True, varname='toy_data'):
         print "### VALIDATION DATASET ###"
         start = time.time()
         
         filename = "hw3_resources/" + self.filename + "_" + "validate" + ".mat"
-        self.loadAnotherDataset(filename)
+        self.loadAnotherDataset(filename, varname)
 
         if verbose:
             self.plotNN([self.W1, self.W2])
@@ -399,9 +399,9 @@ class NeuralNet:
 
 
     @staticmethod
-    def fromMAT(file, type="train", lam=None, M=None):
+    def fromMAT(file, varname='toy_data', type="train", lam=None, M=None):
         filename = "hw3_resources/" + file + "_" + type + ".mat"
-        alldata = scipy.io.loadmat(filename)['toy_data']
+        alldata = scipy.io.loadmat(filename)[varname]
         X = np.array(alldata[:,0:-1])
         T = np.array(alldata[:,-1])
 
