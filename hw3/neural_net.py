@@ -161,8 +161,20 @@ class NeuralNet:
         #    W1_grad += np.outer(self.deltaHidden[:,i], xsample[:,i])
         #    W2_grad += np.outer(self.deltaOutput[:,i], self.z[:,i])
 
-        W1_grad = np.dot(self.deltaOutput,self.z.T) # should be: KxN times Nx(M+1)
-        W2_grad = np.dot(self.deltaHidden,self.X.T) # should be: MxN times Nx(D+1)
+        #print "self.deltaOutput is " + str(np.shape(self.deltaOutput))
+        #print "self.z.T is " + str(np.shape(self.z.T))
+
+        #print "self.deltaHidden is" + str(np.shape(self.deltaHidden))
+        #print "self.X.T is" + str(np.shape(self.X.T))
+
+        W2_grad = np.dot(self.deltaOutput,self.z.T) # should be: KxN times Nx(M+1)
+        W1_grad = np.dot(self.deltaHidden,self.X.T) # should be: MxN times Nx(D+1)
+
+        #print np.shape(W1_grad)
+        #print np.shape(W2_grad)
+
+        #print np.shape(W1)
+        #print np.shape(W2)
 
         W1_grad += 2*lam*W1
         W2_grad += 2*lam*W2
