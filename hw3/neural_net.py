@@ -55,6 +55,8 @@ class NeuralNet:
         if not self.useSoftmax:
             raise Exception('Currently only support gradients for softmax')
 
+        self.trainingTime = None
+
     # activation function = sigmoid
     def g(self, z):
         return 1 / (1 + np.exp(-z))
@@ -269,9 +271,17 @@ class NeuralNet:
         self.forwardProp(self.X, w_list=w_list)
         self.classIdx = np.zeros(self.N)
         self.correctlyClassified = np.zeros(self.N)
+        print self.N
         for i in range(0,self.N):
+            #print i
+            #print "self.y[:,i]", self.y[:,i]
+            #print "np.max(self.y[:,i])", np.max(self.y[:,i])
+
             self.classIdx[i] = np.where(self.y[:,i] == np.max(self.y[:,i]))[0] + 1
+            #print "self.classIdx[i]", self.classIdx[i]
+            #print "self.t[i]", self.t[i]
             self.correctlyClassified[i] = self.classIdx[i] == self.t[i]
+        print "self.correctlyClassified shape:", np.shape(self.correctlyClassified)
 
 
     def classificationErrorRate(self, w_list, verbose=False):
@@ -352,14 +362,16 @@ class NeuralNet:
         gd.stepSize = stepSize
         
         if w_list_initial =='random':
-            w_initial = [np.random.random_sample(np.shape(self.W1)), np.random.random_sample(np.shape(self.W2))]
+            scale=0.5
+            w_initial = [scale*(np.random.random_sample(np.shape(self.W1)) - 0.5 ), scale*(np.random.random_sample(np.shape(self.W2)) - 0.5)]
 
         w_min, f_min, _, _ = gd.computeMin(w_initial, maxFunctionCalls=maxFunctionCalls, storeIterValues=True, printSummary=verbose)    
 
         if verbose: 
             gd.plotIterValues()
 
-        print 'It took', time.time()-start, 'seconds to train.'
+        self.trainingTime = time.time()-start
+        print 'It took', self.trainingTime, 'seconds to train.'
 
         if verbose: 
             start = time.time()
@@ -431,6 +443,7 @@ class NeuralNet:
         alldata = scipy.io.loadmat(filename)[varname]
         X = np.array(alldata[:,0:-1])
         T = np.array(alldata[:,-1])
+
 
         nn = NeuralNet(X,T, lam=lam, M=M)
         nn.filename = file
