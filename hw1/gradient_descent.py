@@ -1,5 +1,6 @@
 __author__ = 'manuelli'
 import numpy as np
+import time
 
 
 class GradientDescent:
@@ -84,6 +85,7 @@ class GradientDescent:
     
         f_old = self.evalF(x_current)
         eps = 1;
+        startTime = time.time()
 
         if storeIterX:
             self.iterX = np.zeros((maxFunctionCalls,len(x_initial)))
@@ -110,6 +112,7 @@ class GradientDescent:
 
 
 
+        elapsedTime = time.time() - startTime;
 
         if printSummary == True:
 
@@ -125,6 +128,7 @@ class GradientDescent:
             print "f_min is = " + str(f_current)
             print "achieved tolerance = " + str(eps)
             print "numFunctionCalls = " + str(self.numFunctionCalls)
+            print "optimization took " + str(elapsedTime) + " seconds"
             print "---------------------------- "
             print " "
 
