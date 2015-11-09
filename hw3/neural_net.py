@@ -276,29 +276,82 @@ class NeuralNet:
             label = " = " + str(i)
             plt.scatter(self.X[1,idx], self.X[2,idx], color=color, marker='o', facecolors='none', label=label)
 
+
         plt.xlabel('x_1')
         plt.ylabel('x_2')
         plt.legend(loc='best')
         plt.show()
 
-    def plotNN(self, w_list):
+
+    def computeClassPrediction(self, w_list):
         self.forwardProp(self.X, w_list=w_list)
-
+        self.classIdx = np.zeros(self.N)
+        self.correctlyClassified = np.zeros(self.N)
         for i in range(0,self.N):
-            classIdx = np.where(self.y[:,i] == np.max(self.y[:,i]))[0]
+            self.classIdx[i] = np.where(self.y[:,i] == np.max(self.y[:,i]))[0] + 1
+            self.correctlyClassified[i] = self.classIdx[i] == self.t[i]
 
-            if classIdx==0:
+
+    def classificationErrorRate(self, w_list, verbose=False):
+        self.computeClassPrediction(w_list=w_list)
+        missclassifiedIdx = np.where(self.correctlyClassified==0)
+
+        missclassified = np.size(missclassifiedIdx)
+        missclassifiedRate = missclassified*1.0/self.N
+
+        if verbose:
+            print "number of entries missclassified = " + str(missclassified)
+            print "missclassification rate  = " + str(missclassifiedRate)
+
+
+    def plotNN(self, w_list):
+        self.computeClassPrediction(w_list=w_list)
+
+        # for i in range(0,self.N):
+        #     if self.classIdx[i]==1:
+        #         color=[1,0,0]
+        #         label=' =1'
+        #     if self.classIdx[i]==2:
+        #         color=[0,1,0]
+        #         label =' =2'
+        #     if self.classIdx[i]==3:
+        #         color=[0,0,1]
+        #         label = ' =3'
+        #
+        #     if not self.correctlyClassified[i]:
+        #         color = [1,1,0]
+        #         label = ' =misclassified'
+        #
+        #     plt.scatter(self.X[1,i], self.X[2,i], color=color, marker='o', facecolors='none', label=label)
+
+
+        correctlyClassifiedIdx = np.where(self.correctlyClassified==1)
+        incorrectlyClassifiedIdx = np.where(self.correctlyClassified==0)
+        classIdx = []
+        classIdx.append(np.intersect1d(np.where(self.classIdx == 1), correctlyClassifiedIdx))
+        classIdx.append(np.intersect1d(np.where(self.classIdx == 2), correctlyClassifiedIdx))
+        classIdx.append(np.intersect1d(np.where(self.classIdx == 3), correctlyClassifiedIdx))
+
+        X_2D = self.X[1:, :]
+        for i in range(1,4):
+            if i==1:
                 color=[1,0,0]
-            if classIdx==1:
+            if i==2:
                 color=[0,1,0]
-            if classIdx==2:
+            if i==3:
                 color=[0,0,1]
 
-            plt.scatter(self.X[1,i], self.X[2,i], color=color, marker='o', facecolors='none')
+            label = " = " + str(i)
+            plt.scatter(self.X[1,classIdx[i-1]], self.X[2,classIdx[i-1]], color=color, marker='o', facecolors='none', label=label)
+
+        color=[1,1,0]
+        label = " = missclassified"
+        plt.scatter(self.X[1,incorrectlyClassifiedIdx], self.X[2,incorrectlyClassifiedIdx], color=color, marker='o', facecolors='none', label=label)
+
 
         plt.xlabel('x_1')
         plt.ylabel('x_2')
-        # plt.legend(loc='best')
+        plt.legend(loc='best')
         plt.show()
 
 

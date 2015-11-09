@@ -18,15 +18,28 @@ class GradientDescent:
         self.numFunctionCalls = 0
         self.numGradientCalls = 0
         self.numIterations = 0
+
+        # these will be used for stochastic gradient descent
+        self.trainingData = None
+        self.evalFTraining = None
+        self.evalGradTraining = None
         
 
     def evalF(self,x):
         self.numFunctionCalls += 1
         return self.f(x)
 
+    def evalFOnTrainingData(self, idx):
+        self.numFunctionCalls += 1
+        return self.evalFTraining(idx)
+
     def evalGradient(self,x):
         self.numGradientCalls += 1
         return self.grad(x)
+
+    def evalGradientOnTrainingData(self, idx):
+        self.numGradientCalls += 1
+        return self.evalGradTraining(idx)
 
     def numericalGradient(self, x, dx=0.00001):
         grad = np.zeros(x.shape)
@@ -100,7 +113,10 @@ class GradientDescent:
 
             print " "
             print "--- Minimization Summary --- "
-            print "x_min is = " + str(x_current)
+
+            if type(x_current) != list:
+                print "x_min is = " + str(x_current)
+
             print "f_min is = " + str(f_current)
             print "achieved tolerance = " + str(eps)
             print "numFunctionCalls = " + str(self.numFunctionCalls)
@@ -128,13 +144,68 @@ class GradientDescent:
             for idx, val in enumerate(x):
                 x_new.append(x[idx] - self.stepSize*grad[idx])
 
-            f_new = self.evalGradient(x_new)
+            f_new = self.evalF(x_new)
 
         else:
             x_new = x - self.stepSize*self.evalGradient(x).T
             f_new = self.evalF(x_new)
 
         return (x_new, f_new)
+
+    def stochasticGradDescentUpdate(self, x_current, idx):
+        return 0
+
+    def stochasticGradDescent(self, x_initial, maxFunctionCalls=10000, storeIterValues=False, storeIterX=False):
+        if (self.trainingData is None) or (self.evalFTraining is None) or (self.evalGradTraining is None):
+            raise Exception('you must specify the training values, and F, Grad functions before running stochastic gradient descent')
+
+        if storeIterValues:
+            self.iterValues = np.zeros((maxFunctionCalls,1))
+
+        if storeIterX:
+            self.iterX = np.zeros((maxFunctionCalls,len(x_initial)))
+            self.iterX[0] = x_current
+
+
+        # columns of trainingX are the training points
+        N = np.shape(self.trainingData)[1]
+        idxList = np.arange(0,N)
+        idxList = np.random.shuffle(idxList)
+
+        eps = 1
+        self.numFunctionCalls = 0
+        self.numGradientCalls = 0
+        self.numIterations = 0
+
+        x_current = x_initial # note for neural net this will be a list of weights, each of which is a matrix
+
+        while(np.abs(eps) > tol):
+            self.numIterations += 1
+            # note I want this to be integer division, allows us to loop through the data multiple times
+            idx = idxList[(self.numIterations-1)/N]
+            (x_current, f_current) = self.stochasticGradDescentUpdate(x_current, idx)
+            eps = f_current - f_old
+            f_old = f_current
+
+
+            if useGradientCriterion:
+                eps = np.max(np.abs(self.evalGradient(x_current)))
+
+            if storeIterValues:
+                self.iterValues[self.numIterations-1] = f_current
+
+            if storeIterX:
+                self.iterX[self.numIterations,:] = x_current
+
+            if self.numFunctionCalls >= maxFunctionCalls:
+                break;
+
+
+    def setTrainingData(self, trainingData):
+        self.trainingData = trainingData
+
+
+
 
     @staticmethod
     def minimize(f, x_initial, grad=None):
