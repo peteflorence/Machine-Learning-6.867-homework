@@ -282,12 +282,12 @@ class NeuralNet:
         #     plt.scatter(self.X[1,i], self.X[2,i], color=color, marker='o', facecolors='none', label=label)
 
 
-        correctlyClassifiedIdx = np.where(self.correctlyClassified==1)
-        incorrectlyClassifiedIdx = np.where(self.correctlyClassified==0)
+        correctlyClassifiedIdx = np.where(self.correctlyClassified==1)[0]
+        incorrectlyClassifiedIdx = np.where(self.correctlyClassified==0)[0]
         classIdx = []
-        classIdx.append(np.intersect1d(np.where(self.classIdx == 1), correctlyClassifiedIdx))
-        classIdx.append(np.intersect1d(np.where(self.classIdx == 2), correctlyClassifiedIdx))
-        classIdx.append(np.intersect1d(np.where(self.classIdx == 3), correctlyClassifiedIdx))
+        classIdx.append(np.intersect1d(np.where(self.classIdx == 1)[0], correctlyClassifiedIdx))
+        classIdx.append(np.intersect1d(np.where(self.classIdx == 2)[0], correctlyClassifiedIdx))
+        classIdx.append(np.intersect1d(np.where(self.classIdx == 3)[0], correctlyClassifiedIdx))
 
         X_2D = self.X[1:, :]
         for i in range(1,4):
@@ -301,7 +301,7 @@ class NeuralNet:
             label = " = " + str(i)
             plt.scatter(self.X[1,classIdx[i-1]], self.X[2,classIdx[i-1]], color=color, marker='o', facecolors='none', label=label)
 
-        color=[1,1,0]
+        color=[1,0.7,0]
         label = " = missclassified"
         plt.scatter(self.X[1,incorrectlyClassifiedIdx], self.X[2,incorrectlyClassifiedIdx], color=color, marker='o', facecolors='none', label=label)
 
