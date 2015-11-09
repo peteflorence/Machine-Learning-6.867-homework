@@ -335,14 +335,11 @@ class NeuralNet:
         self.W1 = w_min[0]
         self.W2 = w_min[1]
 
-    def test(self):
-        filename = "hw3_resources/" + self.filename + "_" + "test" + ".mat"
+    def loadAnotherDataset(self, filename):
         alldata = scipy.io.loadmat(filename)['toy_data']
         x = np.array(alldata[:,0:-1])
         t = np.array(alldata[:,-1])
-
         self.N = np.size(t)
-
         self.t = np.reshape(t,(self.N,))
 
         # transform the k-description into a K-dimensional vector
@@ -354,16 +351,33 @@ class NeuralNet:
         self.D = np.shape(x)[1]     # this is the dimension of the input data
 
         # augment the input data with ones.  this allows the bias weights to be vectorized
-
         ones = np.ones((self.N,1))
         self.X = np.hstack((ones,self.x)).T #note, I transposed this to make some other computation easier
 
 
+    def test(self):
+        start = time.time()
+        
+        filename = "hw3_resources/" + self.filename + "_" + "test" + ".mat"
+        self.loadAnotherDataset(filename)
+
         self.plotNN([self.W1, self.W2])
+        print 'It took', time.time()-start, 'seconds to test.'
 
+    def validate(self):
+        start = time.time()
+        
+        filename = "hw3_resources/" + self.filename + "_" + "validate" + ".mat"
+        self.loadAnotherDataset(filename)
 
+        self.plotNN([self.W1, self.W2])
+        print 'It took', time.time()-start, 'seconds to validate.'
 
-    
+    def reloadTrainingData(self):
+
+        filename = "hw3_resources/" + self.filename + "_" + "train" + ".mat"
+        self.loadAnotherDataset(filename)
+
 
     @staticmethod
     def fromMAT(file, type="train", lam=None):
