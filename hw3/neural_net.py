@@ -84,7 +84,6 @@ class NeuralNet:
 
         #need to grad descent
 
-
         #batch over all samples
         self.W1derivs = 0  # note that the derivs get summed over the for loop, but nothing else
         self.W2derivs = 0
@@ -227,7 +226,6 @@ class NeuralNet:
     def constructGradDescentObject(self, lam=None):
         if lam is None:
             lam = self.lam
-
 
         f = lambda w_list: self.evalCost(self.lam, w_list=w_list)
         grad = lambda w_list: self.evalDerivs(w_list, lam=self.lam)
