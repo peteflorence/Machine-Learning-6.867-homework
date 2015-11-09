@@ -78,29 +78,23 @@ class NeuralNet:
 
 
 
-    # not sure that this works anymore . . .
-    def train(self, numiter=1):
+    def train(self, numiter=3000, w_list_initial='random', stepSize=0.001, maxFunctionCalls=3000):
+        print "Actual data"
+        self.plotData()
 
+        gd = self.constructGradDescentObject()
+        gd.stepSize = stepSize
+        
+        if w_list_initial =='random':
+            w_initial = [np.random.random_sample(np.shape(self.W1)), np.random.random_sample(np.shape(self.W2))]
 
-        #need to grad descent
+        w_min, f_min, _, _ = gd.computeMin(w_initial, maxFunctionCalls=maxFunctionCalls, storeIterValues=True)    
 
-        #batch over all samples
-        self.W1derivs = 0  # note that the derivs get summed over the for loop, but nothing else
-        self.W2derivs = 0
-        for i in range(self.N):
-            xsample = self.X[i,:]
-            tsample = self.T[i,:]
+        gd.plotIterValues()
 
-            
-            self.forwardProp(xsample)
-            self.calcOutputDelta(tsample)
-            self.backProp()
-            print np.shape(self.deltaHidden)
-            self.evalDerivs(xsample)
-            print np.shape(self.W1derivs)
-            print np.shape(self.W2derivs)
+        print "Neural net classifier"
+        self.plotNN(w_min)
 
-        # grad descent update
 
 
     def forwardProp(self, xsample=None, w_list=None):
