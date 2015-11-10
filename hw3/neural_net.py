@@ -214,7 +214,7 @@ class NeuralNet:
         if lam is None:
             lam = self.lam
 
-        f = lambda w_list: self.evalCost(self.lam, w_list=w_list)
+        f = lambda w_list: self.evalCost(lam, w_list=w_list)
         grad = lambda w_list: self.evalDerivs(w_list, lam=lam)
         gd = GradientDescent(f, grad=grad)
 
