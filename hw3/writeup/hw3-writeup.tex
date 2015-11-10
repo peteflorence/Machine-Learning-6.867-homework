@@ -120,13 +120,13 @@ J(w) = l(w) + \lambda(||W^{(1)}||^2_F + ||W^{(2)}||^2_F)
 
 \subsection*{Gradient Calculation}
 
-Having defined our cost function, we are now able to describe how the gradients $\nabla_{W^{(1)}} J(\mathbf{w})$ and $\nabla_{W^{(1)}} J(\mathbf{w})$ are calculated analytically.  Before this derivation, however, we note each of these terms are matrices whose elements are simply the partial derivative of the cost function with respect to that element itself (a scalar).
+Having defined our cost function, we are now able to describe how the gradients $\nabla_{W^{(1)}} J(\mathbf{w})$ and $\nabla_{W^{(1)}} J(\mathbf{w})$ may be calculated analytically.  Before this derivation, however, we note for clarity that each of these terms are matrices whose elements are simply the partial derivative of the cost function with respect to that element itself (a scalar).
 
 In order to calculate the gradients, we will use error backpropagation, for which we will follow Bishop's nice explanation and follow these sequence of steps:
 
 \begin{enumerate}
  \item Forward propagation
- \item Evaluate $\delta_k$ for the output units
+ \item Evaluate $\delta$ for the output units
  \item Backpropagation of the $\delta$'s for each hidden unit
  \item Evaluate derivatives with $\frac{\partial E_n}{\partial w_{ji}}$
 \end{enumerate}
@@ -141,7 +141,7 @@ A^{(1)} = W^{(1)} X_{aug}
 \end{equation}
 %
 %
-Where $X_{aug}$ is a $(D+1) \times N$ augmented matrix for the input data, for the purpose of including the bias input unit in the vectorized computation.  If we consider the original input data to be $X$, of dimension $D \times N$, where $D$ is the dimensionality of each sample input and $N$ is the number of sample inputs, then we form $X_{aug}$ by augmenting $X$ with a $1 \times N$ vector of 1s ($X_{aug} = \begin{bmatrix} 1_{N \times 1} &| & X^T\end{bmatrix} ^T$).  $W^{(1)}$ is then a $M \times (D+1)$ matrix that contains all of the weights from every input to every hidden unit, except the bias unit of course, and $a^{(1)}$ is a $M \times N$ matrix where each column vector is individually the weights for all of the unit activations, given one sample input.  The "output" of each unit is computed simply by applying the sigmoid function $g()$ element-wise to the matrix $A^{(1)}$:
+Where $X_{aug}$ is a $(D+1) \times N$ augmented matrix for the input data, for the purpose of including the bias input unit in the vectorized computation.  If we consider the original input data to be $X$, of dimension $D \times N$, where $D$ is the dimensionality of each sample input and $N$ is the number of sample inputs, then we form $X_{aug}$ by augmenting $X$ with a $1 \times N$ vector of 1s ($X_{aug} = \begin{bmatrix} 1_{N \times 1} &| & X^T\end{bmatrix} ^T$).  $W^{(1)}$ is then a $M \times (D+1)$ matrix that contains all of the weights from every input to every hidden unit, except the hidden bias unit, and $A^{(1)}$ is a $M \times N$ matrix where each column vector is individually the weights for all of the unit activations, given one sample input.  The "output" of each unit is computed simply by applying the sigmoid function $g()$ element-wise to the matrix $A^{(1)}$:
 %
 %
 \begin{equation}
@@ -157,17 +157,24 @@ g(z) = \frac{1}{1 + e^{-z}}
 \end{equation}
 %
 %
-To forward propagate through the second layer to the output units, we similarly use $A^{(2)} = W^{(2)} Z_{aug}^{(1)}$, where $Z^{(1)}$ has been augmented with a vector of 1s to include the bias unit, and so we have $W^{(2)}$ of dimension $K \times (M+1)$.  At this point we also note that in order to do our 1-of-K classification, we have to transform the output from the form they were given in the assigned datasets, from a scalar $k$ to $\mathbf{e}_k$ where $\mathbf{e}_k$ is a vector of length $K = k_{max}$ and contains a 0 for every element except $k$, for example $e_3 = [0 \ 0 \  1]$.  Thus we consider $\mathbf{t}$ to be an $N \times K$ matrix.  Applying $Z^{(2)}_{ij} = g(A^{(2)}_{ij})$, we have our outputs and have completed forward propagation.
+To forward propagate through the second layer to the output units, we similarly use $A^{(2)} = W^{(2)} Z_{aug}^{(1)}$, where $Z^{(1)}$ has been augmented with a vector of 1s to include the bias unit, and so we have $W^{(2)}$ of dimension $K \times (M+1)$.  At this point we also note that in order to do our 1-of-K classification, we have to transform the output from the form they were given in the assigned datasets, from a scalar $k$ to $\mathbf{e}_k$ where $\mathbf{e}_k$ is a vector of length $K = k_{max}$ and contains a 0 for every element except $k$, for example if $k=3$ then we form $e_3 = [0 \ 0 \  1]$.  Thus we consider $\mathbf{t}$ to be an $K \times N$ matrix.  Applying $y_{ij} = g(A^{(2)}_{ij})$, we have our outputs and have completed forward propagation.
 
 \textit{2. Evaluate $\delta_k$ for the output units}
 
 With our softmax formulation.... 
 
 ... we end up with:
+%
+%
+\begin{equation}
+\delta_{nk} = y_{nk} - t_{nk}
+\end{equation}
+%
+%
 
-$\delta_{nk} = y_{nk} - t_{nk}$
+Which is simply vectorized by element-wise subtraction of $K \times N$ matrices: $\delta = \mathbf{y} - \mathbf{t}$.
 
-Which is simply vectorized by element-wise subtraction to give an $N \times K$ matrix
+
 
 \textit{3. Backpropagation of the $\delta$'s for each hidden unit}
 
@@ -175,12 +182,46 @@ Having calculated the $\delta$'s for the output unit, we have only one step of b
 %
 %
 \begin{equation}
-\delta_j = h'(a_j)\sum_k w_{kj} \delta_k
+\delta_j = g'(a_j)\sum_k w_{kj} \delta_k
 \end{equation}
 %
 %
-And note that we may vectorize this computation by 
+where $g'(z)=g(z)(1-g(z))$ signifies the gradient of our sigmoid function. We may start vectorizing this computation so that $\delta$ is an $M \times 1$ vector and we have:
+%
+%
+\begin{equation}
+\delta_{hidden} = g'(A^{(1)}) * W^{(2)^T}_{\text{no bias}} \delta_{outputs}
+\end{equation}
+%
+%
+In the above, $*$ is used to signify element-wise multiplication, and $W^{(2)^T}_{\text{no bias}}$ is a transposed matrix of $W^{(2)}$ except without the vector that corresponds to the bias units.  The above equation holds for calculating $\delta_{hidden}$ for one sample at a time, but also equivalently holds for batch computation $N$ at a time, just by using $\delta_{outputs}$ as a $K \times N$ matrix from step 2, with $W^{(2)^T}_{\text{no bias}}$ of dimension $M \times K$, and $A^{(1)}$ of dimension $M \times N$.
 
+\textit{4. Evaluate derivatives with $\frac{\partial E_n}{\partial w_{ji}}$}
+
+Finally, we use both $\delta$'s together with our inputs, $\mathbf{x}$, and our hidden unit outputs, $Z^{(1)}$, to calculate the gradients $\nabla_{W^{(1)}} J(\mathbf{w})$ and $\nabla_{W^{(1)}} J(\mathbf{w})$.
+
+Following Bishop, we know that we can compute the derivative with respect to any element via:
+%
+%
+\begin{equation}
+\frac{\partial J_n}{\partial w_{ji}} = \delta_j z_i
+\end{equation}
+%
+%
+In the above, $\delta$ represents the $\delta$ at the output of the weight, and $z$ represents the activation at the input of the weight.  The above only calculates the gradient for one sample, and for one element of the matrix, but to vectorize, we this can be vectorized as:
+%
+%
+\begin{equation}
+\nabla_{W^{(1)}} J(\mathbf{w}) = \delta_{outputs} Z^{(1)^T}
+\end{equation}
+%
+%
+\begin{equation}
+\nabla_{W^{(2)}} J(\mathbf{w}) = \delta_{hidden} X^T
+\end{equation}
+%
+%
+where we have explicitly calculated for the gradients with respect to each of the matrices.
 
 
 \subsection*{Implementing 2-Layer Neural Network}

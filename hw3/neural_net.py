@@ -334,8 +334,8 @@ class NeuralNet:
 
 
     def train(self, w_list_initial='random', useSGD=False, stepSize=0.001, maxFunctionCalls=3000, verbose=True, tol=None,
-              storeIterValues=True):
-        self.reloadTrainingData()
+              storeIterValues=True, varname='toy_data'):
+        self.reloadTrainingData(varname)
         if verbose: 
             start = time.time()
             print "Actual data"
@@ -431,10 +431,10 @@ class NeuralNet:
 
         print 'It took', time.time()-start, 'seconds to validate.'
 
-    def reloadTrainingData(self):
+    def reloadTrainingData(self, varname='toy_data'):
 
         filename = "hw3_resources/" + self.filename + "_" + "train" + ".mat"
-        self.loadAnotherDataset(filename, varname='toy_data')
+        self.loadAnotherDataset(filename, varname)
 
 
     @staticmethod
