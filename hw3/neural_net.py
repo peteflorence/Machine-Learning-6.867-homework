@@ -266,7 +266,6 @@ class NeuralNet:
             #print "self.classIdx[i]", self.classIdx[i]
             #print "self.t[i]", self.t[i]
             self.correctlyClassified[i] = self.classIdx[i] == self.t[i]
-        print "self.correctlyClassified shape:", np.shape(self.correctlyClassified)
 
 
     def classificationErrorRate(self, w_list, verbose=False):
@@ -335,7 +334,7 @@ class NeuralNet:
 
 
     def train(self, w_list_initial='random', useSGD=False, stepSize=0.001, maxFunctionCalls=3000, verbose=True, tol=None,
-              storeIterValues=True, varname='toy_data'):
+              storeIterValues=True, varname='toy_data', lam=None):
         self.reloadTrainingData(varname)
         if verbose: 
             start = time.time()
@@ -343,9 +342,14 @@ class NeuralNet:
             self.plotData()
             print 'It took', time.time()-start, 'seconds to plot original data.'
 
+
+        if lam is None:
+            lam = self.lam
+
         
         start = time.time()
-        gd = self.constructGradDescentObject()
+        gd = self.constructGradDescentObject(lam=lam)
+
         gd.stepSize = stepSize
         
         if w_list_initial =='random':
@@ -363,7 +367,7 @@ class NeuralNet:
                 print "---------------------"
                 print " "
             w_min, f_min, = gd.stochasticGradDescent(w_initial, self.N, maxFunctionCalls=maxFunctionCalls,
-                                                     storeIterValues=storeIterValues, printSummary=verbose, tol=None)
+                                                     storeIterValues=storeIterValues, printSummary=verbose, tol=tol)
         else:
             print "using standard gradient descent"
             w_min, f_min, _, _ = gd.computeMin(w_initial, maxFunctionCalls=maxFunctionCalls, storeIterValues=True, printSummary=verbose)

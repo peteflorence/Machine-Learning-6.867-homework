@@ -269,7 +269,7 @@ here $n_j \in \{1,\ldots,N\}$ is the index of the training point used in the $j^
 
 
 
-In practice it was necessary to use a relatively large step size $\eta_n$ to get rapdid convergence. This makes sense since we expect that the gradient of $l_n(w)$ is about $1/N$ as large as the gradient of $l(w)$. For the toy dataset we used a step size of $N*20 = 6000$. In order to get good performance, we set the maximum number of iterations to $50,000$. As can be seen in Figure \ref{SGD_toy_data_2_CER} the performance of stochastic gradient descent is comparable, just slightly worse, than that of the batch method. Cross validation shows that 60 hidden nodes provides the best performance on the test set. However, as can be seen from the figure, we already get good performance with 20 hidden nodes, and that increasing the number of hidden nodes beyond that doesn't yield large gains. However, as Figure \ref{SGD_toy_data_2_training_time} shows, the runtime increases as we increase the number of hidden nodes. This makes sense, since as we increase the number of hidden nodes, we effectively increase the size of the matrices we must multiply together to compute the backpropagation step.
+In practice it was necessary to use a relatively large step size $\eta_n$ to get rapid convergence. This makes sense since we expect that the gradient of $l_n(w)$ is about $1/N$ as large as the gradient of $l(w)$. For the toy dataset we used a step size of $N*20 = 6000$ and $\lambda = 0$. In order to get good performance, we set the maximum number of iterations to $50,000$. As can be seen in Figure \ref{SGD_toy_data_2_CER} the performance of stochastic gradient descent is comparable, just slightly worse, than that of the batch method. Cross validation shows that 60 hidden nodes provides the best performance on the test set. However, as can be seen from the figure, we already get good performance with 20 hidden nodes, and that increasing the number of hidden nodes beyond that doesn't yield large gains. However, as Figure \ref{SGD_toy_data_2_training_time} shows, the runtime increases as we increase the number of hidden nodes. This makes sense, since as we increase the number of hidden nodes, we effectively increase the size of the matrices we must multiply together to compute the backpropagation step.
 
 \begin{figure}
 \centering
@@ -287,6 +287,8 @@ In practice it was necessary to use a relatively large step size $\eta_n$ to get
 
 \subsection*{Testing the Neural Network Code}
 
+\subsubsection*{Stochastic Gradient Descent}
+For stochastic gradient descent we again found that a step size of $N*20$ where $N$ is the number of samples works well. Some experimentation showed that between $30$ and $70$ hidden units provided the best performance. We also found that regularization values around $\lam = 2$ provided good generalization performance. In Figure \todo{ref} we plot the classification error rate against the number of hidden units, fixing $\lambda = 2$.
 \subsection*{MNIST Data (Parts 5 and 6)}
 
 
