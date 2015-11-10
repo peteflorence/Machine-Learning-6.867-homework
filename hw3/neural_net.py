@@ -71,8 +71,8 @@ class NeuralNet:
 
     
     def initializeWeights(self):
-        self.W1 = np.ones((self.M,self.D+1))
-        self.W2 = np.ones((self.K,self.M+1))
+        self.W1 = 1.0*np.ones((self.M,self.D+1))
+        self.W2 = 1.0*np.ones((self.K,self.M+1))
 
         self.w_list = [self.W1, self.W2]
 
@@ -118,7 +118,7 @@ class NeuralNet:
         self.y = self.sigma(self.a_outputs)
 
 
-
+    # deprecated
     def backPropSingle(self, a_hidden):
         return np.multiply(self.g_grad(a_hidden), self.deltaOutputTimesW2)
 
@@ -144,6 +144,7 @@ class NeuralNet:
             lam = self.lam
 
         if idx is not None:
+            idx = np.array(idx)
             n = np.size(idx)
             xsample = self.X[:,idx]
             xsample = np.reshape(xsample, (self.D+1,n))
@@ -163,20 +164,9 @@ class NeuralNet:
         #    W1_grad += np.outer(self.deltaHidden[:,i], xsample[:,i])
         #    W2_grad += np.outer(self.deltaOutput[:,i], self.z[:,i])
 
-        #print "self.deltaOutput is " + str(np.shape(self.deltaOutput))
-        #print "self.z.T is " + str(np.shape(self.z.T))
-
-        #print "self.deltaHidden is" + str(np.shape(self.deltaHidden))
-        #print "self.X.T is" + str(np.shape(self.X.T))
-
         W2_grad = np.dot(self.deltaOutput,self.z.T) # should be: KxN times Nx(M+1)
-        W1_grad = np.dot(self.deltaHidden,self.X.T) # should be: MxN times Nx(D+1)
+        W1_grad = np.dot(self.deltaHidden,xsample.T) # should be: MxN times Nx(D+1)
 
-        #print np.shape(W1_grad)
-        #print np.shape(W2_grad)
-
-        #print np.shape(W1)
-        #print np.shape(W2)
 
         W1_grad += 2*lam*W1
         W2_grad += 2*lam*W2
@@ -191,37 +181,25 @@ class NeuralNet:
         if not self.useSoftmax:
             raise Exception('Currently only support gradients for softmax')
 
-        # need to iterate over idx
-        #self.deltaOutput = self.y[:,idx] - self.T[:,idx]
+        # don't need to worry about idx, self.y and self.T are already the right size from having used
+        # idx in the forwardProp step
+        self.deltaOutput = self.y - self.T[:,idx]
 
-        # not sure how to make compatible with SGD
-        self.deltaOutput = self.y - self.T
+    def evalCost(self, lam, w_list=None, skipForwardProp=False):
 
-    def evalCost(self, lam, idx=None, w_list=None):
+        xsample = self.X
 
-        # make sure we forward propagate if someone asks us to compute for specific indices
-        if idx is None:
-            idx = np.arange(0,self.N)
-            xsample = self.X
-        else:
-            xsample = self.X[:,idx]
+        if w_list is None:
+            w_list = self.w_list
 
-        if w_list is not None:
-            W1 = w_list[0]
-            W2 = w_list[1]
-        else:
-            W1 = self.W1
-            W2 = self.W2
+        W1 = w_list[0]
+        W2 = w_list[1]
 
-        # if the the user passed in an option, then we need to make sure we forward propagate in order to
-        # have up-to-date information
-        if (w_list is not None) or (idx is not None):
+        # forwardProp by default, allow user to override if they know that they have just
+        # forwardProp'd with the weights they want
+        if not skipForwardProp:
             self.forwardProp(xsample, w_list=w_list)
 
-        #loss = 0.0
-
-        # for i in range(np.size(idx)):
-        #     loss += -np.dot(self.y[:,i], self.T[:,i])
 
         # not working for SGD
         loss = - np.sum(np.multiply(self.T,np.log(self.y)))
@@ -236,9 +214,15 @@ class NeuralNet:
         if lam is None:
             lam = self.lam
 
-        f = lambda w_list: self.evalCost(self.lam, w_list=w_list)
-        grad = lambda w_list: self.evalDerivs(w_list, lam=self.lam)
+        f = lambda w_list: self.evalCost(lam, w_list=w_list)
+        grad = lambda w_list: self.evalDerivs(w_list, lam=lam)
         gd = GradientDescent(f, grad=grad)
+
+        def gradSGD(w_list, idx):
+            idx = np.array([idx])
+            return self.evalDerivs(w_list, idx=idx, lam=lam)
+
+        gd.evalGradTraining = gradSGD
         return gd
 
     def plotData(self):
@@ -349,7 +333,9 @@ class NeuralNet:
         plt.show()
 
 
-    def train(self, w_list_initial='random', stepSize=0.001, maxFunctionCalls=3000, verbose=True):
+    def train(self, w_list_initial='random', useSGD=False, stepSize=0.001, maxFunctionCalls=3000, verbose=True, tol=None,
+              storeIterValues=True):
+        self.reloadTrainingData()
         if verbose: 
             start = time.time()
             print "Actual data"
@@ -365,9 +351,23 @@ class NeuralNet:
             scale=0.5
             w_initial = [scale*(np.random.random_sample(np.shape(self.W1)) - 0.5 ), scale*(np.random.random_sample(np.shape(self.W2)) - 0.5)]
 
-        w_min, f_min, _, _ = gd.computeMin(w_initial, maxFunctionCalls=maxFunctionCalls, storeIterValues=True, printSummary=verbose)    
 
-        if verbose: 
+        if useSGD:
+            print "using STOCHASTIC gradient descent"
+            if storeIterValues:
+                print ""
+                print "---------------------"
+                print "WARNING: You are storing function values while using SGD"
+                print "this will significantly slow down the optimization"
+                print "---------------------"
+                print " "
+            w_min, f_min, = gd.stochasticGradDescent(w_initial, self.N, maxFunctionCalls=maxFunctionCalls,
+                                                     storeIterValues=storeIterValues, printSummary=verbose, tol=None)
+        else:
+            print "using standard gradient descent"
+            w_min, f_min, _, _ = gd.computeMin(w_initial, maxFunctionCalls=maxFunctionCalls, storeIterValues=True, printSummary=verbose)
+
+        if verbose and storeIterValues:
             gd.plotIterValues()
 
         self.trainingTime = time.time()-start
@@ -434,7 +434,7 @@ class NeuralNet:
     def reloadTrainingData(self):
 
         filename = "hw3_resources/" + self.filename + "_" + "train" + ".mat"
-        self.loadAnotherDataset(filename)
+        self.loadAnotherDataset(filename, varname='toy_data')
 
 
     @staticmethod
