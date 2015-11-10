@@ -263,7 +263,7 @@ class GradientDescent:
 
         if printSummary == True:
 
-            if self.numFunctionCalls >= maxFunctionCalls:
+            if self.numIterations >= maxFunctionCalls:
                 print "WARNING: hit maximum number of function calls"
 
             print " "
