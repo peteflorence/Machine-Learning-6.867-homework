@@ -220,7 +220,8 @@ class NeuralNet:
 
         def gradSGD(w_list, idx):
             idx = np.array([idx])
-            return self.evalDerivs(w_list, idx=idx, lam=lam)
+            lamSGD = 1.0*lam/self.N
+            return self.evalDerivs(w_list, idx=idx, lam=lamSGD)
 
         gd.evalGradTraining = gradSGD
         return gd
