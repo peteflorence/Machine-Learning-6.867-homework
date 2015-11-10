@@ -253,7 +253,7 @@ class GradientDescent:
                 self.iterValues[self.numIterations-1] = f_current
 
 
-
+        f_current = self.evalF(x_current)
 
         if plotStepSizeGrid:
             plt.plot(np.arange(0,maxFunctionCalls), stepSizeGrid)
@@ -263,7 +263,7 @@ class GradientDescent:
 
         if printSummary == True:
 
-            if self.numFunctionCalls >= maxFunctionCalls:
+            if self.numIterations >= maxFunctionCalls:
                 print "WARNING: hit maximum number of function calls"
 
             print " "
@@ -274,7 +274,7 @@ class GradientDescent:
 
             print "f_min is = " + str(f_current)
             print "achieved tolerance = " + str(eps)
-            print "numFunctionCalls = " + str(self.numFunctionCalls)
+            print "numIterations = " + str(self.numIterations)
             print "---------------------------- "
             print " "
 

@@ -227,11 +227,68 @@ where we have explicitly calculated for the gradients with respect to each of th
 \subsection*{Implementing 2-Layer Neural Network}
 
 \subsection*{Stochastic Gradient Descent}
+The implementation of stochastic gradient descent (SGD) only requires a small modification to the existing code. In particular if we define
+%
+%
+\begin{equation}
+E_n(\mathbf{w}) = -\sum_k t_{n,k} \log(y_k(\mathbf{x}_n,\mathbf{w}))
+\end{equation}
+%
+we can write the objective function as 
+%
+%
+\begin{align}
+l(w) &= \sum_n \left[ E_n(w) + \frac{\lambda}{N} (||W^{(1)}||^2_F + ||W^{(2)}||^2_F) \right] \\
+& = \sum_n l_n(w)
+\end{align}
+%
+%
+Computing the gradient of $l_n(w)$ is fundamentally no different than in the standard case. The only difference is that we only forward/backward propagate for a single sample $x_n$. Thus the computation is much faster than the full gradient computation which takes $N$ times as long, where $N$ is the number of training examples. The other thing we need to define is the learning rate $\eta_n$. The only requirement is that the learning rate satisfy the Robbins-Munro condition. That is $\sum_n \eta_n = \infty, \sum_n \eta_n^2 < \infty$. Following the discussion on Piazza we choose
+%
+%
+\begin{equation}
+\eta_n = \frac{\alpha}{{\beta + n}^\gamma}
+\end{equation}
+%
+%
+where $\gamma > 0.5$ ensures the Robbins-Munro condition is satisfied. The actual SGD algorithm simply updates the weights $W$ as 
+%
+%
+\begin{equation}
+W^{(j+1)} = W^{(j)} - \eta_j \frac{\partial l_{n_j}}{\partial W}|_{W^{(j)}}
+\end{equation}
+%
+%
+here $n_j \in \{1,\ldots,N\}$ is the index of the training point used in the $j^{th}$ step of the SGD algorithm. To choose $n_j$ we randomly shuffle the values $\{1,\ldots,N\}$ and loop through them until convergence. The convergence criterion for SGD is also slightly different. The standard convergence criterion requires evaluating the full cost function $l(w)$ at each iteration. Since the whole point of SGD is to avoid doing this, we propose an alternate convergence criterion. In particular we converge when $||W^{(j+1)} - W^{(j)}||$ is sufficiently small. 
+
+
+
+
 
 \subsection*{Testing the Neural Network Code}
 
+
+
+In practice it was necessary to use a relatively large step size $\eta_n$ to get rapid convergence. This makes sense since we expect that the gradient of $l_n(w)$ is about $1/N$ as large as the gradient of $l(w)$. For the toy dataset we used a step size of $N*20 = 6000$ and $\lambda = 0$. In order to get good performance, we set the maximum number of iterations to $50,000$. As can be seen in Figure \ref{SGD_toy_data_2_CER} the performance of stochastic gradient descent is comparable, just slightly worse, than that of the batch method. Cross validation shows that 60 hidden nodes provides the best performance on the test set. However, as can be seen from the figure, we already get good performance with 20 hidden nodes, and that increasing the number of hidden nodes beyond that doesn't yield large gains. However, as Figure \ref{SGD_toy_data_2_training_time} shows, the runtime increases as we increase the number of hidden nodes. This makes sense, since as we increase the number of hidden nodes, we effectively increase the size of the matrices we must multiply together to compute the backpropagation step.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{SGD_toy_data_2_CER.png}
+\caption{The classification error rate on the train, test and validation datasets for different numbers of hidden nodes}
+\label{SGD_toy_data_2_CER}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{SGD_toy_data_2_training_time.png}
+\caption{The classification error rate on the train, test and validation datasets for different numbers of hidden nodes}
+\label{SGD_toy_data_2_training_time}
+\end{figure}
+
 \subsection*{Testing the Neural Network Code}
 
+\subsubsection*{Stochastic Gradient Descent}
+For stochastic gradient descent we again found that a step size of $N*20$ where $N$ is the number of samples works well. Some experimentation showed that between $30$ and $70$ hidden units provided the best performance. We also found that regularization values around $\lam = 2$ provided good generalization performance. In Figure \todo{ref} we plot the classification error rate against the number of hidden units, fixing $\lambda = 2$.
 \subsection*{MNIST Data (Parts 5 and 6)}
 
 
