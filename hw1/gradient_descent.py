@@ -1,6 +1,7 @@
 __author__ = 'manuelli'
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 
 
 class GradientDescent:
@@ -25,10 +26,12 @@ class GradientDescent:
         self.evalFTraining = None
         self.evalGradTraining = None
 
-    def initializeSGDParameters(self):
-        self.alpha = 0.01
-        self.beta = 50
-        self.gamma = 0.55
+        self.initializeSGDParameters(self.stepSize)
+
+    def initializeSGDParameters(self, stepSize, beta=2000, gamma=0.5+1e-10):
+        self.beta = beta
+        self.gamma = gamma
+        self.alpha = stepSize*self.beta**self.gamma
         
 
     def evalF(self,x):
@@ -161,29 +164,35 @@ class GradientDescent:
 
         return (x_new, f_new)
 
-    def stochasticGradDescebtLearningRate(self, numIterations):
+    def stochasticGradDescentLearningRate(self, numIterations):
 
         return self.alpha/(numIterations + self.beta)**self.gamma
 
 
-    def stochasticGradDescentUpdate(self, x_current, idx, numIterations):
-        learningRate = self.stochasticGradDescebtLearningRate(self.numIterations)
-        x_new = x_current - learningRate*self.evalGradientOnTrainingData(x_current, idx)
-        f_new = self.evalF(x_new)
+    def stochasticGradDescentUpdate(self, x, idx, numIterations):
+        learningRate = self.stochasticGradDescentLearningRate(self.numIterations)
+        if type(x) == list:
+            x_new = []
+            grad = self.evalGradientOnTrainingData(x, idx)
 
-        return (x_new, f_new)
+            for idx, val in enumerate(x):
+                x_new.append(x[idx] - learningRate*grad[idx])
 
-    def stochasticGradDescent(self, x_initial, maxFunctionCalls=10000, storeIterValues=False, printSummary=True, tol=None):
+        else:
+            x_new = x - learningRate*self.evalGradientOnTrainingData(x, idx)
+
+        return x_new
+
+    def stochasticGradDescent(self, x_initial, numTrainingPoints, maxFunctionCalls=10000, storeIterValues=False, printSummary=True,
+                              tol=None, stepSize=0.001, useXDiffCriterion=True):
         if (self.evalGradTraining is None):
             raise Exception('you must specify evalGradTraining before running stochastic gradient descent')
 
 
+        self.initializeSGDParameters(stepSize, beta=maxFunctionCalls/1.5)
 
-
-        # columns of trainingX are the training points
-        N = np.shape(self.trainingData)[1]
-        idxList = np.arange(0,N)
-        idxList = np.random.shuffle(idxList)
+        idxList = np.arange(0,numTrainingPoints)
+        np.random.shuffle(idxList)
 
         eps = 1
         self.numFunctionCalls = 0
@@ -191,7 +200,14 @@ class GradientDescent:
         self.numIterations = 0
 
         x_current = x_initial # note for neural net this will be a list of weights, each of which is a matrix
+        x_old = x_initial # do this so that we get a copy
         f_old = self.evalF(x_current)
+        f_current = f_old
+
+        plotStepSizeGrid = False
+
+        if plotStepSizeGrid:
+            stepSizeGrid = np.zeros(maxFunctionCalls)
 
         if storeIterValues:
             self.iterValues = np.zeros(maxFunctionCalls)
@@ -200,20 +216,48 @@ class GradientDescent:
         if tol is None:
             tol = self.tol
 
+        if storeIterValues or (not useXDiffCriterion):
+            computeFunctionVals = True
+        else:
+            computeFunctionVals = False
+
 
         while(np.abs(eps) > tol):
             self.numIterations += 1
+            if self.numIterations >= maxFunctionCalls:
+                break
             # note I want this to be integer division, allows us to loop through the data multiple times
-            idx = idxList[(self.numIterations-1)/N]
-            (x_current, f_current) = self.stochasticGradDescentUpdate(x_current, idx, self.numIterations)
-            eps = f_current - f_old
-            f_old = f_current
+            idx = idxList[(self.numIterations-1) % numTrainingPoints]
+            x_old = x_current
+            x_current = self.stochasticGradDescentUpdate(x_current, idx, self.numIterations)
+
+            # only compute the function values if necessary, since this is generally an expensive
+            # operation that requires doing operations on the entire dataset
+            if computeFunctionVals:
+                f_old = f_current
+                f_current = self.evalF(x_current)
+
+            if plotStepSizeGrid:
+                stepSizeGrid[self.numIterations-1] = self.stochasticGradDescentLearningRate(self.numIterations)
+
+
+            if useXDiffCriterion:
+                if type(x_current) == list:
+                    eps=0
+                    for idx, val in enumerate(x_current):
+                        eps += np.linalg.norm(val-x_old[idx], ord='fro')
+            else:
+                eps= f_current - f_old
 
             if storeIterValues:
                 self.iterValues[self.numIterations-1] = f_current
 
-            if self.numFunctionCalls >= maxFunctionCalls:
-                break
+
+
+
+        if plotStepSizeGrid:
+            plt.plot(np.arange(0,maxFunctionCalls), stepSizeGrid)
+            plt.show()
 
 
 
