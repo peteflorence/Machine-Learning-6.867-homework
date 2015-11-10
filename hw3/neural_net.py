@@ -69,8 +69,8 @@ class NeuralNet:
 
     
     def initializeWeights(self):
-        self.W1 = np.ones((self.M,self.D+1))
-        self.W2 = np.ones((self.K,self.M+1))
+        self.W1 = 1.0*np.ones((self.M,self.D+1))
+        self.W2 = 1.0*np.ones((self.K,self.M+1))
 
         self.w_list = [self.W1, self.W2]
 
@@ -116,7 +116,7 @@ class NeuralNet:
         self.y = self.sigma(self.a_outputs)
 
 
-
+    # deprecated
     def backPropSingle(self, a_hidden):
         return np.multiply(self.g_grad(a_hidden), self.deltaOutputTimesW2)
 
@@ -178,11 +178,9 @@ class NeuralNet:
         if not self.useSoftmax:
             raise Exception('Currently only support gradients for softmax')
 
-        # need to iterate over idx, should still work even with new vectorization
-        self.deltaOutput = self.y[:,idx] - self.T[:,idx]
-
-        # not sure how to make compatible with SGD
-        # self.deltaOutput = self.y - self.T
+        # don't need to worry about idx, self.y and self.T are already the right size from having used
+        # idx in the forwardProp step
+        self.deltaOutput = self.y - self.T[:,idx]
 
     def evalCost(self, lam, w_list=None, skipForwardProp=False):
 
@@ -218,6 +216,7 @@ class NeuralNet:
         gd = GradientDescent(f, grad=grad)
 
         def gradSGD(w_list, idx):
+            idx = np.array([idx])
             return self.evalDerivs(w_list, idx=idx, lam=lam)
 
         gd.evalGradTraining = gradSGD
@@ -323,7 +322,9 @@ class NeuralNet:
         plt.show()
 
 
-    def train(self, w_list_initial='random', stepSize=0.001, maxFunctionCalls=3000, verbose=True):
+    def train(self, w_list_initial='random', useSGD=False, stepSize=0.001, maxFunctionCalls=3000, verbose=True, tol=None,
+              storeIterValues=True):
+        self.reloadTrainingData()
         if verbose: 
             start = time.time()
             print "Actual data"
@@ -338,9 +339,23 @@ class NeuralNet:
         if w_list_initial =='random':
             w_initial = [np.random.random_sample(np.shape(self.W1)), np.random.random_sample(np.shape(self.W2))]
 
-        w_min, f_min, _, _ = gd.computeMin(w_initial, maxFunctionCalls=maxFunctionCalls, storeIterValues=True, printSummary=verbose)    
 
-        if verbose: 
+        if useSGD:
+            print "using STOCHASTIC gradient descent"
+            if storeIterValues:
+                print ""
+                print "---------------------"
+                print "WARNING: You are storing function values while using SGD"
+                print "this will significantly slow down the optimization"
+                print "---------------------"
+                print " "
+            w_min, f_min, = gd.stochasticGradDescent(w_initial, self.N, maxFunctionCalls=maxFunctionCalls,
+                                                     storeIterValues=storeIterValues, printSummary=verbose, tol=None)
+        else:
+            print "using standard gradient descent"
+            w_min, f_min, _, _ = gd.computeMin(w_initial, maxFunctionCalls=maxFunctionCalls, storeIterValues=True, printSummary=verbose)
+
+        if verbose and storeIterValues:
             gd.plotIterValues()
 
         print 'It took', time.time()-start, 'seconds to train.'
@@ -406,7 +421,7 @@ class NeuralNet:
     def reloadTrainingData(self):
 
         filename = "hw3_resources/" + self.filename + "_" + "train" + ".mat"
-        self.loadAnotherDataset(filename)
+        self.loadAnotherDataset(filename, varname='toy_data')
 
 
     @staticmethod
