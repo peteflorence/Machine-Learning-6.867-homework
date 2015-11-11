@@ -161,13 +161,27 @@ To forward propagate through the second layer to the output units, we similarly 
 
 \textit{2. Evaluate $\delta_k$ for the output units}
 
-With our softmax formulation.... 
-
-... we end up with:
+We want to calculate $\delta_{nk} = \frac{\partial J_n}{\partial a_k}$.  We know this won't be a function of the regularization term, as it does not depend on $a_k$.  With our softmax formulation, we can expand Equation 2 to be:
 %
 %
 \begin{equation}
-\delta_{nk} = y_{nk} - t_{nk}
+l(\mathbf{w}) = - \sum_k t_k \big[ a_k - \ln \big( \sum_{k'} \exp(a_{k'}) \big) \big]
+\end{equation}
+%
+%
+%
+%
+\begin{equation}
+l(\mathbf{w}) = (- \sum t_k a_k) + \ln \big( \sum_{k'} \exp(a_{k'}) \big) \sum t_k
+\end{equation}
+%
+%
+
+And we nicely end up with:
+%
+%
+\begin{equation}
+\delta_{nk} = \frac{\partial J_n}{\partial a_k} =  y_{nk} - t_{nk}
 \end{equation}
 %
 %
@@ -200,7 +214,7 @@ In the above, $*$ is used to signify element-wise multiplication, and $W^{(2)^T}
 
 Finally, we use both $\delta$'s together with our inputs, $\mathbf{x}$, and our hidden unit outputs, $Z^{(1)}$, to calculate the gradients $\nabla_{W^{(1)}} J(\mathbf{w})$ and $\nabla_{W^{(1)}} J(\mathbf{w})$.
 
-Following Bishop, we know that we can compute the derivative with respect to any element via:
+Following Bishop, we know that for an unregularized neural network we can compute the derivative with respect to any element via:
 %
 %
 \begin{equation}
@@ -208,32 +222,51 @@ Following Bishop, we know that we can compute the derivative with respect to any
 \end{equation}
 %
 %
-In the above, $\delta$ represents the $\delta$ at the output of the weight, and $z$ represents the activation at the input of the weight.  The above only calculates the gradient for one sample, and for one element of the matrix, but to vectorize, we this can be vectorized as:
+In the above, $\delta$ represents the $\delta$ at the output of the weight, and $z$ represents the activation at the input of the weight.  The above only calculates the gradient for one sample, and for one element of the matrix, but to vectorize we formulate as:
 %
 %
 \begin{equation}
-\nabla_{W^{(1)}} J(\mathbf{w}) = \delta_{outputs} Z^{(1)^T}
+\nabla_{W^{(1)}} J_{unregularized}(\mathbf{w}) = \delta_{outputs} Z^{(1)^T}
 \end{equation}
 %
 %
 \begin{equation}
-\nabla_{W^{(2)}} J(\mathbf{w}) = \delta_{hidden} X^T
+\nabla_{W^{(2)}} J_{unregularized}(\mathbf{w}) = \delta_{hidden} X^T
 \end{equation}
 %
 %
-where we have explicitly calculated for the gradients with respect to each of the matrices.
+where we have explicitly calculated for the gradients with respect to each of the matrices.  Finally, to account for the regularization we note that due to the Frobenius norm, the derivative with respect to each element $w_{ij}$ is simply $2 \lambda w_{ij}$.  We have our final gradients:
+%
+%
+\begin{equation}
+\nabla_{W^{(1)}} J(\mathbf{w}) = \delta_{outputs} Z^{(1)^T} + 2 \lambda W^{(1)}
+\end{equation}
+%
+%
+\begin{equation}
+\nabla_{W^{(2)}} J(\mathbf{w}) = \delta_{hidden} X^T + 2  \lambda W^{(2)}
+\end{equation}
+%
+%
 
 
 \subsection*{Implementing 2-Layer Neural Network}
+
+We implemented a 2-layer neural network, and generalized so that we can specify the number of hidden nodes as just a parameter.  Many of the details of this implementation were already mentioned in the previous section so as to be able to explain the gradient calculation in its vectorized form.  
+
+In addition to the details from the previous section, we also note that a key step in completing the implementation of the neural network was to implement training via gradient descent.  Essentially, this was no different than simple 1-D gradient descent, with Equation 1 as our cost function, and Equations 15 and 16 as our gradients.  We expanded our gradient descent implementation from HW1 to be able to accept a list of parameters as inputs to the function, so that we could descend our cost function by adjusting the weights of both of the matrices.  Another important implementation detail was that we maintained the ability to plot the objective function value vs. the number of gradient descent iterations.  This feature is critical for being able to tune the gradient descent parameters (step size, maximum number of function calls).  
+
+Once a network was trained on the training data with gradient descent, then classifying new input data was as simple as performing forward propagation on the input dataset.  Misclassification rates are also computed and allow us to search for optimal $\lambda$ and $M$ using cross-validation.
 
 \subsection*{Stochastic Gradient Descent}
 
 \subsection*{Testing the Neural Network Code}
 
-\subsection*{Testing the Neural Network Code}
+We applied our neural network implementation with both batch gradient descent and stochastic gradient to the toy datasets.  As can be shown in the figures, we were able to achieve essentially perfect fits to ``toy multiclass 1'' and good fits to ``toy multiclass 2'' considering that the data is not easily separable -- our classification error rate on the validation dataset was in the range of 6 percent with a sufficient number of hidden nodes.  To find the number of hidden nodes required, we performed cross-validation by varying the number of hidden nodes over the range [1,20] and plotted the classification error rates for each of the training, test, and validation datasets.  The shape of the curve reveals that good fits can be achieved with M=5 hidden units, although slightly better fits can be achieved with increasing the number of hidden units through 20.  We attempted to apply regularization to the neural networks trained on the toy datasets, but since the unregularized neural networks already achieved a high level of performance, there was not a noticeable increase in the performance of regularized neural networks.
 
 \subsection*{MNIST Data (Parts 5 and 6)}
 
+Might be nice to note that we had to initialize the weights so that the hidden unit activations were near 0?
 
 
 \end{document} 
