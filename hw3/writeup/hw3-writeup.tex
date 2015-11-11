@@ -287,9 +287,12 @@ In practice it was necessary to use a relatively large step size $\eta_n$ to get
 
 \subsection*{Testing the Neural Network Code}
 
-\subsubsection*{Stochastic Gradient Descent}
-For stochastic gradient descent we again found that a step size of $N*20$ where $N$ is the number of samples works well. Some experimentation showed that between $30$ and $70$ hidden units provided the best performance. We also found that regularization values around $\lam = 2$ provided good generalization performance. In Figure \todo{ref} we plot the classification error rate against the number of hidden units, fixing $\lambda = 2$.
+
+
 \subsection*{MNIST Data (Parts 5 and 6)}
+
+\subsubsection*{Stochastic Gradient Descent}
+For stochastic gradient descent we again found that a step size of $N*20$ where $N$ is the number of samples works well. Let $M$ denote the number of hidden units. Some experimentation showed that between $30$ and $70$ hidden units provided the best performance. We also found that regularization values around $\lam = 2$ provided good generalization performance. In Figure \todo{ref} we plot the classification error rate against the number of hidden units, fixing $\lambda = 2$. We set the maximum number of iterations for SGD to be $70,000$ for all runs. One important caveat is that since SGD is attempting to minimize a non-convex function, the initial guess can greatly influence the final solution. Thus, for each $M$, we run the optimization repeatedly (3 times in this case), with random initial seeds. Then in Figure we report the results of the run that gave the minimum classification error rate on the test dataset. Let $J$ denote the maximum number of iterations for stochastic gradient descent. In Figure \todo{ref} $J$ ranged from $200,000$ to $300,000$. We found that $200,000$ provided good performance for $M = 30$, but that as you increased the number of hidden units, you need to increase $J$ to maintain reasonable performance.  but that as you increase $M$ you need to increase  From this we see that \todo{number of hidden units}. 
 
 
 
