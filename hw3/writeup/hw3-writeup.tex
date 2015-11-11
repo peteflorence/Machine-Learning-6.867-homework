@@ -292,7 +292,32 @@ In practice it was necessary to use a relatively large step size $\eta_n$ to get
 \subsection*{MNIST Data (Parts 5 and 6)}
 
 \subsubsection*{Stochastic Gradient Descent}
-For stochastic gradient descent we again found that a step size of $N*20$ where $N$ is the number of samples works well. Let $M$ denote the number of hidden units. Some experimentation showed that between $30$ and $70$ hidden units provided the best performance. We also found that regularization values around $\lam = 2$ provided good generalization performance. In Figure \todo{ref} we plot the classification error rate against the number of hidden units, fixing $\lambda = 2$. We set the maximum number of iterations for SGD to be $70,000$ for all runs. One important caveat is that since SGD is attempting to minimize a non-convex function, the initial guess can greatly influence the final solution. Thus, for each $M$, we run the optimization repeatedly (3 times in this case), with random initial seeds. Then in Figure we report the results of the run that gave the minimum classification error rate on the test dataset. Let $J$ denote the maximum number of iterations for stochastic gradient descent. In Figure \todo{ref} $J$ ranged from $200,000$ to $300,000$. We found that $200,000$ provided good performance for $M = 30$, but that as you increased the number of hidden units, you need to increase $J$ to maintain reasonable performance.  but that as you increase $M$ you need to increase  From this we see that \todo{number of hidden units}. 
+For stochastic gradient descent we again found that a step size of $N*20$ where $N$ is the number of samples works well. Let $M$ denote the number of hidden units. Some experimentation showed that between $30$ and $70$ hidden units provided the best performance. We also found that regularization values around $\lambda = 2$ provided good generalization performance. In Figure \ref{SGD_mnist_CER_hidden_nodes} we plot the classification error rate against the number of hidden units, fixing $\lambda = 2$. We set the maximum number of iterations for SGD to be $50,000$ for all runs. One important caveat is that since SGD is attempting to minimize a non-convex function, the initial guess can greatly influence the final solution. Thus, for each $M$, we run the optimization repeatedly (3 times in this case), with random initial seeds. Figure \ref{SGD_mnist_CER_hidden_nodes} shows the results of applying this procedure. Thus cross validation gives that $M = 60$ provides the best performance for a given $\lambda$. Figure \ref{SGD_mnist_training_time_hidden_nodes} shows that the training time increases roughly linearly with the number of hidden nodes. This makes sense since as we increase the number of hidden nodes we are also increasing the size of the matrices that we must multiply to perform forward an backpropagation. Then in Figure \ref{SGD_minist_CER_lambda} we search over different $\lambda$ while holding the number of hidden units fixed. The first thing to notice is that as we increase $\lambda$ the performance on the training data gets worse (for the most part, there are some random fluctations due to random initial seeds). This is to be expected since the regularizer acts to prevent overfitting. The figure shows that the best performance is at $\lambda = 2$ on the test set. The training time is constant across different value of $\lambda$, since we aren't changing the number of hidden nodes.
+
+
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{SGD_mnist_CER_hidden_nodes.png}
+\caption{Performance of SGD on the three datasets as a function of the number of hidden nodes. The number of iterations of SGD was set to $50,000$. For a given number of hidden nodes, 3 trials with random seeds were run and the best performance is shown above.}
+\label{SGD_mnist_CER_hidden_nodes}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{SGD_mnist_training_time_hidden_nodes.png}
+\caption{Training time for stochastic gradient descent as a function of the number of hidden nodes. The number of iterations of SGD was set to $50,000$}
+\label{SGD_mnist_training_time_hidden_nodes}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{SGD_minist_CER_lambda.png}
+\caption{Performance of SGD on the three datasets for different values of the regularize $\lambda$. The number of iterations was $70,000$ and we have $M = 60$ hidden nodes. The values of $\lambda$ that were evaluated are $\lamba = {0.5, 1, 2, 5, 10}$}
+\label{SGD_minist_CER_lambda}
+\end{figure}
+
+
 
 
 
