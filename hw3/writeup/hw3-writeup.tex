@@ -263,14 +263,14 @@ The implementation of stochastic gradient descent (SGD) only requires a small mo
 %
 %
 \begin{equation}
-E_n(\mathbf{w}) = -\sum_k t_{n,k} \log(y_k(\mathbf{x}_n,\mathbf{w}))
+J_n(\mathbf{w}) = -\sum_k t_{n,k} \log(y_k(\mathbf{x}_n,\mathbf{w}))
 \end{equation}
 %
 we can write the objective function as 
 %
 %
 \begin{align}
-l(w) &= \sum_n \left[ E_n(w) + \frac{\lambda}{N} (||W^{(1)}||^2_F + ||W^{(2)}||^2_F) \right] \\
+l(w) &= \sum_n \left[ J_n(w) + \frac{\lambda}{N} (||W^{(1)}||^2_F + ||W^{(2)}||^2_F) \right] \\
 & = \sum_n l_n(w)
 \end{align}
 %
@@ -341,7 +341,7 @@ To find the number of hidden nodes required for batch gradient descent, we perfo
 %
 For stochastic gradient descent, in practice it was necessary to use a relatively large step size $\eta_n$ to get rapid convergence. This makes sense since we expect that the gradient of $l_n(w)$ is about $1/N$ as large as the gradient of $l(w)$. For the toy dataset we used an initial step size of $N*20 = 6000 = \eta_1$ and $\lambda = 0$. In order to get good performance, we set the maximum number of iterations to $50,000$. As can be seen in Figure \ref{SGD_toy_data_2_CER} the performance of stochastic gradient descent is comparable, just slightly worse, than that of the batch method. Cross validation shows that 60 hidden nodes provides the best performance on the test set. However, as can be seen from the figure, we already get good performance with 20 hidden nodes, and that increasing the number of hidden nodes beyond that doesn't yield large gains. However, as Figure \ref{SGD_toy_data_2_training_time} shows, the runtime increases as we increase the number of hidden nodes. This makes sense, since as we increase the number of hidden nodes, we effectively increase the size of the matrices we must multiply together to compute the backpropagation step.
 
-Typical performance of the SGD classifier is shown in \ref{SGD_toy_2_val}. The performance is similar, but slightly worse than that of the batch-gradient descent method in Figure \ref{batch_toydataset2}.
+Typical performance of the SGD classifier is shown in Figure \ref{SGD_toy_2_val}. The performance is similar, but slightly worse than that of the batch-gradient descent method in Figure \ref{toy2_val}.
 %
 \begin{figure}
 \centering
