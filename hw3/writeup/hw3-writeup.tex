@@ -361,16 +361,9 @@ For stochastic gradient descent, in practice it was necessary to use a relativel
 
 \subsection*{MNIST Data (Parts 5 and 6)}
 
+\subsubsection*{Batch Gradient Descent}
 
-
-
-
-\subsubsection*{Stochastic Gradient Descent}
-%For stochastic gradient descent we again found that a step size of $N*20$ where $N$ is the number of samples works well. Some experimentation showed that between $30$ and $70$ hidden units provided the best performance. We also found that regularization values around $\lam = 2$ provided good generalization performance. In Figure \todo{ref} we plot the classification error rate against the number of hidden units, fixing $\lambda = 2$.
-\subsection*{MNIST Data (Parts 5 and 6)}
-
-We applied both batch and stochastic gradient descent to the MNIST dataset.
-
+It was in applying our batch gradient descent to the MNIST dataset that we realized the necessity for vectorizing all of the backpropagation algorithm.  Prior to vectorizing, it would take 10x time as long to train as it did after vectorizing completely the code.  For this dataset, step size was found to be optimal at 1e-4: any larger would cause the objective function to not monotonically decrease, and any smaller would only increase training time to get equivalent performance.  We applied cross validation to a search for the optimal number of hidden units, M (given a fixed $\lambda=0$), and a search for the optimal $\lambda$ (given a fixed $M=150$).  We found that (Figure \ref{MNIST_batch_varyM}) increasing the number of hidden nodes to 150 would decrease the classification error rate to 7-8 percent for the test and validation datasets, and although increasing the number of hidden nodes further would provide a better fit to the training data, the lack of improved classification on the test and validation datasets suggest that this was only increasing overfitting.  We also found that in practice, regularization would not significantly increase the performance of the classifier on the testing or validation data (Figure \ref{MNIST_reg_batch}).  One explanation may be that since the dataset is sufficiently large ($N=1000$) and each step of batch gradient descent takes all of these data points into account, the volume of data prevents overfitting from occurring.  
 %
 \begin{figure}
 \centering
