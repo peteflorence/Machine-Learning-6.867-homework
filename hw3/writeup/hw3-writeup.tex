@@ -161,13 +161,27 @@ To forward propagate through the second layer to the output units, we similarly 
 
 \textit{2. Evaluate $\delta_k$ for the output units}
 
-With our softmax formulation.... 
-
-... we end up with:
+We want to calculate $\delta_{nk} = \frac{\partial J_n}{\partial a_k}$.  We know this won't be a function of the regularization term, as that does not depend on $a_k$.  With our softmax formulation, we can expand Equation 2 to be:
 %
 %
 \begin{equation}
-\delta_{nk} = y_{nk} - t_{nk}
+l(\mathbf{w}) = - \sum_k t_k \big[ a_k - \ln \big( \sum_{k'} \exp(a_{k'}) \big) \big]
+\end{equation}
+%
+%
+%
+%
+\begin{equation}
+l(\mathbf{w}) = (- \sum t_k a_k) + \ln \big( \sum_{k'} \exp(a_{k'}) \big) \sum t_k
+\end{equation}
+%
+%
+
+And we nicely end up with:
+%
+%
+\begin{equation}
+\delta_{nk} = \frac{\partial J_n}{\partial a_k} =  y_{nk} - t_{nk}
 \end{equation}
 %
 %
@@ -200,7 +214,7 @@ In the above, $*$ is used to signify element-wise multiplication, and $W^{(2)^T}
 
 Finally, we use both $\delta$'s together with our inputs, $\mathbf{x}$, and our hidden unit outputs, $Z^{(1)}$, to calculate the gradients $\nabla_{W^{(1)}} J(\mathbf{w})$ and $\nabla_{W^{(1)}} J(\mathbf{w})$.
 
-Following Bishop, we know that we can compute the derivative with respect to any element via:
+Following Bishop, we know that for an unregularized neural network we can compute the derivative with respect to any element via:
 %
 %
 \begin{equation}
@@ -208,23 +222,41 @@ Following Bishop, we know that we can compute the derivative with respect to any
 \end{equation}
 %
 %
-In the above, $\delta$ represents the $\delta$ at the output of the weight, and $z$ represents the activation at the input of the weight.  The above only calculates the gradient for one sample, and for one element of the matrix, but to vectorize, we this can be vectorized as:
+In the above, $\delta$ represents the $\delta$ at the output of the weight, and $z$ represents the activation at the input of the weight.  The above only calculates the gradient for one sample, and for one element of the matrix, but to vectorize we formulate as:
 %
 %
 \begin{equation}
-\nabla_{W^{(1)}} J(\mathbf{w}) = \delta_{outputs} Z^{(1)^T}
+\nabla_{W^{(1)}} J_{unregularized}(\mathbf{w}) = \delta_{outputs} Z^{(1)^T}
 \end{equation}
 %
 %
 \begin{equation}
-\nabla_{W^{(2)}} J(\mathbf{w}) = \delta_{hidden} X^T
+\nabla_{W^{(2)}} J_{unregularized}(\mathbf{w}) = \delta_{hidden} X^T
 \end{equation}
 %
 %
-where we have explicitly calculated for the gradients with respect to each of the matrices.
+where we have explicitly calculated for the gradients with respect to each of the matrices.  Finally, to account for the regularization we note that due to the Frobenius norm, the derivative with respect to each element $w_{ij}$ is simply $2 \lambda w_{ij}$.  We have our final gradients:
+%
+%
+\begin{equation}
+\nabla_{W^{(1)}} J(\mathbf{w}) = \delta_{outputs} Z^{(1)^T} + 2 \lambda W^{(1)}
+\end{equation}
+%
+%
+\begin{equation}
+\nabla_{W^{(2)}} J(\mathbf{w}) = \delta_{hidden} X^T + 2  \lambda W^{(2)}
+\end{equation}
+%
+%
 
 
 \subsection*{Implementing 2-Layer Neural Network}
+
+We implemented a 2-layer neural network, and generalized it so that we can specify the number of hidden nodes as just a parameter.  Many of the details of this implementation were already mentioned in the previous section so as to be able to explain the gradient calculation in its vectorized form.  
+
+In addition to the details from the previous section, we also note that a key step in completing the implementation of the neural network was to implement training via gradient descent.  Essentially, this was no different than simple 1-D gradient descent, with Equation 1 as our cost function, and Equations 15 and 16 as our gradients.  We expanded our gradient descent implementation from HW1 to be able to accept a list of parameters as inputs to the function, so that we could descend our cost function by adjusting the weights of both of the matrices.  Another important implementation detail was that we maintained the ability to plot the objective function value vs. the number of gradient descent iterations.  This feature is critical for being able to tune the gradient descent parameters (step size, maximum number of function calls).  
+
+Once a network was trained on the training data with gradient descent, then classifying new input data was as simple as performing forward propagation on the input dataset.  Misclassification rates are also computed and allow us to search for optimal $\lambda$ and $M$ using cross-validation.
 
 \subsection*{Stochastic Gradient Descent}
 The implementation of stochastic gradient descent (SGD) only requires a small modification to the existing code. In particular if we define
@@ -268,16 +300,54 @@ here $n_j \in \{1,\ldots,N\}$ is the index of the training point used in the $j^
 \subsection*{Testing the Neural Network Code}
 
 
+We applied our neural network implementation with both batch gradient descent and stochastic gradient to the toy datasets.  As can be shown in the figures (1 through 4), we were able to achieve essentially perfect fits to ``toy multiclass 1'' and good fits to ``toy multiclass 2'' considering that the data is not easily separable -- our classification error rate on the validation dataset was in the range of 6 percent with a sufficient number of hidden nodes.  
 
-In practice it was necessary to use a relatively large step size $\eta_n$ to get rapid convergence. This makes sense since we expect that the gradient of $l_n(w)$ is about $1/N$ as large as the gradient of $l(w)$. For the toy dataset we used a step size of $N*20 = 6000$ and $\lambda = 0$. In order to get good performance, we set the maximum number of iterations to $50,000$. As can be seen in Figure \ref{SGD_toy_data_2_CER} the performance of stochastic gradient descent is comparable, just slightly worse, than that of the batch method. Cross validation shows that 60 hidden nodes provides the best performance on the test set. However, as can be seen from the figure, we already get good performance with 20 hidden nodes, and that increasing the number of hidden nodes beyond that doesn't yield large gains. However, as Figure \ref{SGD_toy_data_2_training_time} shows, the runtime increases as we increase the number of hidden nodes. This makes sense, since as we increase the number of hidden nodes, we effectively increase the size of the matrices we must multiply together to compute the backpropagation step.
-
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{toy1_train.png}
+\caption{Classification performance of a batch-gradient-descent-trained neural network on the training data itself for ``toy multiclass 1''.  M = 30 hidden nodes were used, with $\lambda$ = 0, step size of 5e-5, and max 3,000 iterations. Shown classification error rate is 0.033 percent.}
+\label{toy1_train}
+\end{figure}
+%
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{toy1_val.png}
+\caption{Classification performance of a batch-gradient-descent-trained neural network on the validation data for ``toy multiclass 1''.  M = 30 hidden nodes were used, with $\lambda$ = 0, step size of 5e-5, and max 3,000 iterations. Shown classification error rate is 0.033 percent.}
+\label{toy1_val}
+\end{figure}
+%
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{toy2_train.png}
+\caption{Classification performance of a batch-gradient-descent-trained neural network on the training data itself for ``toy multiclass 2''.  M = 30 hidden nodes were used, with $\lambda$ = 0, step size of 5e-5, and max 3,000 iterations. Shown classification error rate is 0.}
+\label{toy2_train}
+\end{figure}
+%
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{toy2_val.png}
+\caption{Classification performance of a batch-gradient-descent-trained neural network on the validation data for ``toy multiclass 2'' .  M = 30 hidden nodes were used, with $\lambda$ = 0, step size of 5e-5, and max 3,000 iterations. Shown classification error rate is 6.0 percent.}
+\label{toy2_val}
+\end{figure}
+%
+To find the number of hidden nodes required for batch gradient descent, we performed cross-validation by varying the number of hidden nodes over the range [1,20] and plotted the classification error rates for each of the training, test, and validation datasets (Figure \ref{batch_toydataset2}).  The shape of the curve reveals that good fits can be achieved with M=5 hidden units, although slightly better fits can be achieved with increasing the number of hidden units through 20.  We attempted to apply regularization to the neural networks trained on the toy datasets, but since the unregularized neural networks already achieved a high level of performance, there was not a noticeable increase in the performance of regularized neural networks.
+%
+\begin{figure}
+\centering
+\includegraphics[scale=0.8]{batch_toydataset2.png}
+\caption{The classification error rate on the train, test and validation datasets for different numbers of hidden nodes.  Performed with batch gradient descent, step size - 5e-5, max 3,000 iterations.  Results shown are the average of ten trials.}
+\label{batch_toydataset2}
+\end{figure}
+%
+For stochastic gradient descent, in practice it was necessary to use a relatively large step size $\eta_n$ to get rapid convergence. This makes sense since we expect that the gradient of $l_n(w)$ is about $1/N$ as large as the gradient of $l(w)$. For the toy dataset we used a step size of $N*20 = 6000$ and $\lambda = 0$. In order to get good performance, we set the maximum number of iterations to $50,000$. As can be seen in Figure \ref{SGD_toy_data_2_CER} the performance of stochastic gradient descent is comparable, just slightly worse, than that of the batch method. Cross validation shows that 60 hidden nodes provides the best performance on the test set. However, as can be seen from the figure, we already get good performance with 20 hidden nodes, and that increasing the number of hidden nodes beyond that doesn't yield large gains. However, as Figure \ref{SGD_toy_data_2_training_time} shows, the runtime increases as we increase the number of hidden nodes. This makes sense, since as we increase the number of hidden nodes, we effectively increase the size of the matrices we must multiply together to compute the backpropagation step.
+%
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{SGD_toy_data_2_CER.png}
 \caption{The classification error rate on the train, test and validation datasets for different numbers of hidden nodes}
 \label{SGD_toy_data_2_CER}
 \end{figure}
-
+%
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{SGD_toy_data_2_training_time.png}
@@ -285,11 +355,37 @@ In practice it was necessary to use a relatively large step size $\eta_n$ to get
 \label{SGD_toy_data_2_training_time}
 \end{figure}
 
-\subsection*{Testing the Neural Network Code}
+
 
 
 
 \subsection*{MNIST Data (Parts 5 and 6)}
+
+
+
+
+
+\subsubsection*{Stochastic Gradient Descent}
+%For stochastic gradient descent we again found that a step size of $N*20$ where $N$ is the number of samples works well. Some experimentation showed that between $30$ and $70$ hidden units provided the best performance. We also found that regularization values around $\lam = 2$ provided good generalization performance. In Figure \todo{ref} we plot the classification error rate against the number of hidden units, fixing $\lambda = 2$.
+\subsection*{MNIST Data (Parts 5 and 6)}
+
+We applied both batch and stochastic gradient descent to the MNIST dataset.
+
+%
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{MNIST_batch_varyM.png}
+\caption{The classification error rate on the train, test and validation datasets for different numbers of hidden nodes for the MNIST dataset.  Step size used was 1e-4, max iterations 5,000, and $\lambda=0$.}
+\label{MNIST_batch_varyM}
+\end{figure}
+%
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{MNIST_reg_batch.png}
+\caption{The classification error rate on the train, test and validation datasets for different regularization parameters, $\lambda$.  Step size used was 1e-4, max iterations 5,000, and $M=150$}
+\label{MNIST_reg_batch}
+\end{figure}
+
 
 \subsubsection*{Stochastic Gradient Descent}
 For stochastic gradient descent we again found that a step size of $N*20$ where $N$ is the number of samples works well. Let $M$ denote the number of hidden units. Some experimentation showed that between $30$ and $70$ hidden units provided the best performance. We also found that regularization values around $\lambda = 2$ provided good generalization performance. In Figure \ref{SGD_mnist_CER_hidden_nodes} we plot the classification error rate against the number of hidden units, fixing $\lambda = 2$. We set the maximum number of iterations for SGD to be $50,000$ for all runs. One important caveat is that since SGD is attempting to minimize a non-convex function, the initial guess can greatly influence the final solution. Thus, for each $M$, we run the optimization repeatedly (3 times in this case), with random initial seeds. Figure \ref{SGD_mnist_CER_hidden_nodes} shows the results of applying this procedure. Thus cross validation gives that $M = 60$ provides the best performance for a given $\lambda$. Figure \ref{SGD_mnist_training_time_hidden_nodes} shows that the training time increases roughly linearly with the number of hidden nodes. This makes sense since as we increase the number of hidden nodes we are also increasing the size of the matrices that we must multiply to perform forward an backpropagation. Then in Figure \ref{SGD_minist_CER_lambda} we search over different $\lambda$ while holding the number of hidden units fixed. The first thing to notice is that as we increase $\lambda$ the performance on the training data gets worse (for the most part, there are some random fluctations due to random initial seeds). This is to be expected since the regularizer acts to prevent overfitting. The figure shows that the best performance is at $\lambda = 2$ on the test set. The training time is constant across different value of $\lambda$, since we aren't changing the number of hidden nodes.
@@ -313,11 +409,9 @@ For stochastic gradient descent we again found that a step size of $N*20$ where 
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{SGD_minist_CER_lambda.png}
-\caption{Performance of SGD on the three datasets for different values of the regularize $\lambda$. The number of iterations was $70,000$ and we have $M = 60$ hidden nodes. The values of $\lambda$ that were evaluated are $\lamba = {0.5, 1, 2, 5, 10}$}
+\caption{Performance of SGD on the three datasets for different values of the regularize $\lambda$. The number of iterations was $70,000$ and we have $M = 60$ hidden nodes. The values of $\lambda$ that were evaluated are $\lambda = {0.5, 1, 2, 5, 10}$}
 \label{SGD_minist_CER_lambda}
 \end{figure}
-
-
 
 
 
