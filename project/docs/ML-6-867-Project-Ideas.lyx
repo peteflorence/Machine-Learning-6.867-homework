@@ -371,5 +371,222 @@ Train with concave, performance on convex???
 \end_layout
 
 \end_deeper
+\begin_layout Section
+Project Proposal
+\end_layout
+
+\begin_layout Subsection
+Steps/Milestones
+\end_layout
+
+\begin_layout Enumerate
+11/16 - Get simulation environment up and running 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Raycast within director
+\end_layout
+
+\begin_layout Enumerate
+Simple car model (in python) -
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+At first car with constant forward speed and 3 actions, {Left, Right, Straight}
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Auto-generation of worlds with random collections of obstacles and boundaries.
+ Should have a few canonical worlds that we can always access for testing
+ repeatability
+\end_layout
+
+\begin_layout Enumerate
+Simple controller
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Maybe performs random actions for now.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Have a method for logging the data of the runs? Print to a file, or broadcast
+ to lcm.
+ Probably print to a file is better
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+11/23 Q-learning (simplified)
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Discretize the state space, e.g.
+ 5 lasers with only 5 distances each, then size of state space is approximately
+ 10,000.
+ Not that large .
+ .
+ .
+\end_layout
+
+\begin_layout Enumerate
+Drive around in very simple world, with no obstacles, except around the
+ edges to keep the car from driving off to infinity.
+\end_layout
+
+\begin_layout Enumerate
+Verify performance of the code and convergence of the Q-values
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+11/30 Q-Learning (full)
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Represent the Q-values using linear regression, as outline above in section
+ 2.2.
+\end_layout
+
+\begin_layout Enumerate
+Verify convergence of the Q-values in simple world.
+\end_layout
+
+\begin_layout Enumerate
+Add obstacles and verify convergence
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+12/5 Evaluation of algorithm performance
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+How does changing the number of lasers and their field of view affect
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Training time
+\end_layout
+
+\begin_layout Enumerate
+Performance
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Subsubsection
+Time permitting goals/milestones
+\end_layout
+
+\begin_layout Enumerate
+Generalize our approach to a more complicated car model
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+e.g.
+ allow the car to have 
+\begin_inset Quotes eld
+\end_inset
+
+state
+\begin_inset Quotes erd
+\end_inset
+
+ instead of the state just being the laser state
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Increase the number of lasers
+\end_layout
+
+\begin_layout Subsection
+Risks
+\end_layout
+
+\begin_layout Enumerate
+Q-values fail to converge, or they converge very slowly
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Maybe because we aren't sampling the entire space
+\end_layout
+
+\begin_layout Enumerate
+The state space of our Q-values is too large .
+ .
+ .
+ 
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Mitigation approach: 
+\series default
+Reduce the dimensionality of the space by applying some hand designed features
+ to the laser data before it is processed by the algorithm.
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+Division of Responsibility
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Pete: 
+\end_layout
+
+\begin_layout Itemize
+Simulator
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Lucas:
+\end_layout
+
+\begin_layout Itemize
+Q-Learning (simple)
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Both:
+\end_layout
+
+\begin_layout Itemize
+Q-learning (full)
+\end_layout
+
+\begin_layout Itemize
+Algorithm evaluation
+\end_layout
+
+\begin_layout Itemize
+Hand-tuned features for dimensionality reduction .
+ .
+ .
+ 
+\end_layout
+
 \end_body
 \end_document
