@@ -1,0 +1,500 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+6.867 Machine Learning Project Ideas
+\end_layout
+
+\begin_layout Author
+Lucas Manuelli and Pete Florence
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+For our project, we want to explore reinforcement learning via Q-learning
+ on a simple car model in simulation.
+ We both work on robotics and so naturally are interested in scenarios in
+ which we need to make decisions in order to decide which data is available
+ for us to learn from, AKA reinforcement learning.
+\end_layout
+
+\begin_layout Standard
+Although reinforcement learning was outside the scope of 6.867, a component
+ of our proposed approach (representation of the Q-values) involves supervised
+ learning.
+ As a first step we will investigate linear regression (with some set of
+ hand-selected features) for this component, and we may explore other supervised
+ learning options as well, potentially including Bayesian priors.
+ We expect this project to build strongly on what we’ve learned in 6.867.
+\end_layout
+
+\begin_layout Standard
+There are a few different options for baseline algorithms that we are interested
+ in comparing.
+ This may actually turn out to be quite easy, since there are other projects
+ going on in our lab that are developing other approaches to planning in
+ a simple limited-sensor-horizon car model environment.
+\end_layout
+
+\begin_layout Standard
+Although our project for this class will be all in simulation, we will have
+ access to a ~1/8 scale car hardware platform with a 2D LIDAR, and if our
+ simulations work, a goal is to get the car driving around autonomously
+ without crashing.
+ 
+\end_layout
+
+\begin_layout Section
+Techincal Approach: Q-Learning for Autonomous Driving
+\end_layout
+
+\begin_layout Standard
+Want to apply Q-Learning techniques.
+ To do this need to formulate our problem as a dynamic programming problem.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+State
+\begin_inset space ~
+\end_inset
+
+Space:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+For simple case, no states needed to describe the motion of the car, i.e.
+ driving at constant speed.
+\end_layout
+
+\begin_layout Itemize
+Let 
+\begin_inset Formula $X=(x_{-n},\ldots,x_{0},\ldots,x_{n})$
+\end_inset
+
+ where 
+\begin_inset Formula $x_{j}\in\mathbb{R}_{+}$
+\end_inset
+
+ is the range returned by the 
+\begin_inset Formula $nth$
+\end_inset
+
+ laser beam.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\series bold
+Action Space: 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Simple Model: The action set is just 
+\begin_inset Formula $\mathcal{A}=\{L,R,S\}$
+\end_inset
+
+ just L=Left, R=Right, S=Straight options.
+\end_layout
+
+\begin_layout Itemize
+More Complex Model: Allow for the car to have some state.
+ Use a Dubins car model, so velocity and steering angle 
+\begin_inset Formula $\theta$
+\end_inset
+
+ are the state variables corresponding to the car.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Now we have specified the state and action space.
+ To apply standard Q-Learning would need to discretize the state space so
+ we could think about 
+\begin_inset Formula $Q(X_{i},a)$
+\end_inset
+
+ for each state 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Representations of Q-values: 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Simple Case: Use few beams with discretized range measurements so that we
+ can actually discretize the state space.
+\end_layout
+
+\begin_layout Itemize
+In order to scale up we (probably) need to do something smarter than representin
+g Q values with a grid.
+ Suggestions offered in Gosavi survey paper.
+ My intuition is that we should be able to do well enough with the linear
+ representation outline below.
+ Don't need to go to something as complicated as a neural network.
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+Linear: 
+\series default
+
+\begin_inset Formula $Q(X,a)=\sum_{j}w_{a}(j)\phi_{j}(X)$
+\end_inset
+
+ where 
+\begin_inset Formula $\phi$
+\end_inset
+
+ is a feature map.
+ This is a linear representation of the Q-values.
+ Makes intuitive sense to me.
+ Have an idea of what the 
+\begin_inset Formula $\phi$
+\end_inset
+
+ values could be.
+ 
+\begin_inset Formula $\phi_{j}$
+\end_inset
+
+ only depends on beam 
+\begin_inset Formula $x_{j}$
+\end_inset
+
+ and is a trucated version of 
+\begin_inset Formula $1/x_{j}$
+\end_inset
+
+.
+ Short laser detection ranges are bad, it means we are very close to an
+ obstacle.
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+If we allow speed to be in the state space, how does affect this representation?
+??
+\end_layout
+
+\begin_layout Itemize
+Would speed enter into the 
+\begin_inset Formula $\phi(X)$
+\end_inset
+
+?
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\series bold
+Neural-Network: 
+\series default
+Could train a neural network to represent Q-values, although linear representati
+on may suffice
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Section
+Steps/Milestones with Proposed Timeline + 
+\end_layout
+
+\begin_layout Enumerate
+11/16 - Get simulation environment up and running (simple car model in Python,
+ use Drake Director for visualizer, have logger working, have baseline hand-code
+d 
+\begin_inset Quotes eld
+\end_inset
+
+turn away from stuff
+\begin_inset Quotes erd
+\end_inset
+
+ controller)
+\end_layout
+
+\begin_layout Enumerate
+11/23 Q-learning (simplified)
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Discretize the state space, e.g.
+ 5 lasers with only 5 distances each, then size of state space is approximately
+ 10,000.
+ Not that large .
+ .
+ .
+\end_layout
+
+\begin_layout Enumerate
+Drive around in very simple world, with no obstacles, except around the
+ edges to keep the car from driving off to infinity.
+\end_layout
+
+\begin_layout Enumerate
+Verify performance of the code and convergence of the Q-values
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+11/30 Q-Learning (full)
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Represent the Q-values using linear regression, as outline above in section
+ 2.2.
+\end_layout
+
+\begin_layout Enumerate
+Verify convergence of the Q-values in simple world.
+\end_layout
+
+\begin_layout Enumerate
+Add obstacles and verify convergence
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+12/5 Evaluation of algorithm performance (change number of lasers, their
+ FOV (field of view), see how training time and performance (measured as
+ time without crashing?) are affected.
+\end_layout
+
+\begin_layout Subsection
+Risks
+\end_layout
+
+\begin_layout Enumerate
+Q-values fail to converge, or they converge very slowly
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Maybe because we aren't sampling the entire space
+\end_layout
+
+\begin_layout Enumerate
+The state space of our Q-values is too large .
+ .
+ .
+ 
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Mitigation approach: 
+\series default
+Reduce the dimensionality of the space by applying some hand designed features
+ to the laser data before it is processed by the algorithm.
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+Division of Responsibility
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Pete: 
+\end_layout
+
+\begin_layout Itemize
+Simulator
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Lucas:
+\end_layout
+
+\begin_layout Itemize
+Q-Learning (simple)
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Both:
+\end_layout
+
+\begin_layout Itemize
+Q-learning (full)
+\end_layout
+
+\begin_layout Itemize
+Algorithm evaluation
+\end_layout
+
+\begin_layout Itemize
+Hand-tuned features for dimensionality reduction .
+ .
+ .
+ 
+\end_layout
+
+\begin_layout Subsection
+Topics & Questions to Discuss
+\end_layout
+
+\begin_layout Itemize
+Compare/contrast performance of the different strategies outlined above.
+\end_layout
+
+\begin_layout Itemize
+Effect of having a better sensor, i.e.
+ more beams.
+ How does it affect .
+ .
+ .
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Training time - presumably makes it longer
+\end_layout
+
+\begin_layout Itemize
+Performance - is it any better? much better?
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+On policy vs.
+ off-policy learning.
+\end_layout
+
+\begin_layout Itemize
+Even if the true model of the car is quite complex, i.e.
+ Dubins, is training with simple actions 
+\begin_inset Formula ${L,R,S}$
+\end_inset
+
+ and then mapping those to the full car model enough?
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+As a follow up, what is the right 
+\begin_inset Quotes eld
+\end_inset
+
+simple space
+\begin_inset Quotes erd
+\end_inset
+
+ to train the Q-learning on, that abstracts from the full car dynamics,
+ but still captures the essentials, enough so we don't crash into stuff?
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+How does the type/structure of environment that we train on affect performance?
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Train with convex obstacles, then what will be performance with concave
+ obstacles?
+\end_layout
+
+\begin_layout Itemize
+Train with concave, performance on convex???
+\end_layout
+
+\end_deeper
+\end_body
+\end_document
