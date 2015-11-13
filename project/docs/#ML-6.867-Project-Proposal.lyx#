@@ -1,5 +1,5 @@
-#LyX 2.0 created this file. For more info see http://www.lyx.org/
-\lyxformat 413
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
 \begin_document
 \begin_header
 \textclass article
@@ -12,13 +12,13 @@
 \font_roman default
 \font_sans default
 \font_typewriter default
+\font_math auto
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
-
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -28,15 +28,24 @@
 \use_hyperref false
 \papersize default
 \use_geometry false
-\use_amsmath 1
-\use_esint 1
-\use_mhchem 1
-\use_mathdots 1
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
 \suppress_date false
+\justification true
 \use_refstyle 1
 \index Index
 \shortcut idx
@@ -63,63 +72,50 @@
 6.867 Machine Learning Project Ideas
 \end_layout
 
-\begin_layout Section
-Reinforcement Learning for Quadrotor Flips
-\end_layout
-
-\begin_layout Standard
-Use reinforcement learning to teach a quadrotor how to do a flip.
-\end_layout
-
-\begin_layout Enumerate
-First teach it how to do a flip.
-\end_layout
-
-\begin_layout Enumerate
-Next see if it can do obstacle avoidance using output feedback with the
- quad???
+\begin_layout Author
+Lucas Manuelli and Pete Florence
 \end_layout
 
 \begin_layout Section
-Q-Learning for Autonomous Driving
+Introduction
 \end_layout
 
 \begin_layout Standard
-Basically want a car that can drive autonomously through a simple obstacle
- field.
- Alternatively could use Policy gradient (PG) methods.
+For our project, we want to explore reinforcement learning via Q-learning
+ on a simple car model in simulation.
+ We both work on robotics and so naturally are interested in scenarios in
+ which we need to make decisions in order to decide which data is available
+ for us to learn from, AKA reinforcement learning.
 \end_layout
 
-\begin_layout Subsection
-Motivation & Big Picture
+\begin_layout Standard
+Although reinforcement learning was outside the scope of 6.867, a component
+ of our proposed approach (representation of the Q-values) involves supervised
+ learning.
+ As a first step we will investigate linear regression (with some set of
+ hand-selected features) for this component, and we may explore other supervised
+ learning options as well, potentially including Bayesian priors.
+ We expect this project to build strongly on what we’ve learned in 6.867.
 \end_layout
 
-\begin_layout Itemize
+\begin_layout Standard
+There are a few different options for baseline algorithms that we are interested
+ in comparing.
+ This may actually turn out to be quite easy, since there are other projects
+ going on in our lab that are developing other approaches to planning in
+ a simple limited-sensor-horizon car model environment.
+\end_layout
 
-\series bold
-Demo: 
-\series default
-Car equiped with LIDAR sensor autonomously driving through obstacle field
+\begin_layout Standard
+Although our project for this class will be all in simulation, we will have
+ access to a ~1/8 scale car hardware platform with a 2D LIDAR, and if our
+ simulations work, a goal is to get the car driving around autonomously
  without crashing.
  
 \end_layout
 
-\begin_deeper
-\begin_layout Itemize
-Project would be in simulation.
-\end_layout
-
-\begin_layout Itemize
-If that works would like to do it on the actual car that the UROPS are building.
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Think about simple case first, then add all the bells and whistles.
-\end_layout
-
-\begin_layout Subsection
-Technical Approach
+\begin_layout Section
+Techincal Approach: Q-Learning for Autonomous Driving
 \end_layout
 
 \begin_layout Standard
@@ -177,7 +173,7 @@ Simple Model: The action set is just
 \end_layout
 
 \begin_layout Itemize
-Complex Model: Allow for the car to have some state.
+More Complex Model: Allow for the car to have some state.
  Use a Dubins car model, so velocity and steering angle 
 \begin_inset Formula $\theta$
 \end_inset
@@ -262,7 +258,7 @@ Linear:
 \end_layout
 
 \begin_deeper
-\begin_layout Itemize
+\begin_layout Standard
 If we allow speed to be in the state space, how does affect this representation?
 ??
 \end_layout
@@ -281,148 +277,30 @@ Would speed enter into the
 \series bold
 Neural-Network: 
 \series default
-Could train a neural network to represent Q-values.
- 
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-I think this is going to be much harder to train.
-\end_layout
-
-\begin_layout Itemize
-Could get stuck in local minima, hard to know if we have a bug or it's just
- not converging.
- Going to try to stay away from this for the moment.
- 
+Could train a neural network to represent Q-values, although linear representati
+on may suffice
 \end_layout
 
 \end_deeper
 \end_deeper
-\end_deeper
-\begin_layout Subsection
-Topics & Questions to Discuss
+\begin_layout Section
+Steps/Milestones with Proposed Timeline + 
 \end_layout
 
-\begin_layout Itemize
-Compare/contrast performance of the different strategies outlined above.
-\end_layout
-
-\begin_layout Itemize
-Effect of having a better sensor, i.e.
- more beams.
- How does it affect .
- .
- .
- 
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Training time - presumably makes it longer
-\end_layout
-
-\begin_layout Itemize
-Performance - is it any better? much better?
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-On policy vs.
- off-policy learning.
-\end_layout
-
-\begin_layout Itemize
-Even if the true model of the car is quite complex, i.e.
- Dubins, is training with simple actions 
-\begin_inset Formula ${L,R,S}$
-\end_inset
-
- and then mapping those to the full car model enough?
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-As a follow up, what is the right 
+\begin_layout Enumerate
+11/16 - Get simulation environment up and running (simple car model in Python,
+ use Drake Director for visualizer, have logger working, have baseline hand-code
+d 
 \begin_inset Quotes eld
 \end_inset
 
-simple space
+turn away from stuff
 \begin_inset Quotes erd
 \end_inset
 
- to train the Q-learning on, that abstracts from the full car dynamics,
- but still captures the essentials, enough so we don't crash into stuff?
+ controller)
 \end_layout
 
-\end_deeper
-\begin_layout Itemize
-How does the type/structure of environment that we train on affect performance?
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Train with convex obstacles, then what will be performance with concave
- obstacles?
-\end_layout
-
-\begin_layout Itemize
-Train with concave, performance on convex???
-\end_layout
-
-\end_deeper
-\begin_layout Section
-Project Proposal
-\end_layout
-
-\begin_layout Subsection
-Steps/Milestones
-\end_layout
-
-\begin_layout Enumerate
-11/16 - Get simulation environment up and running 
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-Raycast within director
-\end_layout
-
-\begin_layout Enumerate
-Simple car model (in python) -
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-At first car with constant forward speed and 3 actions, {Left, Right, Straight}
- 
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Auto-generation of worlds with random collections of obstacles and boundaries.
- Should have a few canonical worlds that we can always access for testing
- repeatability
-\end_layout
-
-\begin_layout Enumerate
-Simple controller
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-Maybe performs random actions for now.
- 
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Have a method for logging the data of the runs? Print to a file, or broadcast
- to lcm.
- Probably print to a file is better
-\end_layout
-
-\end_deeper
 \begin_layout Enumerate
 11/23 Q-learning (simplified)
 \end_layout
@@ -467,50 +345,9 @@ Add obstacles and verify convergence
 
 \end_deeper
 \begin_layout Enumerate
-12/5 Evaluation of algorithm performance
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-How does changing the number of lasers and their field of view affect
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-Training time
-\end_layout
-
-\begin_layout Enumerate
-Performance
-\end_layout
-
-\end_deeper
-\end_deeper
-\begin_layout Subsubsection
-Time permitting goals/milestones
-\end_layout
-
-\begin_layout Enumerate
-Generalize our approach to a more complicated car model
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-e.g.
- allow the car to have 
-\begin_inset Quotes eld
-\end_inset
-
-state
-\begin_inset Quotes erd
-\end_inset
-
- instead of the state just being the laser state
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Increase the number of lasers
+12/5 Evaluation of algorithm performance (change number of lasers, their
+ FOV (field of view), see how training time and performance (measured as
+ time without crashing?) are affected.
 \end_layout
 
 \begin_layout Subsection
@@ -588,5 +425,76 @@ Hand-tuned features for dimensionality reduction .
  
 \end_layout
 
+\begin_layout Subsection
+Topics & Questions to Discuss
+\end_layout
+
+\begin_layout Itemize
+Compare/contrast performance of the different strategies outlined above.
+\end_layout
+
+\begin_layout Itemize
+Effect of having a better sensor, i.e.
+ more beams.
+ How does it affect .
+ .
+ .
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Training time - presumably makes it longer
+\end_layout
+
+\begin_layout Itemize
+Performance - is it any better? much better?
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+On policy vs.
+ off-policy learning.
+\end_layout
+
+\begin_layout Itemize
+Even if the true model of the car is quite complex, i.e.
+ Dubins, is training with simple actions 
+\begin_inset Formula ${L,R,S}$
+\end_inset
+
+ and then mapping those to the full car model enough?
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+As a follow up, what is the right 
+\begin_inset Quotes eld
+\end_inset
+
+simple space
+\begin_inset Quotes erd
+\end_inset
+
+ to train the Q-learning on, that abstracts from the full car dynamics,
+ but still captures the essentials, enough so we don't crash into stuff?
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+How does the type/structure of environment that we train on affect performance?
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Train with convex obstacles, then what will be performance with concave
+ obstacles?
+\end_layout
+
+\begin_layout Itemize
+Train with concave, performance on convex???
+\end_layout
+
+\end_deeper
 \end_body
 \end_document
