@@ -113,19 +113,23 @@ There are a few different options for baseline algorithms that we are interested
 
 \begin_layout Standard
 Although our project for this class will be all in simulation, we will have
- access to a ~1/8 scale car hardware platform with a 2D LIDAR, and if our
- simulations work, a goal is to get the car driving around autonomously
- without crashing.
+ access to a 
+\begin_inset Formula $\sim$
+\end_inset
+
+ 1/8 scale car hardware platform with a 2D LIDAR, and if our simulations
+ work, a goal is to get the car driving around autonomously without crashing.
  
 \end_layout
 
 \begin_layout Section
-Techincal Approach: Q-Learning for Autonomous Driving
+Technical Approach: Q-Learning for Autonomous Driving
 \end_layout
 
 \begin_layout Standard
 Want to apply Q-Learning techniques.
  To do this need to formulate our problem as a dynamic programming problem.
+ 
 \end_layout
 
 \begin_layout Itemize
@@ -140,8 +144,8 @@ Space:
 
 \begin_deeper
 \begin_layout Itemize
-For simple case, no states needed to describe the motion of the car, i.e.
- driving at constant speed.
+As a simple first step suppose no states are required to describe the car.
+ This would be the case if directly control the car's velocity.
 \end_layout
 
 \begin_layout Itemize
@@ -189,8 +193,8 @@ More Complex Model: Allow for the car to have some state.
 \end_deeper
 \begin_layout Standard
 Now we have specified the state and action space.
- To apply standard Q-Learning would need to discretize the state space so
- we could think about 
+ Standard Q-Learning requires discretizing the state so that we can think
+ about 
 \begin_inset Formula $Q(X_{i},a)$
 \end_inset
 
@@ -199,25 +203,27 @@ Now we have specified the state and action space.
 \end_inset
 
 .
- 
+ However, with 
+\begin_inset Formula $N$
+\end_inset
+
+ laser measurements and discretizing the possible return values into 
+\begin_inset Formula $K$
+\end_inset
+
+ pieces the size of our state space would be 
+\begin_inset Formula $K^{N}$
+\end_inset
+
+ which grows exponentially.
+ To have any hope of this working in practice we need a more efficient way
+ of representing the Q-values.
 \end_layout
 
 \begin_layout Itemize
 
 \series bold
 Representations of Q-values: 
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Simple Case: Use few beams with discretized range measurements so that we
- can actually discretize the state space.
-\end_layout
-
-\begin_layout Itemize
-In order to scale up we (probably) need to do something smarter than representin
-g Q values with a grid.
- Suggestions offered in Gosavi survey paper.
 \end_layout
 
 \begin_deeper
@@ -236,49 +242,30 @@ Linear:
 
  is a feature map.
  This is a linear representation of the Q-values.
- Makes intuitive sense to me.
- Have an idea of what the 
-\begin_inset Formula $\phi$
+ For example 
+\begin_inset Formula $\phi(x)=\min(1/x,C)$
 \end_inset
 
- values could be.
- 
-\begin_inset Formula $\phi_{j}$
+ for a large constant 
+\begin_inset Formula $C.$
 \end_inset
 
- only depends on beam 
-\begin_inset Formula $x_{j}$
-\end_inset
-
- and is a trucated version of 
-\begin_inset Formula $1/x_{j}$
-\end_inset
-
-.
- Short laser detection ranges are bad, it means we are very close to an
- obstacle.
+ Intuitively this says that we care more about laser measurements that are
+ small, namely those that indicate an obstacle close by.
+ This is just one example of a feature.
+ We could come up with several and compare them,
 \end_layout
 
-\begin_deeper
-\begin_layout Itemize
-One question is, would speed enter into the 
-\begin_inset Formula $\phi(X)$
-\end_inset
-
-?
-\end_layout
-
-\end_deeper
 \begin_layout Itemize
 
 \series bold
 Neural-Network: 
 \series default
-Could train a neural network to represent Q-values, although intuition is
- that linear representation may suffice.
+Could train a neural network to represent Q-values, although our intuition
+ is that linear representation (with appropriately chosen featuers) may
+ suffice.
 \end_layout
 
-\end_deeper
 \end_deeper
 \begin_layout Section
 Milestones with Proposed Timeline + Division of Responsibility
@@ -306,10 +293,7 @@ Lucas, 11/23 - Q-learning (simplified)
 \begin_layout Itemize
 Discretize the state space, e.g.
  5 lasers with only 5 distances each, then size of state space is approximately
- 10,000.
- Not that large .
- .
- .
+ 10,000 (which is not too large).
 \end_layout
 
 \begin_layout Itemize
@@ -350,34 +334,27 @@ Lucas + Pete, 12/5 - Evaluation of algorithm performance (change number
 Risks
 \end_layout
 
-\begin_layout Enumerate
-Q-values fail to converge, or they converge very slowly
+\begin_layout Standard
+Q-values fail to converge, or they converge very slowly.
+ Possible reasons for failure to converge could be that we aren't sampling/cover
+ing the entire state space in our simulations.
+ One approach to reducing the dimensionality of the state space is to reduce
+ the number of lasers, e.g.
+ from 50 to 25.
+ A second option is to summarize the entire laser measurement 
+\begin_inset Formula $X=(x_{-n},\ldots,x_{0},\ldots,x_{n})$
+\end_inset
+
+ into a small set of hand designed features.
+ For example, these features could include the range and bearing to the
+ nearest obstacle.
+ Then we could try to express the Q-values as a function only of this small
+ set of features.
+ This would mean we are estimating/learning a much smaller set of parameters.
 \end_layout
 
-\begin_deeper
-\begin_layout Enumerate
-Maybe because we aren't sampling the entire space
-\end_layout
-
-\begin_layout Enumerate
-The state space of our Q-values is too large .
- .
- .
- 
-\end_layout
-
-\begin_layout Enumerate
-
-\series bold
-Mitigation approach: 
-\series default
-Reduce the dimensionality of the space by applying some hand designed features
- to the laser data before it is processed by the algorithm
-\end_layout
-
-\end_deeper
 \begin_layout Section
-Topics & Questions to Discuss
+Topics/Questions to Discuss In Report
 \end_layout
 
 \begin_layout Itemize
@@ -385,41 +362,29 @@ Compare/contrast performance of the different strategies considered.
 \end_layout
 
 \begin_layout Itemize
-Effect of having a better sensor, i.e.
+What is the effect of having a better sensor, i.e.
  more beams.
- How does it affect .
- .
- .
- 
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Training time - presumably makes it longer
+ How would this affect training time (presumably makes it longer) and performanc
+e? Is there a way to train with few beams (to get fast learning), but still
+ be able ot use the added information of many beams if they are available
+ in practice?
 \end_layout
 
 \begin_layout Itemize
-Performance - is it any better? much better?
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-On policy vs.
- off-policy learning.
+How does on policy vs.
+ off-policy learning compare in this setup, e.g.
+ Q-Learning vs.
+ SARSA.
 \end_layout
 
 \begin_layout Itemize
 Even if the true model of the car is quite complex, i.e.
- Dubins, is training with simple actions 
+ Dubins, can we train with simple actions 
 \begin_inset Formula ${L,R,S}$
 \end_inset
 
- and then mapping those to the full car model enough?
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-As a follow up, what is the right 
+ and then use the policy learned on the simple model to come up with a policy
+ on the full model? As a follow up, is there an appropriate 
 \begin_inset Quotes eld
 \end_inset
 
@@ -427,25 +392,15 @@ simple space
 \begin_inset Quotes erd
 \end_inset
 
- to train the Q-learning on, that abstracts from the full car dynamics,
+ on which to train the Q-learning, that abstracts from the full car dynamics,
  but still captures the essentials, enough so we don't crash into stuff?
 \end_layout
 
-\end_deeper
 \begin_layout Itemize
 How does the type/structure of environment that we train on affect performance?
+ If we train our algorithm in a world with convex obstacles, what will be
+ the performance in a world with concave obstacles and vice versa?
 \end_layout
 
-\begin_deeper
-\begin_layout Itemize
-Train with convex obstacles, then what will be performance with concave
- obstacles?
-\end_layout
-
-\begin_layout Itemize
-Train with concave, performance on convex???
-\end_layout
-
-\end_deeper
 \end_body
 \end_document
