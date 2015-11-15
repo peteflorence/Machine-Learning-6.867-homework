@@ -46,12 +46,11 @@ def computeIntersection(locator, rayOrigin, rayEnd):
     return pt if result else None
 
 
-def updateIntersection(frame):
+def updateDrawIntersection(frame):
 
     origin = np.array(frame.transform.GetPosition())
     print "origin is now at", origin
-    rayLength = 5
-
+    
     for i in range(0,numRays):
         ray = rays[:,i]
         rayTransformed = np.array(frame.transform.TransformNormal(ray))
@@ -73,38 +72,44 @@ def updateIntersection(frame):
             color = [0,1,0]
             # d.addSphere(intersection, radius=0.04)
             vis.updatePolyData(d.getPolyData(), name, color=color)
+
+
+
+# initial positions
+x = 0.0
+y = 0.0
+psi = 0.0
+
+rad = pi/180.0
+
+# initial state
+state = np.array([x, y, psi*rad])
+
+def simulate():
+    
+    dt = 0.05
+    t = np.arange(0.0, 10, dt)
+    y = integrate.odeint(dynamics, state, t)
+
 
 def computeRays(frame):
 
+    intersections = np.zeros((3,numRays))
+
     origin = np.array(frame.transform.GetPosition())
-    rayLength = 5
 
     for i in range(0,numRays):
         ray = rays[:,i]
         rayTransformed = np.array(frame.transform.TransformNormal(ray))
-        print "rayTransformed is", rayTransformed
-        intersection = computeIntersection(locator, origin, origin + rayTransformed*rayLength)
-        name = 'ray intersection ' + str(i)
+        intersections[i] = computeIntersection(locator, origin, origin + rayTransformed*rayLength)
 
-        if intersection is not None:
-            om.removeFromObjectModel(om.findObjectByName(name))
-            d = DebugData()
-            d.addLine(origin, intersection)
-            color = [1,0,0]
-            # d.addSphere(intersection, radius=0.04)
-            vis.updatePolyData(d.getPolyData(), name, color=color)
-        else:
-            om.removeFromObjectModel(om.findObjectByName(name))
-            d = DebugData()
-            d.addLine(origin, origin+rayTransformed*rayLength)
-            color = [0,1,0]
-            # d.addSphere(intersection, radius=0.04)
-            vis.updatePolyData(d.getPolyData(), name, color=color)
-
+    return intersections
 
 def calcInput(state, t):
 
     u = 0
+    intersections = computeRays(frame)
+    return u
 
 def dynamics(state, t, u):
 
@@ -112,7 +117,7 @@ def dynamics(state, t, u):
     
     dqdt[0] = v*np.cos(state[2])
     dqdt[1] = v*np.sin(state[2]) 
-    dqdt[2] = u
+    dqdt[2] = calcInput(state)
     
     return dqdt
 
@@ -124,12 +129,14 @@ def dynamics(state, t, u):
 
 #########################
 numRays = 20
+rayLength = 5
 angleMin = -np.pi/2
 angleMax = np.pi/2
 angleGrid = np.linspace(angleMin, angleMax, numRays)
 rays = np.zeros((3,numRays))
 rays[0,:] = np.cos(angleGrid)
 rays[1,:] = np.sin(angleGrid)
+
 
 
 
@@ -148,8 +155,8 @@ rep.SetTranslateAxisEnabled(2, False)
 rep.SetRotateAxisEnabled(0, False)
 rep.SetRotateAxisEnabled(1, False)
 
-frame.connectFrameModified(updateIntersection)
-updateIntersection(frame)
+frame.connectFrameModified(updateDrawIntersection)
+updateDrawIntersection(frame)
 
 applogic.resetCamera(viewDirection=[0.2,0,-1])
 view.showMaximized()
