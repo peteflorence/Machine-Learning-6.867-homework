@@ -7,6 +7,79 @@ from ddapp.timercallback import TimerCallback
 from ddapp import applogic
 import numpy as np
 import time
+import scipy.integrate as integrate
+
+from PythonQt import QtCore, QtGui
+
+class Car:
+
+    def __init__(self):
+        self.x = 0
+
+
+# initial positions
+x = 0.0
+y = 0.0
+psi = 0.0
+rad = np.pi/180.0
+
+# initial state
+state = np.array([x, y, psi*rad])
+
+# constant velocity
+v = 8
+
+
+
+def computeRays(frame):
+
+    intersections = np.zeros((3,numRays))
+
+    origin = np.array(frame.transform.GetPosition())
+
+    for i in range(0,numRays):
+        ray = rays[:,i]
+        rayTransformed = np.array(frame.transform.TransformNormal(ray))
+        intersections[:,i] = computeIntersection(locator, origin, origin + rayTransformed*rayLength)
+
+    return intersections
+
+def calcInput(state, t):
+
+    #u = 0
+    u = np.sin(t)
+    intersections = computeRays(frame)
+    return u
+
+#     #Barry 12 controller
+#     c_1 = 1
+#     c_2 = 10
+#     c_3 = 100
+
+#     F = rays*0.0
+#     for i in range(0,numRays):
+#         F[i] = -c_1*
+
+def dynamics(state, t):
+
+    dqdt = np.zeros_like(state)
+    
+    u = calcInput(state, t)
+
+    dqdt[0] = v*np.cos(state[2])
+    dqdt[1] = v*np.sin(state[2]) 
+    dqdt[2] = u
+    
+    return dqdt
+
+def simulate(dt=0.05):
+    
+    t = np.arange(0.0, 10, dt)
+    y = integrate.odeint(dynamics, state, t)
+    return y
+
+#output = simulate(0.05)
+
 
 
 def buildWorld():
@@ -18,10 +91,10 @@ def buildWorld():
     return obj
 
 
-def buildRobot():
+def buildRobot(x=0,y=0):
 
     d = DebugData()
-    d.addCone((0,0,0), (1,0,0), height=0.2, radius=0.1)
+    d.addCone((x,y,0), (1,0,0), height=0.2, radius=0.1)
     obj = vis.showPolyData(d.getPolyData(), 'robot')
     frame = vis.addChildFrame(obj)
     return obj
@@ -52,84 +125,21 @@ def updateDrawIntersection(frame):
 
     origin = np.array(frame.transform.GetPosition())
     #print "origin is now at", origin
-    
+    d = DebugData()
+
     for i in xrange(numRays):
         ray = rays[:,i]
         rayTransformed = np.array(frame.transform.TransformNormal(ray))
         #print "rayTransformed is", rayTransformed
         intersection = computeIntersection(locator, origin, origin + rayTransformed*rayLength)
-        name = 'ray intersection ' + str(i)
+
 
         if intersection is not None:
-            om.removeFromObjectModel(om.findObjectByName(name))
-            d = DebugData()
-            d.addLine(origin, intersection)
-            color = [1,0,0]
-            # d.addSphere(intersection, radius=0.04)
-            vis.updatePolyData(d.getPolyData(), name, color=color)
+            d.addLine(origin, intersection, color=[1,0,0])
         else:
-            om.removeFromObjectModel(om.findObjectByName(name))
-            d = DebugData()
-            d.addLine(origin, origin+rayTransformed*rayLength)
-            color = [0,1,0]
-            # d.addSphere(intersection, radius=0.04)
-            vis.updatePolyData(d.getPolyData(), name, color=color)
+            d.addLine(origin, origin+rayTransformed*rayLength, color=[0,1,0])
 
-
-
-# initial positions
-x = 0.0
-y = 0.0
-psi = 0.0
-
-rad = np.pi/180.0
-
-# initial state
-state = np.array([x, y, psi*rad])
-
-def simulate(dt):
-    
-    t = np.arange(0.0, 10, dt)
-    y = integrate.odeint(dynamics, state, t)
-
-
-def computeRays(frame):
-
-    intersections = np.zeros((3,numRays))
-
-    origin = np.array(frame.transform.GetPosition())
-
-    for i in xrange(0,numRays):
-        ray = rays[:,i]
-        rayTransformed = np.array(frame.transform.TransformNormal(ray))
-        intersections[i] = computeIntersection(locator, origin, origin + rayTransformed*rayLength)
-
-    return intersections
-
-def calcInput(state, t):
-
-    u = 0
-    intersections = computeRays(frame)
-    return u
-
-#     #Barry 12 controller
-#     c_1 = 1
-#     c_2 = 10
-#     c_3 = 100
-
-#     F = rays*0.0
-#     for i in range(0,numRays):
-#         F[i] = -c_1*
-
-def dynamics(state, t, u):
-
-    dqdt = np.zeros_like(state)
-    
-    dqdt[0] = v*np.cos(state[2])
-    dqdt[1] = v*np.sin(state[2]) 
-    dqdt[2] = calcInput(state)
-    
-    return dqdt
+    vis.updatePolyData(d.getPolyData(), 'rays', colorByName='RGB255')
 
 
 
@@ -148,6 +158,27 @@ def tick():
     y = np.cos(time.time())
     setRobotState(x,y,0.0)
 
+def tick2():
+    #print timer.elapsed
+    #simulate(t.elapsed)
+
+    x = np.sin(time.time())
+    y = np.cos(time.time())
+    setRobotState(x,y,0.0)
+
+
+def onSliderChanged(value):
+    numSteps = len(evolvedState)
+    idx = int(np.floor(numSteps*(value/1000.0)))
+    print value, idx
+
+    x,y,theta = evolvedState[idx]
+    setRobotState(x,y,theta)
+
+
+def onPlayButton():
+    print 'play'
+    playTimer.start()
 
 #########################
 numRays = 20
@@ -164,10 +195,37 @@ timer = TimerCallback(targetFps=30)
 timer.callback = tick
 
 
+playTimer = TimerCallback(targetFps=30)
+playTimer.callback = tick2
+
+
 
 
 app = ConsoleApp()
 view = app.createView()
+
+
+panel = QtGui.QWidget()
+l = QtGui.QHBoxLayout(panel)
+
+playButton = QtGui.QPushButton('Play')
+playButton.connect('clicked()', onPlayButton)
+
+slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+slider.connect('valueChanged(int)', onSliderChanged)
+slider.setMaximum(999)
+
+l.addWidget(playButton)
+l.addWidget(slider)
+
+
+w = QtGui.QWidget()
+l = QtGui.QVBoxLayout(w)
+l.addWidget(view)
+l.addWidget(panel)
+
+
+w.showMaximized()
 
 world = buildWorld()
 robot = buildRobot()
@@ -183,6 +241,9 @@ rep.SetRotateAxisEnabled(1, False)
 
 frame.connectFrameModified(updateDrawIntersection)
 updateDrawIntersection(frame)
+
+# Simulate
+evolvedState = simulate()
 
 applogic.resetCamera(viewDirection=[0.2,0,-1])
 view.showMaximized()
