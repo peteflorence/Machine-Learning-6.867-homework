@@ -6,17 +6,27 @@
 
 https://github.com/RobotLocomotion/director
 
-### Recommended Usage
+### Recommended setup
 
 Add to ~/.bash_profile or ~/.bash_rc:
 
 `alias ddConsoleApp=$HOME/path-to/build/bin/ddConsoleApp`
 
-Run with visualizer
+### How to run
 
 ```
 cd project/code/
-ddConsoleApp intersection.py
+ddConsoleApp movingIntersection.py
 ```
+
+Alternatively, can press play in `runcar.ipynb`
+
+Once visualizer opens:
+
+- F8 to open the console
+- `timer.start()`
+
+
+
 
 
