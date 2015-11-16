@@ -3,8 +3,10 @@ import ddapp.visualization as vis
 import ddapp.objectmodel as om
 from ddapp.debugVis import DebugData
 from ddapp.consoleapp import ConsoleApp
+from ddapp.timercallback import TimerCallback
 from ddapp import applogic
 import numpy as np
+import time
 
 
 def buildWorld():
@@ -49,12 +51,12 @@ def computeIntersection(locator, rayOrigin, rayEnd):
 def updateDrawIntersection(frame):
 
     origin = np.array(frame.transform.GetPosition())
-    print "origin is now at", origin
+    #print "origin is now at", origin
     
-    for i in range(0,numRays):
+    for i in xrange(numRays):
         ray = rays[:,i]
         rayTransformed = np.array(frame.transform.TransformNormal(ray))
-        print "rayTransformed is", rayTransformed
+        #print "rayTransformed is", rayTransformed
         intersection = computeIntersection(locator, origin, origin + rayTransformed*rayLength)
         name = 'ray intersection ' + str(i)
 
@@ -80,14 +82,13 @@ x = 0.0
 y = 0.0
 psi = 0.0
 
-rad = pi/180.0
+rad = np.pi/180.0
 
 # initial state
 state = np.array([x, y, psi*rad])
 
-def simulate():
+def simulate(dt):
     
-    dt = 0.05
     t = np.arange(0.0, 10, dt)
     y = integrate.odeint(dynamics, state, t)
 
@@ -98,7 +99,7 @@ def computeRays(frame):
 
     origin = np.array(frame.transform.GetPosition())
 
-    for i in range(0,numRays):
+    for i in xrange(0,numRays):
         ray = rays[:,i]
         rayTransformed = np.array(frame.transform.TransformNormal(ray))
         intersections[i] = computeIntersection(locator, origin, origin + rayTransformed*rayLength)
@@ -110,6 +111,15 @@ def calcInput(state, t):
     u = 0
     intersections = computeRays(frame)
     return u
+
+#     #Barry 12 controller
+#     c_1 = 1
+#     c_2 = 10
+#     c_3 = 100
+
+#     F = rays*0.0
+#     for i in range(0,numRays):
+#         F[i] = -c_1*
 
 def dynamics(state, t, u):
 
@@ -123,8 +133,20 @@ def dynamics(state, t, u):
 
 
 
+def setRobotState(x,y,theta):
+    t = vtk.vtkTransform()
+    t.Translate(x,y,0.0)
+    t.RotateZ(np.degrees(theta))
+    robot.getChildFrame().copyFrame(t)
 
 
+def tick():
+    #print timer.elapsed
+    #simulate(t.elapsed)
+
+    x = np.sin(time.time())
+    y = np.cos(time.time())
+    setRobotState(x,y,0.0)
 
 
 #########################
@@ -136,6 +158,10 @@ angleGrid = np.linspace(angleMin, angleMax, numRays)
 rays = np.zeros((3,numRays))
 rays[0,:] = np.cos(angleGrid)
 rays[1,:] = np.sin(angleGrid)
+
+
+timer = TimerCallback(targetFps=30)
+timer.callback = tick
 
 
 
