@@ -588,5 +588,108 @@ Hand-tuned features for dimensionality reduction .
  
 \end_layout
 
+\begin_layout Section
+Meeting w/ Leslie
+\end_layout
+
+\begin_layout Standard
+Overall went pretty well.
+ Encouraged us to start with a simple case, build it up from there.
+ 
+\end_layout
+
+\begin_layout Itemize
+Our 
+\begin_inset Quotes eld
+\end_inset
+
+state
+\begin_inset Quotes erd
+\end_inset
+
+ is not really a state, i.e.
+ doesn't satisfy the Markov property.
+ This violates the conditions of all the convergence algorithms in RL.
+\end_layout
+
+\begin_layout Itemize
+Use SARSA instead of Q-Learning.
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+SARSA is apparently more tolerant to violations of the Markov property.
+ The policy and action-value function move together in a sense.
+ Makes things smooth .
+ .
+ .
+\end_layout
+
+\begin_layout Itemize
+Q-Learning can be very sensitive and bounce around, probably won't converge
+ very well in this scenario, but maybe worth trying if we have time.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Policy Search - another method we could try
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Have a parametric form of a policy
+\end_layout
+
+\begin_layout Itemize
+Train it directly on the reward function.
+\end_layout
+
+\begin_layout Itemize
+Maybe also have a linear parametric form??? Need to think about the correct
+ parametric form .
+ .
+ .
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\series bold
+3 Main Methods in RL:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Model based, i.e.
+ MPC, have a model of the world and plan within it
+\end_layout
+
+\begin_layout Enumerate
+Value based - e.g.
+ SARSA and Q-Learning
+\end_layout
+
+\begin_layout Enumerate
+Policy search
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\series bold
+Leslie Says:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Implement both SARSA and policy search methods.
+\end_layout
+
+\begin_layout Itemize
+Evaluate their relative performance.
+\end_layout
+
+\end_deeper
 \end_body
 \end_document
