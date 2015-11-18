@@ -24,7 +24,6 @@ class Simulator(object):
         self.Car = CarPlant(self.Controller)
 
 
-
     def run(self):
 
         self.timer = TimerCallback(targetFps=30)
@@ -112,7 +111,6 @@ class Simulator(object):
         t.Translate(x,y,0.0)
         t.RotateZ(np.degrees(theta))
         self.robot.getChildFrame().copyFrame(t)
-
 
     def tick(self):
         #print timer.elapsed
