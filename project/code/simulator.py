@@ -23,13 +23,18 @@ class Simulator(object):
         self.Controller = ControllerObj(self.Sensor)
         self.Car = CarPlant(self.Controller)
 
-    def mainLoop(self, endTime=10.0, dt=0.05):
+    def mainLoop(self, endTime=2.0, dt=0.05):
         self.endTime = endTime
         self.t = np.arange(0.0, self.endTime, dt)
         self.stateOverTime = np.zeros((self.endTime/dt, 3))
 
         for idx, value in enumerate(self.t):
             self.stateOverTime[idx,:] = self.Car.simulateOneStep(value, dt)
+            x = self.stateOverTime[idx,0] 
+            y = self.stateOverTime[idx,1]
+            theta = self.stateOverTime[idx,2] 
+            self.setRobotState(x,y,theta)
+
 
 
     def run(self):
@@ -147,7 +152,6 @@ class Simulator(object):
     def onSliderChanged(self, value):
         numSteps = len(self.stateOverTime)
         idx = int(np.floor(numSteps*(value/1000.0)))
-        print value, idx
         x,y,theta = self.stateOverTime[idx]
         self.setRobotState(x,y,theta)
 
