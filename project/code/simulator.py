@@ -22,6 +22,7 @@ class Simulator(object):
         self.Sensor = SensorObj()
         self.Controller = ControllerObj(self.Sensor)
         self.Car = CarPlant(self.Controller)
+        self.collisionThreshold = 0.2
 
     def mainLoop(self, endTime=10.0, dt=0.05):
         self.endTime = endTime
@@ -29,6 +30,7 @@ class Simulator(object):
         numTimesteps = np.size(self.t)
         self.stateOverTime = np.zeros((numTimesteps, 3))
         self.raycastData = np.zeros((numTimesteps, self.Sensor.numRays))
+        self.controlInputData = np.zeros(numTimesteps)
 
         currentCarState = np.copy(self.Car.state)
         nextCarState = np.copy(self.Car.state)
@@ -49,6 +51,8 @@ class Simulator(object):
             currentRaycast = self.Sensor.raycastAll(self.frame)
             self.raycastData[idx,:] = currentRaycast
             controlInput = self.Controller.computeControlInput(currentCarState, currentTime, self.frame, raycastDistance=currentRaycast)
+            self.controlInputData[idx] = controlInput
+
             nextCarState = self.Car.simulateOneStep(controlInput=controlInput)
 
             # want to compute nextRaycast so we can do the SARSA algorithm
@@ -66,10 +70,19 @@ class Simulator(object):
             currentCarState = nextCarState
             currentRaycast = nextRaycast
             counter+=1
+            # break if we are in collision
+            if self.checkInCollision(nextRaycast):
+                print "Had a collision, terminating simulation"
+                break
 
         # fill in the last state by hand
         self.stateOverTime[counter,:] = currentCarState
         self.raycastData[counter,:] = currentRaycast
+
+        # truncate stateOverTime, raycastData, controlInputs to be the correct size
+        self.stateOverTime = self.stateOverTime[0:counter+1, :]
+        self.raycastData = self.raycastData[0:counter+1, :]
+        self.controlInputData = self.controlInputData[0:counter+1]
 
 
     def run(self):
@@ -158,12 +171,21 @@ class Simulator(object):
         t.RotateZ(np.degrees(theta))
         self.robot.getChildFrame().copyFrame(t)
 
+    # returns true if we are in collision
+    def checkInCollision(self, raycastDistance):
+        if np.min(raycastDistance) < self.collisionThreshold:
+            return True
+        else:
+            return False
+
     def tick(self):
         #print timer.elapsed
         #simulate(t.elapsed)
         x = np.sin(time.time())
         y = np.cos(time.time())
         self.setRobotState(x,y,0.0)
+        if (time.time() - self.playTime) > self.endTime:
+            self.playTimer.stop()
 
     def tick2(self):
         newtime = time.time() - self.playTime
@@ -185,6 +207,7 @@ class Simulator(object):
         self.setRobotState(x,y,theta)
 
     def onSliderChanged(self, value):
+        self.playTimer.stop()
         numSteps = len(self.stateOverTime)
         idx = int(np.floor(numSteps*(value/1000.0)))
         idx = min(idx, numSteps-1)
@@ -194,8 +217,8 @@ class Simulator(object):
     def onPlayButton(self):
         print 'play'
         self.playTimer.start()
-
         self.playTime = time.time()
+
 
 
 if __name__ == "__main__":
