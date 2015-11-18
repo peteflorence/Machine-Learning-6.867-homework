@@ -11,6 +11,8 @@ import scipy.integrate as integrate
 
 from PythonQt import QtCore, QtGui
 
+from world import World
+
 class Simulator(object):
 
     def __init__(self):
@@ -73,9 +75,9 @@ class Simulator(object):
 
         w.showMaximized()
 
-        self.world = self.buildWorld()
-        self.robot = self.buildRobot()
-        self.locator = self.buildCellLocator(self.world.polyData)
+        self.world = World.buildSimpleWorld()
+        self.robot, self.frame = World.buildRobot()
+        self.locator = World.buildCellLocator(self.world.polyData)
 
         self.frame = self.robot.getChildFrame()
         self.frame.setProperty('Edit', True)
@@ -145,32 +147,6 @@ class Simulator(object):
         y = integrate.odeint(self.dynamics, self.state, t)
         print "Finished simulation:", y
         return y
-
-    def buildWorld(self):
-
-        d = DebugData()
-        d.addLine((2,-1,0), (2,1,0), radius=0.1)
-        d.addLine((2,-1,0), (1,-2,0), radius=0.1)
-        obj = vis.showPolyData(d.getPolyData(), 'world')
-        return obj
-
-
-    def buildRobot(self, x=0,y=0):
-
-        d = DebugData()
-        d.addCone((x,y,0), (1,0,0), height=0.2, radius=0.1)
-        obj = vis.showPolyData(d.getPolyData(), 'robot')
-        self.frame = vis.addChildFrame(obj)
-        return obj
-
-
-    def buildCellLocator(self, polyData):
-
-        loc = vtk.vtkCellLocator()
-        loc.SetDataSet(polyData)
-        loc.BuildLocator()
-        return loc
-
 
     def computeIntersection(self, locator, rayOrigin, rayEnd):
 
