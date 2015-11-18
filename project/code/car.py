@@ -3,7 +3,7 @@ import scipy.integrate as integrate
 
 class CarPlant(object):
 
-    def __init__(self):
+    def __init__(self, controller=None):
         # initial state
         self.x = 0.0
         self.y = 0.0
@@ -16,12 +16,18 @@ class CarPlant(object):
         # constant velocity
         self.v = 8
 
+        self.Controller = controller
+
+
     def dynamics(self, state, t):
 
         dqdt = np.zeros_like(state)
     
         # need to calculate from controller
-        u = 0
+        if self.Controller is None:
+            u = np.sin(t)
+        else:
+            u = self.Controller.computeControlInput(state, t, self.frame)
 
         dqdt[0] = self.v*np.cos(state[2])
         dqdt[1] = self.v*np.sin(state[2]) 
@@ -29,8 +35,10 @@ class CarPlant(object):
     
         return dqdt
 
+    def setFrame(self, frame):
+        self.frame = frame
+
     def simulate(self, dt=0.05):
-    
         t = np.arange(0.0, 10, dt)
         newState = integrate.odeint(self.dynamics, self.state, t)
         print "Finished simulation:", newState

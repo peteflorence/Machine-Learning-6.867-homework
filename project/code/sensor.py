@@ -18,6 +18,8 @@ class SensorObj(object):
         self.rays[0,:] = np.cos(self.angleGrid)
         self.rays[1,:] = np.sin(self.angleGrid)
 
+    def setLocator(self, locator):
+        self.locator = locator
 
     def raycastAll(self,frame):
 

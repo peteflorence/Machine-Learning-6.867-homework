@@ -14,19 +14,18 @@ from PythonQt import QtCore, QtGui
 from world import World
 from car import CarPlant
 from sensor import SensorObj
+from controller import ControllerObj
 
 class Simulator(object):
 
     def __init__(self):
-        self.variable = 1
+        self.Sensor = SensorObj()
+        self.Controller = ControllerObj(self.Sensor)
+        self.Car = CarPlant(self.Controller)
+
+
 
     def run(self):
-
-        self.Car = CarPlant()
-        self.Sensor = SensorObj()
-
-
-        #########################
 
         self.timer = TimerCallback(targetFps=30)
         self.timer.callback = self.tick
@@ -63,6 +62,8 @@ class Simulator(object):
         self.robot, self.frame = World.buildRobot()
         self.locator = World.buildCellLocator(self.world.polyData)
 
+        self.Sensor.setLocator(self.locator)
+
         self.frame = self.robot.getChildFrame()
         self.frame.setProperty('Edit', True)
         self.frame.widget.HandleRotationEnabledOff()
@@ -75,28 +76,15 @@ class Simulator(object):
         self.updateDrawIntersection(self.frame)
 
         # Simulate
+        self.Car.setFrame(self.frame)
         self.evolvedState = self.Car.simulate()
 
         applogic.resetCamera(viewDirection=[0.2,0,-1])
         view.showMaximized()
         view.raise_()
+
+        
         app.start()
-
-    def calcInput(self, state, t):
-
-        #u = 0
-        u = np.sin(t)
-        intersections = self.Sensor.raycastAll(self.frame)
-        return u
-
-    #     #Barry 12 controller
-    #     c_1 = 1
-    #     c_2 = 10
-    #     c_3 = 100
-
-    #     F = rays*0.0
-    #     for i in range(0,numRays):
-    #         F[i] = -c_1*
 
 
     def updateDrawIntersection(self, frame):
