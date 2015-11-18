@@ -17,6 +17,9 @@ class Car:
         self.x = 0
 
 
+
+
+
 # initial positions
 x = 0.0
 y = 0.0
@@ -72,11 +75,14 @@ def dynamics(state, t):
     
     return dqdt
 
+endTime = 10
 def simulate(dt=0.05):
     
-    t = np.arange(0.0, 10, dt)
+    t = np.arange(0.0, endTime, dt)
     y = integrate.odeint(dynamics, state, t)
+    print y
     return y
+
 
 #output = simulate(0.05)
 
@@ -159,12 +165,28 @@ def tick():
     setRobotState(x,y,0.0)
 
 def tick2():
-    #print timer.elapsed
-    #simulate(t.elapsed)
+    
+    newtime = time.time() - playTime
+    print time.time() - playTime
 
-    x = np.sin(time.time())
-    y = np.cos(time.time())
+    x = np.sin(newtime)
+    y = np.cos(newtime)
+
     setRobotState(x,y,0.0)
+
+def tick3():
+
+    newtime = time.time() - playTime
+    
+    newtime = np.clip(newtime, 0, endTime)
+
+    p = newtime/endTime
+    numStates = len(evolvedState)
+
+    idx = int(np.floor(numStates*p))
+
+    x,y,theta = evolvedState[idx]
+    setRobotState(x,y,theta)
 
 
 def onSliderChanged(value):
@@ -179,6 +201,12 @@ def onSliderChanged(value):
 def onPlayButton():
     print 'play'
     playTimer.start()
+
+    global playTime 
+    playTime = time.time()
+
+
+
 
 #########################
 numRays = 20
@@ -196,7 +224,9 @@ timer.callback = tick
 
 
 playTimer = TimerCallback(targetFps=30)
-playTimer.callback = tick2
+playTimer.callback = tick3
+
+
 
 
 
@@ -210,6 +240,7 @@ l = QtGui.QHBoxLayout(panel)
 
 playButton = QtGui.QPushButton('Play')
 playButton.connect('clicked()', onPlayButton)
+
 
 slider = QtGui.QSlider(QtCore.Qt.Horizontal)
 slider.connect('valueChanged(int)', onSliderChanged)

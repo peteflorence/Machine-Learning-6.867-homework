@@ -26,6 +26,8 @@ Once visualizer opens:
 - F8 to open the console
 - `timer.start()`
 
+$$ e^((x - 2)^2) $$
+
 
 
 
