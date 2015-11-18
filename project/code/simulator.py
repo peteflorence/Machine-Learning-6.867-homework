@@ -26,7 +26,9 @@ class Simulator(object):
     def mainLoop(self, endTime=10.0, dt=0.05):
         self.endTime = endTime
         self.t = np.arange(0.0, self.endTime, dt)
-        self.stateOverTime = np.zeros((self.endTime/dt, 3))
+        numTimesteps = np.size(self.t)
+        self.stateOverTime = np.zeros((numTimesteps, 3))
+        self.raycastData = np.zeros((numTimesteps, self.Sensor.numRays))
 
         for idx, value in enumerate(self.t):
             self.stateOverTime[idx,:] = self.Car.simulateOneStep(value, dt)
@@ -34,7 +36,7 @@ class Simulator(object):
             y = self.stateOverTime[idx,1]
             theta = self.stateOverTime[idx,2] 
             self.setRobotState(x,y,theta)
-
+            self.raycastData[idx,:] = self.Sensor.raycastAll(self.frame)
 
 
     def run(self):
@@ -152,6 +154,7 @@ class Simulator(object):
     def onSliderChanged(self, value):
         numSteps = len(self.stateOverTime)
         idx = int(np.floor(numSteps*(value/1000.0)))
+        idx = min(idx, numSteps-1)
         x,y,theta = self.stateOverTime[idx]
         self.setRobotState(x,y,theta)
 
