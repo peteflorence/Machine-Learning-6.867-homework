@@ -42,10 +42,11 @@ class CarPlant(object):
         t = np.arange(0.0, 10, dt)
         newState = integrate.odeint(self.dynamics, self.state, t)
         print "Finished simulation:", newState
+        print "Shape is", np.shape(newState)
         return newState
 
-    def simulateOneStep(self, dt=0.05):
-    
-        t = np.arange(0.0, dt*2, dt)
+    def simulateOneStep(self, startTime=0.0, dt=0.05):
+        t = np.linspace(startTime, startTime+dt, 2)
         newState = integrate.odeint(self.dynamics, self.state, t)
-        return newState[-1,:]
+        self.state = newState[-1,:]
+        return self.state

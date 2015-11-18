@@ -23,6 +23,17 @@ class Simulator(object):
         self.Controller = ControllerObj(self.Sensor)
         self.Car = CarPlant(self.Controller)
 
+    def mainLoop(self, endTime=10.0, dt=0.05):
+        self.endTime = endTime
+        self.t = np.arange(0.0, self.endTime, dt)
+        print self.t
+        self.stateOverTime = np.zeros((self.endTime/dt, 3))
+
+        for idx, value in enumerate(self.t):
+            print idx
+            print value
+            self.stateOverTime[idx,:] = self.Car.simulateOneStep(value, dt)
+            print self.stateOverTime[idx,:]
 
     def run(self):
 
@@ -31,7 +42,6 @@ class Simulator(object):
 
         self.playTimer = TimerCallback(targetFps=30)
         self.playTimer.callback = self.tick3
-        self.endTime = 10
 
 
         app = ConsoleApp()
@@ -76,13 +86,12 @@ class Simulator(object):
 
         # Simulate
         self.Car.setFrame(self.frame)
-        self.evolvedState = self.Car.simulate()
+        self.mainLoop()
 
         applogic.resetCamera(viewDirection=[0.2,0,-1])
         view.showMaximized()
         view.raise_()
 
-        
         app.start()
 
 
@@ -131,18 +140,18 @@ class Simulator(object):
         newtime = np.clip(newtime, 0, self.endTime)
 
         p = newtime/self.endTime
-        numStates = len(self.evolvedState)
+        numStates = len(self.stateOverTime)
 
         idx = int(np.floor(numStates*p))
 
-        x,y,theta = self.evolvedState[idx]
+        x,y,theta = self.stateOverTime[idx]
         self.setRobotState(x,y,theta)
 
     def onSliderChanged(self, value):
-        numSteps = len(self.evolvedState)
+        numSteps = len(self.stateOverTime)
         idx = int(np.floor(numSteps*(value/1000.0)))
         print value, idx
-        x,y,theta = self.evolvedState[idx]
+        x,y,theta = self.stateOverTime[idx]
         self.setRobotState(x,y,theta)
 
     def onPlayButton(self):
