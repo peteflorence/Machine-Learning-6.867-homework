@@ -4,10 +4,6 @@ from ddapp.debugVis import DebugData
 
 from PythonQt import QtCore, QtGui
 
-import numpy as np
-import time
-import scipy.integrate as integrate
-
 class World(object):
 
     def __init__(self, worldType='simple'):

@@ -1,5 +1,4 @@
 import numpy as np
-import time
 import scipy.integrate as integrate
 
 class CarPlant(object):
@@ -16,7 +15,6 @@ class CarPlant(object):
 
         # constant velocity
         self.v = 8
-
 
     def dynamics(self, state, t):
 

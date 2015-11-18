@@ -13,6 +13,7 @@ from PythonQt import QtCore, QtGui
 
 from world import World
 from car import CarPlant
+from sensor import SensorObj
 
 class Simulator(object):
 
@@ -21,19 +22,11 @@ class Simulator(object):
 
     def run(self):
 
-        Car = CarPlant()
+        self.Car = CarPlant()
+        self.Sensor = SensorObj()
 
 
         #########################
-        self.numRays = 20
-        self.rayLength = 5
-        self.angleMin = -np.pi/2
-        self.angleMax = np.pi/2
-        self.angleGrid = np.linspace(self.angleMin, self.angleMax, self.numRays)
-        self.rays = np.zeros((3,self.numRays))
-        self.rays[0,:] = np.cos(self.angleGrid)
-        self.rays[1,:] = np.sin(self.angleGrid)
-
 
         self.timer = TimerCallback(targetFps=30)
         self.timer.callback = self.tick
@@ -82,32 +75,18 @@ class Simulator(object):
         self.updateDrawIntersection(self.frame)
 
         # Simulate
-        self.evolvedState = Car.simulate()
+        self.evolvedState = self.Car.simulate()
 
         applogic.resetCamera(viewDirection=[0.2,0,-1])
         view.showMaximized()
         view.raise_()
         app.start()
 
-
-    def computeRays(self,frame):
-
-        intersections = np.zeros((3,self.numRays))
-
-        origin = np.array(frame.transform.GetPosition())
-
-        for i in range(0,self.numRays):
-            ray = self.rays[:,i]
-            rayTransformed = np.array(frame.transform.TransformNormal(ray))
-            intersections[:,i] = self.computeIntersection(self.locator, origin, origin + rayTransformed*self.rayLength)
-
-        return intersections
-
     def calcInput(self, state, t):
 
         #u = 0
         u = np.sin(t)
-        intersections = self.computeRays(self.frame)
+        intersections = self.Sensor.raycastAll(self.frame)
         return u
 
     #     #Barry 12 controller
@@ -120,36 +99,22 @@ class Simulator(object):
     #         F[i] = -c_1*
 
 
-    def computeIntersection(self, locator, rayOrigin, rayEnd):
-
-        tolerance = 0.0 # intersection tolerance
-        pt = [0.0, 0.0, 0.0] # data coordinate where intersection occurs
-        lineT = vtk.mutable(0.0) # parametric distance along line segment where intersection occurs
-        pcoords = [0.0, 0.0, 0.0] # parametric location within cell (triangle) where intersection occurs
-        subId = vtk.mutable(0) # sub id of cell intersection
-
-        result = locator.IntersectWithLine(rayOrigin, rayEnd, tolerance, lineT, pt, pcoords, subId)
-
-        return pt if result else None
-
-
     def updateDrawIntersection(self, frame):
 
         origin = np.array(frame.transform.GetPosition())
         #print "origin is now at", origin
         d = DebugData()
 
-        for i in xrange(self.numRays):
-            ray = self.rays[:,i]
+        for i in xrange(self.Sensor.numRays):
+            ray = self.Sensor.rays[:,i]
             rayTransformed = np.array(frame.transform.TransformNormal(ray))
             #print "rayTransformed is", rayTransformed
-            intersection = self.computeIntersection(self.locator, origin, origin + rayTransformed*self.rayLength)
-
+            intersection = self.Sensor.raycast(self.locator, origin, origin + rayTransformed*self.Sensor.rayLength)
 
             if intersection is not None:
                 d.addLine(origin, intersection, color=[1,0,0])
             else:
-                d.addLine(origin, origin+rayTransformed*self.rayLength, color=[0,1,0])
+                d.addLine(origin, origin+rayTransformed*self.Sensor.rayLength, color=[0,1,0])
 
         vis.updatePolyData(d.getPolyData(), 'rays', colorByName='RGB255')
 
