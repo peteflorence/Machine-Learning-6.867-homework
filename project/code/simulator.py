@@ -26,14 +26,11 @@ class Simulator(object):
     def mainLoop(self, endTime=10.0, dt=0.05):
         self.endTime = endTime
         self.t = np.arange(0.0, self.endTime, dt)
-        print self.t
         self.stateOverTime = np.zeros((self.endTime/dt, 3))
 
         for idx, value in enumerate(self.t):
-            print idx
-            print value
             self.stateOverTime[idx,:] = self.Car.simulateOneStep(value, dt)
-            print self.stateOverTime[idx,:]
+
 
     def run(self):
 
@@ -67,7 +64,7 @@ class Simulator(object):
 
         w.showMaximized()
 
-        self.world = World.buildSimpleWorld()
+        self.world = World.buildBigWorld()
         self.robot, self.frame = World.buildRobot()
         self.locator = World.buildCellLocator(self.world.polyData)
 
