@@ -26,15 +26,50 @@ class Simulator(object):
     def mainLoop(self, endTime=10.0, dt=0.05):
         self.endTime = endTime
         self.t = np.arange(0.0, self.endTime, dt)
-        self.stateOverTime = np.zeros((self.endTime/dt, 3))
+        numTimesteps = np.size(self.t)
+        self.stateOverTime = np.zeros((numTimesteps, 3))
+        self.raycastData = np.zeros((numTimesteps, self.Sensor.numRays))
 
-        for idx, value in enumerate(self.t):
-            self.stateOverTime[idx,:] = self.Car.simulateOneStep(value, dt)
-            x = self.stateOverTime[idx,0] 
+        currentCarState = np.copy(self.Car.state)
+        nextCarState = np.copy(self.Car.state)
+        self.setRobotState(currentCarState[0], currentCarState[1], currentCarState[2])
+        currentRaycast = self.Sensor.raycastAll(self.frame)
+        nextRaycast = np.zeros(self.Sensor.numRays)
+        counter = 0
+
+
+        for idx in xrange(np.size(self.t) - 1):
+            currentTime = self.t[idx]
+            self.stateOverTime[idx,:] = currentCarState
+            x = self.stateOverTime[idx,0]
             y = self.stateOverTime[idx,1]
-            theta = self.stateOverTime[idx,2] 
+            theta = self.stateOverTime[idx,2]
             self.setRobotState(x,y,theta)
+            # self.setRobotState(currentCarState[0], currentCarState[1], currentCarState[2])
+            currentRaycast = self.Sensor.raycastAll(self.frame)
+            self.raycastData[idx,:] = currentRaycast
+            controlInput = self.Controller.computeControlInput(currentCarState, currentTime, self.frame, raycastDistance=currentRaycast)
+            nextCarState = self.Car.simulateOneStep(controlInput=controlInput)
 
+            # want to compute nextRaycast so we can do the SARSA algorithm
+            x = nextCarState[0]
+            y = nextCarState[1]
+            theta = nextCarState[2]
+            self.setRobotState(x,y,theta)
+            nextRaycast = self.Sensor.raycastAll(self.frame)
+
+            #Also need to compute the reward . . .
+
+            ## Now have everything we need to pass to SARSA algorithm
+
+            #bookkeeping
+            currentCarState = nextCarState
+            currentRaycast = nextRaycast
+            counter+=1
+
+        # fill in the last state by hand
+        self.stateOverTime[counter,:] = currentCarState
+        self.raycastData[counter,:] = currentRaycast
 
 
     def run(self):
@@ -145,13 +180,14 @@ class Simulator(object):
         numStates = len(self.stateOverTime)
 
         idx = int(np.floor(numStates*p))
-
+        idx = min(idx, numStates-1)
         x,y,theta = self.stateOverTime[idx]
         self.setRobotState(x,y,theta)
 
     def onSliderChanged(self, value):
         numSteps = len(self.stateOverTime)
         idx = int(np.floor(numSteps*(value/1000.0)))
+        idx = min(idx, numSteps-1)
         x,y,theta = self.stateOverTime[idx]
         self.setRobotState(x,y,theta)
 

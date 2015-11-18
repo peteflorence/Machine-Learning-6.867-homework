@@ -6,11 +6,14 @@ class ControllerObj(object):
     def __init__(self, sensor):
         self.Sensor = sensor
 
-    def computeControlInput(self, state, t, frame):
+    def computeControlInput(self, state, t, frame, raycastDistance=None):
         # test cases
         # u = 0
         # u = np.sin(t)
-        distances = self.Sensor.raycastAll(frame)
+        if raycastDistance is None:
+            distances = self.Sensor.raycastAll(frame)
+        else:
+            distances = raycastDistance
 
 
 
@@ -44,9 +47,10 @@ class ControllerObj(object):
         # Count stuff controller
         firstHalf = distances[0:numRays/2]
         secondHalf = distances[numRays/2:]
+        tol = 1e-3;
 
-        numLeft = np.count_nonzero(firstHalf)
-        numRight = np.count_nonzero(secondHalf)
+        numLeft = np.size(np.where(firstHalf < self.Sensor.rayLength - tol))
+        numRight = np.size(np.where(secondHalf < self.Sensor.rayLength - tol))
 
         if numLeft == numRight:
             u = 0

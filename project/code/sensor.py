@@ -23,7 +23,7 @@ class SensorObj(object):
 
     def raycastAll(self,frame):
 
-        distances = np.zeros((1,self.numRays))[0]
+        distances = np.zeros(self.numRays)
 
         origin = np.array(frame.transform.GetPosition())
 
@@ -32,7 +32,7 @@ class SensorObj(object):
             rayTransformed = np.array(frame.transform.TransformNormal(ray))
             intersection = self.raycast(self.locator, origin, origin + rayTransformed*self.rayLength)
             if intersection is None:
-                distances[i] = 0
+                distances[i] = self.rayLength
             else:
                 distances[i] = np.linalg.norm(intersection - origin)
 

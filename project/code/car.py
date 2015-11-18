@@ -19,15 +19,18 @@ class CarPlant(object):
         self.Controller = controller
 
 
-    def dynamics(self, state, t):
+    def dynamics(self, state, t, controlInput=None):
 
         dqdt = np.zeros_like(state)
-    
-        # need to calculate from controller
-        if self.Controller is None:
-            u = np.sin(t)
+
+        if controlInput is not None:
+            u = controlInput
         else:
-            u = self.Controller.computeControlInput(state, t, self.frame)
+            # need to calculate from controller
+            if self.Controller is None:
+                u = np.sin(t)
+            else:
+                u = self.Controller.computeControlInput(state, t, self.frame)
 
         dqdt[0] = self.v*np.cos(state[2])
         dqdt[1] = self.v*np.sin(state[2]) 
@@ -45,8 +48,8 @@ class CarPlant(object):
         print "Shape is", np.shape(newState)
         return newState
 
-    def simulateOneStep(self, startTime=0.0, dt=0.05):
+    def simulateOneStep(self, startTime=0.0, dt=0.05, controlInput=None):
         t = np.linspace(startTime, startTime+dt, 2)
-        newState = integrate.odeint(self.dynamics, self.state, t)
+        newState = integrate.odeint(self.dynamics, self.state, t, args=(controlInput,))
         self.state = newState[-1,:]
         return self.state
