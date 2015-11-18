@@ -31,6 +31,11 @@ class SensorObj(object):
             ray = self.rays[:,i]
             rayTransformed = np.array(frame.transform.TransformNormal(ray))
             intersections[:,i] = self.raycast(self.locator, origin, origin + rayTransformed*self.rayLength)
+            
+            #if intersection is None:
+            #    distances[i] = 0
+            #else:
+            #    distances[i] = np.linalg.norm(origin - intersection)
 
         return intersections
 

@@ -7,16 +7,22 @@ class ControllerObj(object):
         self.Sensor = sensor
 
     def computeControlInput(self, state, t, frame):
-        #u = 0
-        u = np.sin(t)
+        # base tests
+        # u = 0
+        # u = np.sin(t)
+        
+
         intersections = self.Sensor.raycastAll(frame)
-        return u
+        u = 0
+        
+        # #Barry 12 controller
+        # c_1 = 1
+        # c_2 = 10
+        # c_3 = 100
 
-    #     #Barry 12 controller
-    #     c_1 = 1
-    #     c_2 = 10
-    #     c_3 = 100
+        # F = intersections*0.0
+        # for idx, value in enumerate(intersections):
+        #     F[i] = -c_1*
 
-    #     F = rays*0.0
-    #     for i in range(0,numRays):
-    #         F[i] = -c_1*
+
+        # return u
