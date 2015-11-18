@@ -12,6 +12,7 @@ import scipy.integrate as integrate
 from PythonQt import QtCore, QtGui
 
 from world import World
+from car import CarPlant
 
 class Simulator(object):
 
@@ -20,17 +21,7 @@ class Simulator(object):
 
     def run(self):
 
-        # initial positions
-        self.x = 0.0
-        self.y = 0.0
-        self.psi = 0.0
-        rad = np.pi/180.0
-
-        # initial state
-        self.state = np.array([self.x, self.y, self.psi*rad])
-
-        # constant velocity
-        self.v = 8
+        Car = CarPlant()
 
 
         #########################
@@ -91,7 +82,7 @@ class Simulator(object):
         self.updateDrawIntersection(self.frame)
 
         # Simulate
-        self.evolvedState = self.simulate()
+        self.evolvedState = Car.simulate()
 
         applogic.resetCamera(viewDirection=[0.2,0,-1])
         view.showMaximized()
@@ -128,25 +119,6 @@ class Simulator(object):
     #     for i in range(0,numRays):
     #         F[i] = -c_1*
 
-    def dynamics(self, state, t):
-
-        dqdt = np.zeros_like(state)
-        
-        u = self.calcInput(state, t)
-
-        dqdt[0] = self.v*np.cos(state[2])
-        dqdt[1] = self.v*np.sin(state[2]) 
-        dqdt[2] = u
-        
-        return dqdt
-
-    
-    def simulate(self, dt=0.05):
-        
-        t = np.arange(0.0, self.endTime, dt)
-        y = integrate.odeint(self.dynamics, self.state, t)
-        print "Finished simulation:", y
-        return y
 
     def computeIntersection(self, locator, rayOrigin, rayEnd):
 
@@ -180,7 +152,6 @@ class Simulator(object):
                 d.addLine(origin, origin+rayTransformed*self.rayLength, color=[0,1,0])
 
         vis.updatePolyData(d.getPolyData(), 'rays', colorByName='RGB255')
-
 
 
     def setRobotState(self, x, y, theta):

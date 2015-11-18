@@ -2,7 +2,7 @@ import numpy as np
 import time
 import scipy.integrate as integrate
 
-class Car(object):
+class CarPlant(object):
 
     def __init__(self):
         # initial state
@@ -35,6 +35,7 @@ class Car(object):
     
         t = np.arange(0.0, 10, dt)
         newState = integrate.odeint(self.dynamics, self.state, t)
+        print "Finished simulation:", newState
         return newState
 
     def simulateOneStep(self, dt=0.05):
