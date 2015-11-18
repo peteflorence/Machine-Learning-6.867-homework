@@ -31,7 +31,7 @@ class World(object):
         worldYmax = 50
 
         numObs = 200
-        obsLength = 4
+        obsLength = 2.0
 
         for i in xrange(numObs):
             firstX = worldXmin + np.random.rand()*(worldXmax-worldXmin)
@@ -39,7 +39,7 @@ class World(object):
             firstEndpt = (firstX,firstY,0)
             
             randTheta = np.random.rand() * 2.0*np.pi
-            secondEndpt = (firstX+np.cos(randTheta), firstY+np.sin(randTheta), 0)
+            secondEndpt = (firstX+obsLength*np.cos(randTheta), firstY+obsLength*np.sin(randTheta), 0)
 
             d.addLine(firstEndpt, secondEndpt, radius=0.1)
 
