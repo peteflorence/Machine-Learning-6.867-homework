@@ -55,8 +55,8 @@ class ControllerObj(object):
         if numLeft == numRight:
             u = 0
         elif numLeft > numRight:
-            u = 1
+            u = 2
         else:
-            u = -1
+            u = -2
 
         return u

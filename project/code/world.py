@@ -30,6 +30,21 @@ class World(object):
         worldYmin = -50
         worldYmax = 50
 
+        # draw boundaries for the world
+        NW = (worldXmax, worldYmax, 0)
+        NE = (worldXmax, worldYmin, 0)
+        SE = (worldXmin, worldYmin, 0)
+        SW = (worldXmin, worldYmax, 0)
+        NW = (worldXmax, worldYmax, 0)
+
+        listOfCorners = [NW, NE, SE, SW, NW]
+        for idx, value in enumerate(listOfCorners[:-1]):
+            firstEndpt = value
+            secondEndpt = listOfCorners[idx+1]
+            d.addLine(firstEndpt, secondEndpt, radius=0.1)
+
+
+        # draw random stick obstacles
         numObs = 200
         obsLength = 2.0
 
@@ -42,6 +57,7 @@ class World(object):
             secondEndpt = (firstX+obsLength*np.cos(randTheta), firstY+obsLength*np.sin(randTheta), 0)
 
             d.addLine(firstEndpt, secondEndpt, radius=0.1)
+
 
         obj = vis.showPolyData(d.getPolyData(), 'world')
         return obj

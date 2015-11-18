@@ -23,7 +23,7 @@ class Simulator(object):
         self.Controller = ControllerObj(self.Sensor)
         self.Car = CarPlant(self.Controller)
 
-    def mainLoop(self, endTime=10.0, dt=0.05):
+    def mainLoop(self, endTime=20.0, dt=0.05):
         self.endTime = endTime
         self.t = np.arange(0.0, self.endTime, dt)
         numTimesteps = np.size(self.t)
