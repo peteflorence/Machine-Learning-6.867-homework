@@ -5,20 +5,26 @@ class ControllerObj(object):
 
     def __init__(self, sensor):
         self.Sensor = sensor
+        self.numRays = self.Sensor.numRays
 
     def computeControlInput(self, state, t, frame, raycastDistance=None):
         # test cases
         # u = 0
         # u = np.sin(t)
         if raycastDistance is None:
-            distances = self.Sensor.raycastAll(frame)
+            self.distances = self.Sensor.raycastAll(frame)
         else:
-            distances = raycastDistance
-
-
+            self.distances = raycastDistance
 
         # #Barry 12 controller
-        numRays = self.Sensor.numRays
+        
+
+        #u = self.countStuffController()
+        u = self.countInverseDistancesController()
+
+        return u
+
+
         # rays = self.Sensor.rays
 
         # c_1 = 1
@@ -44,9 +50,9 @@ class ControllerObj(object):
         # print u
 
 
-        # Count stuff controller
-        firstHalf = distances[0:numRays/2]
-        secondHalf = distances[numRays/2:]
+    def countStuffController(self):
+        firstHalf = self.distances[0:self.numRays/2]
+        secondHalf = self.distances[self.numRays/2:]
         tol = 1e-3;
 
         numLeft = np.size(np.where(firstHalf < self.Sensor.rayLength - tol))
@@ -55,8 +61,27 @@ class ControllerObj(object):
         if numLeft == numRight:
             u = 0
         elif numLeft > numRight:
-            u = 2
+            u = 4
         else:
-            u = -2
-
+            u = -4
         return u
+
+    def countInverseDistancesController(self):
+        firstHalf = np.array((self.distances[0:self.numRays/2]))
+        secondHalf = np.array((self.distances[self.numRays/2:]))
+        tol = 1e-3;
+
+        inverseFirstHalf = (1/firstHalf)**2
+        inverseSecondHalf = (1/secondHalf)**2
+
+        numLeft = np.sum(inverseFirstHalf)
+        numRight = np.sum(inverseSecondHalf)
+
+        if numLeft == numRight:
+            u = 0
+        elif numLeft > numRight:
+            u = 4
+        else:
+            u = -4
+        return u
+

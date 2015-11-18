@@ -1,4 +1,6 @@
 import ddapp.vtkAll as vtk
+from ddapp import ioUtils
+from ddapp import filterUtils
 import ddapp.visualization as vis
 from ddapp.debugVis import DebugData
 
@@ -45,7 +47,7 @@ class World(object):
 
 
         # draw random stick obstacles
-        numObs = 200
+        numObs = 300
         obsLength = 2.0
 
         for i in xrange(numObs):
@@ -64,10 +66,19 @@ class World(object):
 
     @staticmethod
     def buildRobot(x=0,y=0):
+        polyData = ioUtils.readPolyData('celica.obj')
+        
+        scale = 0.04
+        t = vtk.vtkTransform()
+        t.RotateZ(90)
+        t.Scale(scale, scale, scale)
+        polyData = filterUtils.transformPolyData(polyData, t)
 
-        d = DebugData()
-        d.addCone((x,y,0), (1,0,0), height=0.2, radius=0.1)
-        obj = vis.showPolyData(d.getPolyData(), 'robot')
+        #d = DebugData()
+        #d.addCone((x,y,0), (1,0,0), height=0.2, radius=0.1)
+        #polyData = d.getPolyData()
+
+        obj = vis.showPolyData(polyData, 'robot')
         robotFrame = vis.addChildFrame(obj)
         return obj, robotFrame
 

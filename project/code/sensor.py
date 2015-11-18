@@ -4,7 +4,7 @@ import numpy as np
 
 class SensorObj(object):
 
-    def __init__(self, FOV=180.0, numRays=20, rayLength=5):
+    def __init__(self, FOV=180.0, numRays=20, rayLength=8):
         self.numRays = numRays
         self.rayLength = rayLength
 

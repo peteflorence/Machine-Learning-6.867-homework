@@ -19,12 +19,13 @@ from controller import ControllerObj
 class Simulator(object):
 
     def __init__(self):
+        self.startSimTime = time.time()
         self.Sensor = SensorObj()
         self.Controller = ControllerObj(self.Sensor)
         self.Car = CarPlant(self.Controller)
         self.collisionThreshold = 0.2
 
-    def mainLoop(self, endTime=20.0, dt=0.05):
+    def mainLoop(self, endTime=40.0, dt=0.05):
         self.endTime = endTime
         self.t = np.arange(0.0, self.endTime, dt)
         numTimesteps = np.size(self.t)
@@ -84,6 +85,9 @@ class Simulator(object):
         self.raycastData = self.raycastData[0:counter+1, :]
         self.controlInputData = self.controlInputData[0:counter+1]
 
+        self.counter = counter
+        self.endTime = 1.0*counter/numTimesteps*self.endTime
+
 
     def run(self):
 
@@ -95,7 +99,8 @@ class Simulator(object):
 
 
         app = ConsoleApp()
-        view = app.createView()
+        view = app.createView(useGrid=False)
+        self.view = view
 
         panel = QtGui.QWidget()
         l = QtGui.QHBoxLayout(panel)
@@ -131,17 +136,21 @@ class Simulator(object):
         rep.SetRotateAxisEnabled(0, False)
         rep.SetRotateAxisEnabled(1, False)
 
-        self.frame.connectFrameModified(self.updateDrawIntersection)
-        self.updateDrawIntersection(self.frame)
-
         # Simulate
         self.Car.setFrame(self.frame)
         self.mainLoop()
+
+        self.frame.connectFrameModified(self.updateDrawIntersection)
+        self.updateDrawIntersection(self.frame)
 
         applogic.resetCamera(viewDirection=[0.2,0,-1])
         view.showMaximized()
         view.raise_()
 
+        elapsed = time.time() - self.startSimTime
+        simRate = self.counter/elapsed
+        print "Total run time", elapsed
+        print "Ticks (Hz)", simRate
         app.start()
 
 
@@ -163,6 +172,10 @@ class Simulator(object):
                 d.addLine(origin, origin+rayTransformed*self.Sensor.rayLength, color=[0,1,0])
 
         vis.updatePolyData(d.getPolyData(), 'rays', colorByName='RGB255')
+
+        #camera = self.view.camera()
+        #camera.SetFocalPoint(frame.transform.GetPosition())
+        #camera.SetPosition(frame.transform.TransformPoint((-30,0,10)))
 
 
     def setRobotState(self, x, y, theta):

@@ -148,7 +148,6 @@ def updateDrawIntersection(frame):
     vis.updatePolyData(d.getPolyData(), 'rays', colorByName='RGB255')
 
 
-
 def setRobotState(x,y,theta):
     t = vtk.vtkTransform()
     t.Translate(x,y,0.0)
