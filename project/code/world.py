@@ -23,7 +23,7 @@ class World(object):
         return obj
 
     @staticmethod
-    def buildBigWorld():
+    def buildBigWorld(numObstacles=200):
         d = DebugData()
 
         worldXmin = -20
@@ -47,10 +47,9 @@ class World(object):
 
 
         # draw random stick obstacles
-        numObs = 300
         obsLength = 2.0
 
-        for i in xrange(numObs):
+        for i in xrange(numObstacles):
             firstX = worldXmin + np.random.rand()*(worldXmax-worldXmin)
             firstY = worldYmin + np.random.rand()*(worldYmax-worldYmin)
             firstEndpt = (firstX,firstY,0)

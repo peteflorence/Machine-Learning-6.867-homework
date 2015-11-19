@@ -8,6 +8,7 @@ from ddapp import applogic
 import numpy as np
 import time
 import scipy.integrate as integrate
+import argparse
 
 from PythonQt import QtCore, QtGui
 
@@ -15,18 +16,76 @@ from world import World
 from car import CarPlant
 from sensor import SensorObj
 from controller import ControllerObj
+from sarsa import SARSA
+from reward import Reward
+
 
 class Simulator(object):
 
-    def __init__(self):
+    def __init__(self, numObstacles=200, endTime=40):
         self.startSimTime = time.time()
         self.Sensor = SensorObj()
         self.Controller = ControllerObj(self.Sensor)
         self.Car = CarPlant(self.Controller)
-        self.collisionThreshold = 0.2
-
-    def mainLoop(self, endTime=40.0, dt=0.05):
+        self.Sarsa = SARSA(sensorObj=self.Sensor, actionSet=self.Controller.actionSet)
+        self.collisionThreshold = 1.3
+        self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
+        self.numObstacles = numObstacles
         self.endTime = endTime
+        self.initialize()
+
+    def initialize(self):
+
+        # create the visualizer object
+        self.app = ConsoleApp()
+        # view = app.createView(useGrid=False)
+        self.view = self.app.createView(useGrid=False)
+
+        # panel = QtGui.QWidget()
+        # l = QtGui.QHBoxLayout(panel)
+        #
+        # playButton = QtGui.QPushButton('Play')
+        # playButton.connect('clicked()', self.onPlayButton)
+        #
+        # slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        # slider.connect('valueChanged(int)', self.onSliderChanged)
+        # slider.setMaximum(999)
+        #
+        # l.addWidget(playButton)
+        # l.addWidget(slider)
+        #
+        # w = QtGui.QWidget()
+        # l = QtGui.QVBoxLayout(w)
+        # l.addWidget(self.view)
+        # l.addWidget(panel)
+
+
+
+        # create the things needed for simulation
+        self.world = World.buildBigWorld(numObstacles=self.numObstacles)
+        self.robot, self.frame = World.buildRobot()
+        self.locator = World.buildCellLocator(self.world.polyData)
+        self.Sensor.setLocator(self.locator)
+        self.frame = self.robot.getChildFrame()
+
+
+        self.frame.setProperty('Scale', 3)
+        self.frame.setProperty('Edit', True)
+        self.frame.widget.HandleRotationEnabledOff()
+        rep = self.frame.widget.GetRepresentation()
+        rep.SetTranslateAxisEnabled(2, False)
+        rep.SetRotateAxisEnabled(0, False)
+        rep.SetRotateAxisEnabled(1, False)
+
+        # Simulate
+        self.Car.setFrame(self.frame)
+        # self.mainLoop()
+
+
+    def mainLoop(self, endTime=None, dt=0.05):
+
+        if endTime is not None:
+            self.endTime = endTime
         self.t = np.arange(0.0, self.endTime, dt)
         numTimesteps = np.size(self.t)
         self.stateOverTime = np.zeros((numTimesteps, 3))
@@ -51,7 +110,7 @@ class Simulator(object):
             # self.setRobotState(currentCarState[0], currentCarState[1], currentCarState[2])
             currentRaycast = self.Sensor.raycastAll(self.frame)
             self.raycastData[idx,:] = currentRaycast
-            controlInput = self.Controller.computeControlInput(currentCarState, currentTime, self.frame, raycastDistance=currentRaycast)
+            controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState, currentTime, self.frame, raycastDistance=currentRaycast)
             self.controlInputData[idx] = controlInput
 
             nextCarState = self.Car.simulateOneStep(controlInput=controlInput)
@@ -89,7 +148,7 @@ class Simulator(object):
         self.endTime = 1.0*counter/numTimesteps*self.endTime
 
 
-    def run(self):
+    def runOld(self):
 
         self.timer = TimerCallback(targetFps=30)
         self.timer.callback = self.tick
@@ -129,6 +188,8 @@ class Simulator(object):
         self.Sensor.setLocator(self.locator)
 
         self.frame = self.robot.getChildFrame()
+
+        self.frame.setProperty('Scale', 3)
         self.frame.setProperty('Edit', True)
         self.frame.widget.HandleRotationEnabledOff()
         rep = self.frame.widget.GetRepresentation()
@@ -153,6 +214,54 @@ class Simulator(object):
         print "Ticks (Hz)", simRate
         app.start()
 
+
+    def setupPlayback(self):
+
+        self.timer = TimerCallback(targetFps=30)
+        self.timer.callback = self.tick
+
+        self.playTimer = TimerCallback(targetFps=30)
+        self.playTimer.callback = self.tick3
+
+        panel = QtGui.QWidget()
+        l = QtGui.QHBoxLayout(panel)
+
+        playButton = QtGui.QPushButton('Play')
+        playButton.connect('clicked()', self.onPlayButton)
+
+        slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        slider.connect('valueChanged(int)', self.onSliderChanged)
+        slider.setMaximum(999)
+
+        l.addWidget(playButton)
+        l.addWidget(slider)
+
+        w = QtGui.QWidget()
+        l = QtGui.QVBoxLayout(w)
+        l.addWidget(self.view)
+        l.addWidget(panel)
+        w.showMaximized()
+
+
+
+        self.frame.connectFrameModified(self.updateDrawIntersection)
+        self.updateDrawIntersection(self.frame)
+
+        applogic.resetCamera(viewDirection=[0.2,0,-1])
+        self.view.showMaximized()
+        self.view.raise_()
+
+        elapsed = time.time() - self.startSimTime
+        simRate = self.counter/elapsed
+        print "Total run time", elapsed
+        print "Ticks (Hz)", simRate
+        print "Number of steps taken", self.counter
+        self.app.start()
+
+    def run(self):
+        self.initialize()
+        self.mainLoop()
+        self.setupPlayback()
 
     def updateDrawIntersection(self, frame):
 
@@ -234,7 +343,21 @@ class Simulator(object):
 
 
 
-if __name__ == "__main__":
-    sim = Simulator()
+
+def main(argv):
+    sim = Simulator(numObstacles=200)
     sim.run()
+
+
+if __name__ == "__main__":
+    # main(sys.argv[1:])
+    parser = argparse.ArgumentParser(description='interpret simulation parameters')
+    parser.add_argument('--numObstacles', type=int, nargs=1, default=[100])
+    parser.add_argument('--endTime', type=int, nargs=1, default=[40])
+    argNamespace = parser.parse_args()
+    numObstacles = argNamespace.numObstacles[0]
+    endTime = argNamespace.endTime[0]
+    sim = Simulator(numObstacles=numObstacles, endTime=endTime)
+    sim.run()
+
 

@@ -14,7 +14,7 @@ class CarPlant(object):
         self.state = np.array([self.x, self.y, self.psi*rad])
 
         # constant velocity
-        self.v = 16
+        self.v = 12
 
         self.Controller = controller
 

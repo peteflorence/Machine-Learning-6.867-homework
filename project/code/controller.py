@@ -3,9 +3,10 @@ import scipy.integrate as integrate
 
 class ControllerObj(object):
 
-    def __init__(self, sensor):
+    def __init__(self, sensor, u_max=4):
         self.Sensor = sensor
         self.numRays = self.Sensor.numRays
+        self.actionSet = np.array([-u_max,0,u_max])
 
     def computeControlInput(self, state, t, frame, raycastDistance=None):
         # test cases
@@ -20,9 +21,9 @@ class ControllerObj(object):
         
 
         #u = self.countStuffController()
-        u = self.countInverseDistancesController()
+        u, actionIdx = self.countInverseDistancesController()
 
-        return u
+        return u, actionIdx
 
 
         # rays = self.Sensor.rays
@@ -59,12 +60,14 @@ class ControllerObj(object):
         numRight = np.size(np.where(secondHalf < self.Sensor.rayLength - tol))
 
         if numLeft == numRight:
-            u = 0
+            actionIdx = 1
         elif numLeft > numRight:
-            u = 4
+            actionIdx = 2
         else:
-            u = -4
-        return u
+            actionIdx = 0
+
+        u = self.actionSet[actionIdx]
+        return u, actionIdx
 
     def countInverseDistancesController(self):
         firstHalf = np.array((self.distances[0:self.numRays/2]))
@@ -78,10 +81,12 @@ class ControllerObj(object):
         numRight = np.sum(inverseSecondHalf)
 
         if numLeft == numRight:
-            u = 0
+            actionIdx = 1
         elif numLeft > numRight:
-            u = 4
+            actionIdx = 2
         else:
-            u = -4
-        return u
+            actionIdx = 0
+
+        u = self.actionSet[actionIdx]
+        return u, actionIdx
 
