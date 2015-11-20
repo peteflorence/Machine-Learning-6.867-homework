@@ -23,7 +23,7 @@ from reward import Reward
 
 class Simulator(object):
 
-    def __init__(self, numObstacles=200, endTime=40, randomizeControl=False):
+    def __init__(self, numObstacles, endTime=40, randomizeControl=False):
         self.randomizeControl = randomizeControl
         self.startSimTime = time.time()
         self.Sensor = SensorObj()
@@ -314,13 +314,6 @@ class Simulator(object):
         print 'play'
         self.playTimer.start()
         self.playTime = time.time()
-
-
-
-
-def main(argv):
-    sim = Simulator(numObstacles=200)
-    sim.run()
 
 
 if __name__ == "__main__":

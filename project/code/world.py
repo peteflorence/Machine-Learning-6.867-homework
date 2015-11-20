@@ -23,11 +23,7 @@ class World(object):
         return obj
 
     @staticmethod
-    def buildBigWorld(numObstacles=200):
-        print "building big world"
-
-        d = DebugData()
-
+    def buildBoundaries(d):
         worldXmin = -20
         worldXmax = 100
 
@@ -47,6 +43,15 @@ class World(object):
             secondEndpt = listOfCorners[idx+1]
             d.addLine(firstEndpt, secondEndpt, radius=0.1)
 
+        return worldXmin, worldXmax, worldYmin, worldYmax
+
+
+    @staticmethod
+    def buildBigWorld(numObstacles):
+        print "building big world"
+
+        d = DebugData()
+        worldXmin, worldXmax, worldYmin, worldYmax = World.buildBoundaries(d)
 
         # draw random stick obstacles
         obsLength = 2.0
