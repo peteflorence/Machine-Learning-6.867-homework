@@ -24,7 +24,6 @@ class Reward(object):
     def initializeRaycastRewardWeights(self):
         self.raycastRewardWeights = -5*np.ones(self.numRays)
 
-
     def checkInCollision(self, raycastDistance):
         if np.min(raycastDistance) < self.collisionThreshold:
             return True
@@ -47,8 +46,6 @@ class Reward(object):
         raycastAdjusted[maxRangeIdx] = self.largeConstant
 
         inverseTruncated = utils.inverseTruncate(raycastAdjusted, self.cutoff)
-        print "inverse truncated"
-        print inverseTruncated
         return np.dot(self.raycastRewardWeights, inverseTruncated)
 
     def computeRewardFromFrameLocation(self):

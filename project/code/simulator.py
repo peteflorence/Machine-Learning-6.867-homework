@@ -91,6 +91,7 @@ class Simulator(object):
         self.stateOverTime = np.zeros((numTimesteps, 3))
         self.raycastData = np.zeros((numTimesteps, self.Sensor.numRays))
         self.controlInputData = np.zeros(numTimesteps)
+        self.rewardData = np.zeros(numTimesteps)
 
         currentCarState = np.copy(self.Car.state)
         nextCarState = np.copy(self.Car.state)
@@ -122,9 +123,21 @@ class Simulator(object):
             self.setRobotState(x,y,theta)
             nextRaycast = self.Sensor.raycastAll(self.frame)
 
-            #Also need to compute the reward . . .
+            # compute the next control input, this is needed for SARSA
+            nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState, currentTime, self.frame,
+                                                                                        raycastDistance=nextRaycast)
 
-            ## Now have everything we need to pass to SARSA algorithm
+            # Gather all the information we have
+            S_current = (currentCarState, currentRaycast)
+            S_next = (nextCarState, nextRaycast)
+
+
+            # compute the reward
+            reward = self.Reward.computeReward(S_next, controlInput)
+            self.rewardData[idx] = reward
+
+            ## SARSA update
+            self.Sarsa.sarsaUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
 
             #bookkeeping
             currentCarState = nextCarState
@@ -143,6 +156,7 @@ class Simulator(object):
         self.stateOverTime = self.stateOverTime[0:counter+1, :]
         self.raycastData = self.raycastData[0:counter+1, :]
         self.controlInputData = self.controlInputData[0:counter+1]
+        self.rewardData = self.rewardData[0:counter+1]
 
         self.counter = counter
         self.endTime = 1.0*counter/numTimesteps*self.endTime
@@ -318,6 +332,8 @@ class Simulator(object):
 
     def tick3(self):
         newtime = time.time() - self.playTime
+        if newtime > self.endTime:
+            self.playTimer.stop()
         newtime = np.clip(newtime, 0, self.endTime)
 
         p = newtime/self.endTime
