@@ -47,14 +47,24 @@ class World(object):
 
 
     @staticmethod
-    def buildBigWorld(numObstacles):
+    def buildBigWorld(percentObsDensity):
         print "building big world"
 
         d = DebugData()
         worldXmin, worldXmax, worldYmin, worldYmax = World.buildBoundaries(d)
+        print "boundaries done"
+
+        worldArea = (worldXmax-worldXmin)*(worldYmax-worldYmin)
+        print worldArea
+        obsScalingFactor = 1.0/12.0
+        maxNumObstacles = obsScalingFactor * worldArea
+        
+        numObstacles = int(percentObsDensity/100.0 * maxNumObstacles)
+        print numObstacles
 
         # draw random stick obstacles
         obsLength = 2.0
+
 
         for i in xrange(numObstacles):
             firstX = worldXmin + np.random.rand()*(worldXmax-worldXmin)
@@ -76,6 +86,8 @@ class World(object):
         world.Ymax = worldYmax
         world.Ymin = worldYmin
         world.numObstacles = numObstacles
+        world.percentObsDensity = percentObsDensity
+
         return world
 
     @staticmethod
