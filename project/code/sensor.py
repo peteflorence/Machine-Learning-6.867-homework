@@ -1,6 +1,8 @@
 import ddapp.vtkAll as vtk
 
 import numpy as np
+import ddapp.objectmodel as om
+
 
 class SensorObj(object):
 
@@ -37,6 +39,10 @@ class SensorObj(object):
                 distances[i] = np.linalg.norm(intersection - origin)
 
         return distances
+
+    def raycastAllFromCurrentFrameLocation(self):
+        frame = om.findObjectByName('robot frame')
+        return self.raycastAll(frame)
 
 
     def raycast(self, locator, rayOrigin, rayEnd):

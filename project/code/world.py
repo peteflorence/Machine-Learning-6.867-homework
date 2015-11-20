@@ -12,7 +12,7 @@ class World(object):
 
     def __init__(self, worldType='simple'):
         if worldType == 'simple':
-            print "Building simple world"
+            print "initializing world object"
 
     @staticmethod
     def buildSimpleWorld():
@@ -24,6 +24,8 @@ class World(object):
 
     @staticmethod
     def buildBigWorld(numObstacles=200):
+        print "building big world"
+
         d = DebugData()
 
         worldXmin = -20
@@ -61,10 +63,19 @@ class World(object):
 
 
         obj = vis.showPolyData(d.getPolyData(), 'world')
-        return obj
+
+        world = World()
+        world.visObj = obj
+        world.Xmax = worldXmax
+        world.Xmin = worldXmin
+        world.Ymax = worldYmax
+        world.Ymin = worldYmin
+        world.numObstacles = numObstacles
+        return world
 
     @staticmethod
     def buildRobot(x=0,y=0):
+        print "building robot"
         polyData = ioUtils.readPolyData('celica.obj')
         
         scale = 0.04
@@ -83,6 +94,7 @@ class World(object):
 
     @staticmethod
     def buildCellLocator(polyData):
+        print "buidling cell locator"
 
         loc = vtk.vtkCellLocator()
         loc.SetDataSet(polyData)

@@ -7,7 +7,7 @@ import numpy as np
 class Reward(object):
 
     def __init__(self, sensorObj=None, collisionThreshold=None, collisionPenalty=300.0,
-                 actionCost=1.0):
+                 actionCost=10.0):
         if sensorObj is None or collisionThreshold is None:
             ValueError("need to specify sensorObj, actionSet and collisionThreshold")
         self.numRays = sensorObj.numRays
@@ -41,21 +41,25 @@ class Reward(object):
 
     def computeRaycastReward(self, S, u):
         carState, raycastDistance = S
-        raycastAdjusted = raycastDistance - self.collisionThreshold
-        maxRangeIdx = np.where(raycastDistance > self.rayLength - self.tol)
-        raycastAdjusted[maxRangeIdx] = self.largeConstant
+        # raycastAdjusted = raycastDistance - self.collisionThreshold
+        # maxRangeIdx = np.where(raycastDistance > self.rayLength - self.tol)
+        # raycastAdjusted[maxRangeIdx] = self.largeConstant
+        #
+        # raycastAdjusted = self.setMaxRangeToLargeConstant()
 
-        inverseTruncated = utils.inverseTruncate(raycastAdjusted, self.cutoff)
+
+        inverseTruncated = utils.inverseTruncate(raycastDistance, self.cutoff, rayLength=self.rayLength,
+                                                 collisionThreshold=self.collisionThreshold)
         return np.dot(self.raycastRewardWeights, inverseTruncated)
 
-    def computeRewardFromFrameLocation(self):
+    def computeRewardFromFrameLocation(self, u=0.0):
         carFrame = om.findObjectByName('robot frame')
         raycastDistance = self.sensorObj.raycastAll(carFrame)
 
-        u = 0.0;
         carState = 0.0 # just a placeholder for now
         S = (carState, raycastDistance)
         return self.computeReward(S, u)
+
 
 
 

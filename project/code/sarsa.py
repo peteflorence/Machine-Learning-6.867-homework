@@ -1,16 +1,18 @@
 __author__ = 'manuelli'
 import numpy as np
 import utils
+import matplotlib.pyplot as plt
 
 
 class SARSA(object):
 
-    def __init__(self, sensorObj=None, actionSet=None, gamma=0.8, lam=0.7, alphaStepSize=0.05, epsilonGreedy=0.1,
-                 cutoff=20):
-        if sensorObj is None or actionSet is None:
-            raise ValueError("you must specify the sensorObj and the action set")
+    def __init__(self, sensorObj=None, actionSet=None, gamma=0.8, lam=0.7, alphaStepSize=0.05, epsilonGreedy=0.2,
+                 cutoff=20, collisionThreshold=None):
+        if sensorObj is None or actionSet is None or collisionThreshold is None:
+            raise ValueError("you must specify the sensorObj and the action set and collisionThreshold")
         self.numRays = sensorObj.numRays
         self.rayLength = sensorObj.rayLength
+        self.sensor = sensorObj
         self.lam = lam
         self.gamma = gamma # the discount factor
         self.epsilonGreedy = epsilonGreedy
@@ -19,9 +21,13 @@ class SARSA(object):
         self.tol = 1e-3
         self.alphaStepSize = alphaStepSize
         self.cutoff = cutoff
+        self.collisionThreshold = collisionThreshold
 
         self.numFeatures = self.numRays + 1
         self.initializeWeights()
+
+        grid = np.arange(0, self.numRays)
+        self.plotGrid = grid - np.mean(grid)
 
 
     def initializeWeights(self):
@@ -32,7 +38,8 @@ class SARSA(object):
         carState, raycastDistance = S
         featureVec = np.zeros(self.numFeatures)
         featureVec[0] = 1
-        featureVec[1:] = utils.inverseTruncate(raycastDistance, self.cutoff)
+        featureVec[1:] = utils.inverseTruncate(raycastDistance, self.cutoff, rayLength=self.rayLength,
+                                               collisionThreshold=self.collisionThreshold)
         return featureVec
 
     def computeSingleRayFeature(self, rayLength):
@@ -77,6 +84,41 @@ class SARSA(object):
             QVec[i] = self.computeQValue(S, i, featureVector=featureVector)
 
         return QVec
+
+    def plotWeights(self):
+
+
+        for idx in xrange(0,self.numActions):
+            plt.plot(self.plotGrid, self.weights[idx,1:], label=str(self.actionSet[idx]))
+
+        plt.legend(loc='best')
+        plt.show()
+
+    def plotFeatureVec(self):
+        carState = 0
+        raycastDistance = self.sensor.raycastAllFromCurrentFrameLocation()
+        featureVec = self.computeFeatureVector((carState, raycastDistance))
+        plt.plot(self.plotGrid, featureVec[1:])
+        plt.show()
+
+    def computeQValueAtFrame(self, actionIdx):
+        carState = 0
+        raycastDistance = self.sensor.raycastAllFromCurrentFrameLocation()
+        S = (carState, raycastDistance)
+        return self.computeQValue(S, actionIdx)
+
+    def computeQValueVectorAtFrame(self):
+        carState = 0
+        raycastDistance = self.sensor.raycastAllFromCurrentFrameLocation()
+        S = (carState, raycastDistance)
+        QVec = self.computeQValueVector(S)
+        actionIdx = np.argmax(QVec)
+        action = self.actionSet[actionIdx]
+        print "QVec", QVec
+        print "Best action is, ", action
+        return self.computeQValueVector(S)
+
+
 
 
 

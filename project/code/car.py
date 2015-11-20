@@ -34,12 +34,19 @@ class CarPlant(object):
 
         dqdt[0] = self.v*np.cos(state[2])
         dqdt[1] = self.v*np.sin(state[2]) 
-        dqdt[2] = u
+        dqdt[2] = u # we are directly controlling yaw rate
     
         return dqdt
 
     def setFrame(self, frame):
         self.frame = frame
+
+    def setStateFromFrame(self, frame):
+         # get roll, pitch, yaw from the frame, set the state to that . . .
+         pass
+
+    def setCarState(self, x, y, theta):
+        self.state = np.array([x, y, theta])
 
     def simulate(self, dt=0.05):
         t = np.arange(0.0, 10, dt)

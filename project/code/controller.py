@@ -3,12 +3,14 @@ import scipy.integrate as integrate
 
 class ControllerObj(object):
 
-    def __init__(self, sensor, u_max=4):
+    def __init__(self, sensor, u_max=4, epsilonRand=0.1):
         self.Sensor = sensor
         self.numRays = self.Sensor.numRays
         self.actionSet = np.array([-u_max,0,u_max])
+        self.epsilonRand = epsilonRand
+        self.actionSetIdx = np.arange(0,np.size(self.actionSet))
 
-    def computeControlInput(self, state, t, frame, raycastDistance=None):
+    def computeControlInput(self, state, t, frame, raycastDistance=None, randomize=False):
         # test cases
         # u = 0
         # u = np.sin(t)
@@ -23,32 +25,14 @@ class ControllerObj(object):
         #u = self.countStuffController()
         u, actionIdx = self.countInverseDistancesController()
 
+        if randomize:
+            if np.random.uniform(0,1,1)[0] < self.epsilonRand:
+                otherActionIdx = np.setdiff1d(self.actionSetIdx, np.array([actionIdx]))
+                randActionIdx = np.random.choice(otherActionIdx)
+                actionIdx = randActionIdx
+                u = self.actionSet[actionIdx]
+
         return u, actionIdx
-
-
-        # rays = self.Sensor.rays
-
-        # c_1 = 1
-        # c_2 = 1
-        # c_3 = 1
-
-        # F = distances*0.0
-
-        # for i in range(0,numRays):
-        #     r = distances[i]
-        #     if r is not None:
-        #         r_hat = rays[:,i]
-        #         x_hat = np.array(frame.transform.TransformNormal(rays[:,numRays/2]))
-
-        #         G_hat = x_hat
-
-        #         F[i] = np.dot(-c_1 * x_hat, r_hat * (1.0 - (r/c_3))**2.0 / (1.0 + (r/c_3)**3.0))
-
-        # Ftot = np.sum(F)
-        # F_G = np.dot(-c_2 * G_hat, x_hat)
-
-        # u = F_G + Ftot
-        # print u
 
 
     def countStuffController(self):
