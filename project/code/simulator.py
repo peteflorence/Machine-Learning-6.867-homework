@@ -44,7 +44,7 @@ class Simulator(object):
     def initialize(self):
 
         # create the things needed for simulation
-        self.world = World.buildBigWorld(percentObsDensity=self.percentObsDensity)
+        self.world = World.buildCircleWorld(percentObsDensity=self.percentObsDensity)
         self.robot, self.frame = World.buildRobot()
         self.locator = World.buildCellLocator(self.world.visObj.polyData)
         self.Sensor.setLocator(self.locator)
@@ -319,7 +319,7 @@ class Simulator(object):
 if __name__ == "__main__":
     # main(sys.argv[1:])
     parser = argparse.ArgumentParser(description='interpret simulation parameters')
-    parser.add_argument('--percentObsDensity', type=int, nargs=1, default=[40])
+    parser.add_argument('--percentObsDensity', type=int, nargs=1, default=[30])
     parser.add_argument('--endTime', type=int, nargs=1, default=[40])
     parser.add_argument('--randomizeControl', action='store_true', default=False)
     argNamespace = parser.parse_args()

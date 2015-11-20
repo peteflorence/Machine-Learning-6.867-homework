@@ -47,8 +47,95 @@ class World(object):
 
 
     @staticmethod
-    def buildBigWorld(percentObsDensity):
-        print "building big world"
+    def buildStickWorld(percentObsDensity):
+        print "building stick world"
+
+        d = DebugData()
+        worldXmin, worldXmax, worldYmin, worldYmax = World.buildBoundaries(d)
+        print "boundaries done"
+
+        worldArea = (worldXmax-worldXmin)*(worldYmax-worldYmin)
+        print worldArea
+        obsScalingFactor = 1.0/12.0
+        maxNumObstacles = obsScalingFactor * worldArea
+        
+        numObstacles = int(percentObsDensity/100.0 * maxNumObstacles)
+        print numObstacles
+
+        # draw random stick obstacles
+        obsLength = 2.0
+
+
+        for i in xrange(numObstacles):
+            firstX = worldXmin + np.random.rand()*(worldXmax-worldXmin)
+            firstY = worldYmin + np.random.rand()*(worldYmax-worldYmin)
+            firstEndpt = (firstX,firstY,0)
+            
+            randTheta = np.random.rand() * 2.0*np.pi
+            secondEndpt = (firstX+obsLength*np.cos(randTheta), firstY+obsLength*np.sin(randTheta), 0)
+
+            d.addLine(firstEndpt, secondEndpt, radius=0.2)
+
+
+        obj = vis.showPolyData(d.getPolyData(), 'world')
+
+        world = World()
+        world.visObj = obj
+        world.Xmax = worldXmax
+        world.Xmin = worldXmin
+        world.Ymax = worldYmax
+        world.Ymin = worldYmin
+        world.numObstacles = numObstacles
+        world.percentObsDensity = percentObsDensity
+
+        return world
+
+
+    @staticmethod
+    def buildCircleWorld(percentObsDensity):
+        print "building stick world"
+
+        d = DebugData()
+        worldXmin, worldXmax, worldYmin, worldYmax = World.buildBoundaries(d)
+        print "boundaries done"
+
+        worldArea = (worldXmax-worldXmin)*(worldYmax-worldYmin)
+        print worldArea
+        obsScalingFactor = 1.0/12.0
+        maxNumObstacles = obsScalingFactor * worldArea
+        
+        numObstacles = int(percentObsDensity/100.0 * maxNumObstacles)
+        print numObstacles
+
+        # draw random stick obstacles
+        obsLength = 2.0
+
+        for i in xrange(numObstacles):
+            firstX = worldXmin + np.random.rand()*(worldXmax-worldXmin)
+            firstY = worldYmin + np.random.rand()*(worldYmax-worldYmin)
+            firstEndpt = (firstX,firstY,+0.2)
+            secondEndpt = (firstX,firstY,-0.2)
+
+            #d.addLine(firstEndpt, secondEndpt, radius=2*np.random.randn())
+            d.addLine(firstEndpt, secondEndpt, radius=0.7)
+
+
+        obj = vis.showPolyData(d.getPolyData(), 'world')
+
+        world = World()
+        world.visObj = obj
+        world.Xmax = worldXmax
+        world.Xmin = worldXmin
+        world.Ymax = worldYmax
+        world.Ymin = worldYmin
+        world.numObstacles = numObstacles
+        world.percentObsDensity = percentObsDensity
+
+        return world
+
+    @staticmethod
+    def buildFixedTriangleWorld(percentObsDensity):
+        print "building fixed triangle world"
 
         d = DebugData()
         worldXmin, worldXmax, worldYmin, worldYmax = World.buildBoundaries(d)
