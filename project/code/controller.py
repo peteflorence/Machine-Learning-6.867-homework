@@ -1,12 +1,14 @@
 import numpy as np
 import scipy.integrate as integrate
+import ddapp.objectmodel as om
+
 
 class ControllerObj(object):
 
-    def __init__(self, sensor, u_max=4, epsilonRand=0.1):
+    def __init__(self, sensor, u_max=4, epsilonRand=0.3):
         self.Sensor = sensor
         self.numRays = self.Sensor.numRays
-        self.actionSet = np.array([-u_max,0,u_max])
+        self.actionSet = np.array([u_max,0,-u_max])
         self.epsilonRand = epsilonRand
         self.actionSetIdx = np.arange(0,np.size(self.actionSet))
 
@@ -27,9 +29,9 @@ class ControllerObj(object):
 
         if randomize:
             if np.random.uniform(0,1,1)[0] < self.epsilonRand:
-                otherActionIdx = np.setdiff1d(self.actionSetIdx, np.array([actionIdx]))
-                randActionIdx = np.random.choice(otherActionIdx)
-                actionIdx = randActionIdx
+                # otherActionIdx = np.setdiff1d(self.actionSetIdx, np.array([actionIdx]))
+                # randActionIdx = np.random.choice(otherActionIdx)
+                actionIdx = np.random.choice(self.actionSetIdx)
                 u = self.actionSet[actionIdx]
 
         return u, actionIdx
@@ -54,15 +56,17 @@ class ControllerObj(object):
         return u, actionIdx
 
     def countInverseDistancesController(self):
-        firstHalf = np.array((self.distances[0:self.numRays/2]))
-        secondHalf = np.array((self.distances[self.numRays/2:]))
+        midpoint = np.floor(self.numRays/2.0)
+        leftHalf = np.array((self.distances[0:midpoint]))
+        rightHalf = np.array((self.distances[midpoint:]))
         tol = 1e-3;
 
-        inverseFirstHalf = (1/firstHalf)**2
-        inverseSecondHalf = (1/secondHalf)**2
+        inverseLeftHalf = (1.0/leftHalf)**2
+        inverseRightHalf = (1.0/rightHalf)**2
 
-        numLeft = np.sum(inverseFirstHalf)
-        numRight = np.sum(inverseSecondHalf)
+        numLeft = np.sum(inverseLeftHalf)
+        numRight = np.sum(inverseRightHalf)
+
 
         if numLeft == numRight:
             actionIdx = 1
@@ -71,6 +75,21 @@ class ControllerObj(object):
         else:
             actionIdx = 0
 
+
+        # print "leftHalf ", leftHalf
+        # print "rightHalf", rightHalf
+        # print "inverseLeftHalf", inverseLeftHalf
+        # print "inverserRightHalf", inverseRightHalf
+        # print "numLeft", numLeft
+        # print "numRight", numRight
+
         u = self.actionSet[actionIdx]
         return u, actionIdx
+
+
+    def computeControlInputFromFrame(self):
+        carState = 0
+        t = 0
+        frame = om.findObjectByName('robot frame')
+        return self.computeControlInput(carState, t, frame)
 

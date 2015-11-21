@@ -23,6 +23,7 @@ from reward import Reward
 
 class Simulator(object):
 
+
     def __init__(self, percentObsDensity, endTime=40, randomizeControl=False):
         self.randomizeControl = randomizeControl
         self.startSimTime = time.time()
@@ -31,8 +32,7 @@ class Simulator(object):
         self.Car = CarPlant(self.Controller)
         self.collisionThreshold = 1.3
         self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
-        self.Sarsa = SARSA(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
-                           collisionThreshold=self.collisionThreshold)
+        self.Sarsa = SARSA(sensorObj=self.Sensor, actionSet=self.Controller.actionSet, collisionThreshold=self.collisionThreshold)
         self.percentObsDensity = percentObsDensity
         self.endTime = endTime
         # create the visualizer object
@@ -229,6 +229,7 @@ class Simulator(object):
     def run(self):
         self.counter = 1
         self.runBatchSimulation()
+        # self.Sarsa.plotWeights()
         self.setupPlayback()
 
     def updateDrawIntersection(self, frame):
@@ -322,6 +323,7 @@ if __name__ == "__main__":
     parser.add_argument('--percentObsDensity', type=int, nargs=1, default=[30])
     parser.add_argument('--endTime', type=int, nargs=1, default=[40])
     parser.add_argument('--randomizeControl', action='store_true', default=False)
+    parser.add_argument('--nonRandomSeed', action='store_true', default=False)
     argNamespace = parser.parse_args()
     percentObsDensity = argNamespace.percentObsDensity[0]
     endTime = argNamespace.endTime[0]

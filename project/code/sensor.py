@@ -18,7 +18,7 @@ class SensorObj(object):
 
         self.rays = np.zeros((3,self.numRays))
         self.rays[0,:] = np.cos(self.angleGrid)
-        self.rays[1,:] = np.sin(self.angleGrid)
+        self.rays[1,:] = -np.sin(self.angleGrid)
 
     def setLocator(self, locator):
         self.locator = locator

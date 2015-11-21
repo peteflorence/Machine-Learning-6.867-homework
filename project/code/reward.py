@@ -7,7 +7,7 @@ import numpy as np
 class Reward(object):
 
     def __init__(self, sensorObj=None, collisionThreshold=None, collisionPenalty=300.0,
-                 actionCost=10.0):
+                 actionCost=5.0):
         if sensorObj is None or collisionThreshold is None:
             ValueError("need to specify sensorObj, actionSet and collisionThreshold")
         self.numRays = sensorObj.numRays
@@ -22,7 +22,7 @@ class Reward(object):
         self.cutoff = 20
 
     def initializeRaycastRewardWeights(self):
-        self.raycastRewardWeights = -5*np.ones(self.numRays)
+        self.raycastRewardWeights = -1*np.ones(self.numRays)
 
     def checkInCollision(self, raycastDistance):
         if np.min(raycastDistance) < self.collisionThreshold:
