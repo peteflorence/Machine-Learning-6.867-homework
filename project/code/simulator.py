@@ -32,8 +32,7 @@ class Simulator(object):
         self.Car = CarPlant(self.Controller)
         self.collisionThreshold = 1.3
         self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
-        self.Sarsa = SARSA(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
-
+        self.Sarsa = SARSA(sensorObj=self.Sensor, actionSet=self.Controller.actionSet, collisionThreshold=self.collisionThreshold)
         self.percentObsDensity = percentObsDensity
         self.endTime = endTime
         # create the visualizer object
