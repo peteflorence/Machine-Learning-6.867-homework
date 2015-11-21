@@ -23,7 +23,7 @@ from reward import Reward
 
 class Simulator(object):
 
-    def __init__(self, numObstacles=200, endTime=40, randomizeControl=False):
+    def __init__(self, numObstacles=200, endTime=40, randomizeControl=False, nonRandomSeed=False):
         self.randomizeControl = randomizeControl
         self.startSimTime = time.time()
         self.Sensor = SensorObj()
@@ -34,6 +34,7 @@ class Simulator(object):
         self.Sarsa = SARSA(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
                            collisionThreshold=self.collisionThreshold)
         self.numObstacles = numObstacles
+        self.nonRandomSeed = nonRandomSeed
         self.endTime = endTime
         # create the visualizer object
         self.app = ConsoleApp()
@@ -44,7 +45,7 @@ class Simulator(object):
     def initialize(self):
 
         # create the things needed for simulation
-        self.world = World.buildBigWorld(numObstacles=self.numObstacles)
+        self.world = World.buildBigWorld(numObstacles=self.numObstacles, nonRandomSeed=self.nonRandomSeed)
         self.robot, self.frame = World.buildRobot()
         self.locator = World.buildCellLocator(self.world.visObj.polyData)
         self.Sensor.setLocator(self.locator)
@@ -229,6 +230,7 @@ class Simulator(object):
     def run(self):
         self.counter = 1
         self.runBatchSimulation()
+        # self.Sarsa.plotWeights()
         self.setupPlayback()
 
     def updateDrawIntersection(self, frame):
@@ -329,11 +331,14 @@ if __name__ == "__main__":
     parser.add_argument('--numObstacles', type=int, nargs=1, default=[100])
     parser.add_argument('--endTime', type=int, nargs=1, default=[40])
     parser.add_argument('--randomizeControl', action='store_true', default=False)
+    parser.add_argument('--nonRandomSeed', action='store_true', default=False)
     argNamespace = parser.parse_args()
     numObstacles = argNamespace.numObstacles[0]
     endTime = argNamespace.endTime[0]
     randomizeControl = argNamespace.randomizeControl
-    sim = Simulator(numObstacles=numObstacles, endTime=endTime, randomizeControl=randomizeControl)
+    nonRandomSeed = argNamespace.nonRandomSeed
+    sim = Simulator(numObstacles=numObstacles, endTime=endTime, randomizeControl=randomizeControl,
+                    nonRandomSeed=nonRandomSeed)
     sim.run()
 
 

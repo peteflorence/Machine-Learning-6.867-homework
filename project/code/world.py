@@ -23,8 +23,12 @@ class World(object):
         return obj
 
     @staticmethod
-    def buildBigWorld(numObstacles=200):
+    def buildBigWorld(numObstacles=200, nonRandomSeed=False):
         print "building big world"
+
+        if nonRandomSeed:
+            np.random.seed(0)
+
 
         d = DebugData()
 

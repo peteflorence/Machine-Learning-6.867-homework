@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 class SARSA(object):
 
-    def __init__(self, sensorObj=None, actionSet=None, gamma=0.8, lam=0.7, alphaStepSize=0.05, epsilonGreedy=0.2,
-                 cutoff=20, collisionThreshold=None):
+    def __init__(self, sensorObj=None, actionSet=None, gamma=0.95, lam=0.7, alphaStepSize=1e-5, epsilonGreedy=0.1,
+                 cutoff=20, collisionThreshold=None, useSumFeature=True):
         if sensorObj is None or actionSet is None or collisionThreshold is None:
             raise ValueError("you must specify the sensorObj and the action set and collisionThreshold")
         self.numRays = sensorObj.numRays
@@ -22,6 +22,7 @@ class SARSA(object):
         self.alphaStepSize = alphaStepSize
         self.cutoff = cutoff
         self.collisionThreshold = collisionThreshold
+        self.useSumFeature = useSumFeature
 
         self.numFeatures = self.numRays + 1
         self.initializeWeights()
@@ -32,7 +33,8 @@ class SARSA(object):
 
     def initializeWeights(self):
         self.weights = np.zeros((3,self.numFeatures))
-        pass
+        if self.useSumFeature:
+            self.weights = (0,np.zeros((3,self.numFeatures)))
 
     def computeFeatureVector(self, S):
         carState, raycastDistance = S
@@ -40,6 +42,10 @@ class SARSA(object):
         featureVec[0] = 1
         featureVec[1:] = utils.inverseTruncate(raycastDistance, self.cutoff, rayLength=self.rayLength,
                                                collisionThreshold=self.collisionThreshold)
+
+        if self.useSumFeature:
+            featureVec = (np.sum(featureVec[1:]), featureVec)
+
         return featureVec
 
     def computeSingleRayFeature(self, rayLength):
@@ -53,13 +59,29 @@ class SARSA(object):
         delta = R + self.gamma*Q_next - Q_vec[A_idx_current]
         gradQ = self.computeGradient(S_current, A_idx_current)
 
-        newWeights = self.weights - self.alphaStepSize*gradQ
+        if self.useSumFeature:
+            newWeights = [a + self.alphaStepSize*delta*b for a,b in zip(self.weights, gradQ)]
+            # for idx in xrange(len(self.weights)):
+            #     newWeights[idx] = self.weights[idx]+self.alphaStepSize*delta*gradQ[idx]
+        else:
+            newWeights = self.weights + self.alphaStepSize*delta*gradQ
+
+
         self.weights = newWeights
 
 
     def computeGradient(self, S, A_idx):
-        grad = np.zeros((3,self.numFeatures))
-        grad[A_idx,:] = self.computeFeatureVector(S)
+
+
+        if self.useSumFeature:
+            featureList = self.computeFeatureVector(S)
+            grad = np.zeros((3,self.numFeatures))
+            grad[A_idx,:] = featureList[1]
+            grad = (featureList[0], grad)
+        else:
+            grad = np.zeros((3,self.numFeatures))
+            grad[A_idx,:] = self.computeFeatureVector(S)
+
         return grad
 
     # S is a tuple S = (plantState, raycastDistance)
@@ -74,7 +96,12 @@ class SARSA(object):
         if featureVector is None:
             featureVector = self.computeFeatureVector(S)
 
-        QVal = np.dot(self.weights[A_idx,:], featureVector)
+        if self.useSumFeature:
+            QVal = self.weights[0]*featureVector[0]
+            QVal += np.dot(self.weights[1][A_idx,:], featureVector[1])
+        else:
+            QVal = np.dot(self.weights[A_idx,:], featureVector)
+
         return QVal
 
     def computeQValueVector(self, S):
@@ -87,9 +114,13 @@ class SARSA(object):
 
     def plotWeights(self):
 
+        if self.useSumFeature:
+            weights = self.weights[1]
+        else:
+            weights = self.weights
 
         for idx in xrange(0,self.numActions):
-            plt.plot(self.plotGrid, self.weights[idx,1:], label=str(self.actionSet[idx]))
+            plt.plot(self.plotGrid, weights[idx,1:], label=str(self.actionSet[idx]))
 
         plt.legend(loc='best')
         plt.show()
