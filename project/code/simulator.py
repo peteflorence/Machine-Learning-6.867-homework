@@ -23,7 +23,8 @@ from reward import Reward
 
 class Simulator(object):
 
-    def __init__(self, numObstacles=200, endTime=40, randomizeControl=False, nonRandomSeed=False):
+
+    def __init__(self, percentObsDensity, endTime=40, randomizeControl=False):
         self.randomizeControl = randomizeControl
         self.startSimTime = time.time()
         self.Sensor = SensorObj()
@@ -32,9 +33,8 @@ class Simulator(object):
         self.collisionThreshold = 1.3
         self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
         self.Sarsa = SARSA(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
-                           collisionThreshold=self.collisionThreshold)
-        self.numObstacles = numObstacles
-        self.nonRandomSeed = nonRandomSeed
+
+        self.percentObsDensity = percentObsDensity
         self.endTime = endTime
         # create the visualizer object
         self.app = ConsoleApp()
@@ -45,7 +45,7 @@ class Simulator(object):
     def initialize(self):
 
         # create the things needed for simulation
-        self.world = World.buildBigWorld(numObstacles=self.numObstacles, nonRandomSeed=self.nonRandomSeed)
+        self.world = World.buildCircleWorld(percentObsDensity=self.percentObsDensity)
         self.robot, self.frame = World.buildRobot()
         self.locator = World.buildCellLocator(self.world.visObj.polyData)
         self.Sensor.setLocator(self.locator)
@@ -318,27 +318,18 @@ class Simulator(object):
         self.playTime = time.time()
 
 
-
-
-def main(argv):
-    sim = Simulator(numObstacles=200)
-    sim.run()
-
-
 if __name__ == "__main__":
     # main(sys.argv[1:])
     parser = argparse.ArgumentParser(description='interpret simulation parameters')
-    parser.add_argument('--numObstacles', type=int, nargs=1, default=[100])
+    parser.add_argument('--percentObsDensity', type=int, nargs=1, default=[30])
     parser.add_argument('--endTime', type=int, nargs=1, default=[40])
     parser.add_argument('--randomizeControl', action='store_true', default=False)
     parser.add_argument('--nonRandomSeed', action='store_true', default=False)
     argNamespace = parser.parse_args()
-    numObstacles = argNamespace.numObstacles[0]
+    percentObsDensity = argNamespace.percentObsDensity[0]
     endTime = argNamespace.endTime[0]
     randomizeControl = argNamespace.randomizeControl
-    nonRandomSeed = argNamespace.nonRandomSeed
-    sim = Simulator(numObstacles=numObstacles, endTime=endTime, randomizeControl=randomizeControl,
-                    nonRandomSeed=nonRandomSeed)
+    sim = Simulator(percentObsDensity=percentObsDensity, endTime=endTime, randomizeControl=randomizeControl)
     sim.run()
 
 
