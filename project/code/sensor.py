@@ -44,7 +44,6 @@ class SensorObj(object):
         frame = om.findObjectByName('robot frame')
         return self.raycastAll(frame)
 
-
     def raycast(self, locator, rayOrigin, rayEnd):
 
         tolerance = 0.0 # intersection tolerance
