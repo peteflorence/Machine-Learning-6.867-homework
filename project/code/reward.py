@@ -2,12 +2,13 @@ __author__ = 'manuelli'
 import utils
 import ddapp.objectmodel as om
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Reward(object):
 
-    def __init__(self, sensorObj=None, collisionThreshold=None, collisionPenalty=300.0,
-                 actionCost=5.0):
+    def __init__(self, sensorObj=None, collisionThreshold=None, collisionPenalty=10.0,
+                 actionCost=0.05):
         if sensorObj is None or collisionThreshold is None:
             ValueError("need to specify sensorObj, actionSet and collisionThreshold")
         self.numRays = sensorObj.numRays
@@ -22,7 +23,9 @@ class Reward(object):
         self.cutoff = 20
 
     def initializeRaycastRewardWeights(self):
-        self.raycastRewardWeights = -1*np.ones(self.numRays)
+        constant = -20
+        self.raycastRewardWeights = np.cos(self.sensorObj.angleGrid)
+        self.raycastRewardWeights = constant*self.raycastRewardWeights/self.raycastRewardWeights.sum()
 
     def checkInCollision(self, raycastDistance):
         if np.min(raycastDistance) < self.collisionThreshold:
@@ -59,6 +62,12 @@ class Reward(object):
         carState = 0.0 # just a placeholder for now
         S = (carState, raycastDistance)
         return self.computeReward(S, u)
+
+
+    def plotRaycastRewardWeights(self):
+        grid = np.arange(0,self.sensorObj.numRays) - self.sensorObj.numRays/2.0
+        plt.plot(grid, self.raycastRewardWeights)
+        plt.show()
 
 
 

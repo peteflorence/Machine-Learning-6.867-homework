@@ -25,7 +25,8 @@ from reward import Reward
 class Simulator(object):
 
 
-    def __init__(self, percentObsDensity, endTime=40, randomizeControl=False):
+    def __init__(self, percentObsDensity, endTime=40, randomizeControl=False, nonRandomWorld=False,
+                 circleRadius=0.7, worldScale=1.0, supervisedTrainingTime=500):
         self.randomizeControl = randomizeControl
         self.startSimTime = time.time()
         self.Sensor = SensorObj()
@@ -33,12 +34,16 @@ class Simulator(object):
         self.Car = CarPlant(self.Controller)
         self.collisionThreshold = 1.3
         self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
-        self.SarsaCts = SARSAContinuous(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
-                                        collisionThreshold=self.collisionThreshold)
-        self.SarsaDiscrete = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
+        # self.SarsaCts = SARSAContinuous(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
+        #                                 collisionThreshold=self.collisionThreshold)
+        self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
                                            collisionThreshold=self.collisionThreshold)
         self.percentObsDensity = percentObsDensity
         self.endTime = endTime
+        self.nonRandomWorld = nonRandomWorld
+        self.circleRadius = circleRadius
+        self.worldScale = worldScale
+        self.supervisedTrainingTime = supervisedTrainingTime
         # create the visualizer object
         self.app = ConsoleApp()
         # view = app.createView(useGrid=False)
@@ -48,7 +53,8 @@ class Simulator(object):
     def initialize(self):
 
         # create the things needed for simulation
-        self.world = World.buildCircleWorld(percentObsDensity=self.percentObsDensity)
+        self.world = World.buildCircleWorld(percentObsDensity=self.percentObsDensity,
+                                            nonRandom=self.nonRandomWorld, scale=self.worldScale)
         self.robot, self.frame = World.buildRobot()
         self.locator = World.buildCellLocator(self.world.visObj.polyData)
         self.Sensor.setLocator(self.locator)
@@ -67,8 +73,9 @@ class Simulator(object):
         self.Car.setFrame(self.frame)
         # self.mainLoop()
 
-    def runSingleSimulation(self):
+    def runSingleSimulation(self, useQValueController=False):
 
+        print "using QValue based controller = ", useQValueController
 
         self.setCollisionFreeInitialState()
 
@@ -77,6 +84,7 @@ class Simulator(object):
         self.setRobotFrameState(currentCarState[0], currentCarState[1], currentCarState[2])
         currentRaycast = self.Sensor.raycastAll(self.frame)
         nextRaycast = np.zeros(self.Sensor.numRays)
+        self.Sarsa.resetElibilityTraces()
 
 
         while (self.counter < self.numTimesteps - 1):
@@ -90,7 +98,13 @@ class Simulator(object):
             # self.setRobotState(currentCarState[0], currentCarState[1], currentCarState[2])
             currentRaycast = self.Sensor.raycastAll(self.frame)
             self.raycastData[idx,:] = currentRaycast
-            controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
+            S_current = (currentCarState, currentRaycast)
+
+            if useQValueController:
+                controlInput, controlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_current)
+
+            if not useQValueController or emptyQValue:
+                controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
                                                                                 currentTime, self.frame,
                                                                                 raycastDistance=currentRaycast,
                                                                                 randomize=self.randomizeControl)
@@ -105,13 +119,20 @@ class Simulator(object):
             self.setRobotFrameState(x,y,theta)
             nextRaycast = self.Sensor.raycastAll(self.frame)
 
-            # compute the next control input, this is needed for SARSA
-            nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState, currentTime, self.frame,
-                                                                                        raycastDistance=nextRaycast)
 
             # Gather all the information we have
-            S_current = (currentCarState, currentRaycast)
             S_next = (nextCarState, nextRaycast)
+
+            if useQValueController:
+                nextControlInput, nextControlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_next)
+
+            if not useQValueController or emptyQValue:
+                nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState, currentTime, self.frame,
+                                                                                        raycastDistance=nextRaycast)
+
+
+            # compute the next control input, this is needed for SARSA
+
 
 
             # compute the reward
@@ -119,7 +140,7 @@ class Simulator(object):
             self.rewardData[idx] = reward
 
             ## SARSA update
-            self.SarsaCts.sarsaUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
+            self.Sarsa.sarsaUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
 
             #bookkeeping
             currentCarState = nextCarState
@@ -136,6 +157,10 @@ class Simulator(object):
 
 
     def runBatchSimulation(self, endTime=None, dt=0.05):
+
+        # for use in playback
+        self.dt = dt
+
         if endTime is not None:
             self.endTime = endTime
 
@@ -148,12 +173,20 @@ class Simulator(object):
         self.numTimesteps = numTimesteps
 
         self.counter = 0
+        self.usingQValueControllerIdx = None
 
 
         while(self.counter < self.numTimesteps - 1):
+            if self.counter > (self.supervisedTrainingTime*1.0/self.endTime)*self.numTimesteps:
+                useQValueController = True
+                if self.usingQValueControllerIdx is None:
+                    self.usingQValueControllerIdx = self.counter
+            else:
+                useQValueController = False
+
             print "starting a new single simulation"
             print "counter is ", self.counter
-            self.runSingleSimulation()
+            self.runSingleSimulation(useQValueController=useQValueController)
 
 
 
@@ -192,8 +225,10 @@ class Simulator(object):
         self.timer = TimerCallback(targetFps=30)
         self.timer.callback = self.tick
 
-        self.playTimer = TimerCallback(targetFps=30)
-        self.playTimer.callback = self.tick3
+        playButtonFps = 1.0/self.dt
+        print "playButtonFPS", playButtonFps
+        self.playTimer = TimerCallback(targetFps=playButtonFps)
+        self.playTimer.callback = self.playTimerCallback
 
         panel = QtGui.QWidget()
         l = QtGui.QHBoxLayout(panel)
@@ -203,7 +238,9 @@ class Simulator(object):
 
         slider = QtGui.QSlider(QtCore.Qt.Horizontal)
         slider.connect('valueChanged(int)', self.onSliderChanged)
-        slider.setMaximum(999)
+        self.sliderMax = self.numTimesteps
+        slider.setMaximum(self.sliderMax)
+        self.slider = slider
 
         l.addWidget(playButton)
         l.addWidget(slider)
@@ -242,6 +279,13 @@ class Simulator(object):
         #print "origin is now at", origin
         d = DebugData()
 
+        sliderIdx = self.slider.value
+
+        if self.slider.value >= self.usingQValueControllerIdx:
+            colorMaxRange = [1,1,0]
+        else:
+            colorMaxRange = [0,1,0]
+
         for i in xrange(self.Sensor.numRays):
             ray = self.Sensor.rays[:,i]
             rayTransformed = np.array(frame.transform.TransformNormal(ray))
@@ -251,7 +295,7 @@ class Simulator(object):
             if intersection is not None:
                 d.addLine(origin, intersection, color=[1,0,0])
             else:
-                d.addLine(origin, origin+rayTransformed*self.Sensor.rayLength, color=[0,1,0])
+                d.addLine(origin, origin+rayTransformed*self.Sensor.rayLength, color=colorMaxRange)
 
         vis.updatePolyData(d.getPolyData(), 'rays', colorByName='RGB255')
 
@@ -293,46 +337,62 @@ class Simulator(object):
         y = np.cos(newtime)
         self.setRobotFrameState(x,y,0.0)
 
-    def tick3(self):
-        newtime = time.time() - self.playTime
-        if newtime > self.endTime:
+    # just increment the slider, stop the timer if we get to the end
+    def playTimerCallback(self):
+        self.sliderMovedByPlayTimer = True
+        currentIdx = self.slider.value
+        nextIdx = currentIdx + 1
+        self.slider.setSliderPosition(nextIdx)
+        if currentIdx >= self.sliderMax:
+            print "reached end of tape, stopping playTime"
             self.playTimer.stop()
-        newtime = np.clip(newtime, 0, self.endTime)
-
-        p = newtime/self.endTime
-        numStates = len(self.stateOverTime)
-
-        idx = int(np.floor(numStates*p))
-        idx = min(idx, numStates-1)
-        x,y,theta = self.stateOverTime[idx]
-        self.setRobotFrameState(x,y,theta)
 
     def onSliderChanged(self, value):
-        self.playTimer.stop()
+        if not self.sliderMovedByPlayTimer:
+            self.playTimer.stop()
         numSteps = len(self.stateOverTime)
-        idx = int(np.floor(numSteps*(value/1000.0)))
+        idx = int(np.floor(numSteps*(1.0*value/self.sliderMax)))
         idx = min(idx, numSteps-1)
         x,y,theta = self.stateOverTime[idx]
         self.setRobotFrameState(x,y,theta)
+        self.sliderMovedByPlayTimer = False
 
     def onPlayButton(self):
+
+        if self.playTimer.isActive():
+            self.onPauseButton()
+            return
+
         print 'play'
         self.playTimer.start()
         self.playTime = time.time()
+
+    def onPauseButton(self):
+        print 'pause'
+        self.playTimer.stop()
 
 
 if __name__ == "__main__":
     # main(sys.argv[1:])
     parser = argparse.ArgumentParser(description='interpret simulation parameters')
-    parser.add_argument('--percentObsDensity', type=int, nargs=1, default=[30])
+    parser.add_argument('--percentObsDensity', type=float, nargs=1, default=[30])
     parser.add_argument('--endTime', type=int, nargs=1, default=[40])
     parser.add_argument('--randomizeControl', action='store_true', default=False)
-    parser.add_argument('--nonRandomSeed', action='store_true', default=False)
+    parser.add_argument('--nonRandomWorld', action='store_true', default=False)
+    parser.add_argument('--circleRadius', type=float, nargs=1, default=0.7)
+    parser.add_argument('--worldScale', type=float, nargs=1, default=1.0)
+    parser.add_argument('--supervisedTrainingTime', type=float, nargs=1, default=500)
     argNamespace = parser.parse_args()
     percentObsDensity = argNamespace.percentObsDensity[0]
     endTime = argNamespace.endTime[0]
     randomizeControl = argNamespace.randomizeControl
-    sim = Simulator(percentObsDensity=percentObsDensity, endTime=endTime, randomizeControl=randomizeControl)
+    nonRandomWorld = argNamespace.nonRandomWorld
+    circleRadius = argNamespace.circleRadius[0]
+    worldScale = argNamespace.worldScale[0]
+    supervisedTrainingTime = argNamespace.supervisedTrainingTime[0]
+    sim = Simulator(percentObsDensity=percentObsDensity, endTime=endTime, randomizeControl=randomizeControl,
+                    nonRandomWorld=nonRandomWorld, circleRadius=circleRadius, worldScale=worldScale,
+                    supervisedTrainingTime=supervisedTrainingTime)
     sim.run()
 
 

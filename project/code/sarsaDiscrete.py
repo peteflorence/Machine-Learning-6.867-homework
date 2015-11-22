@@ -4,8 +4,8 @@ from sarsa import SARSA
 
 class SARSADiscrete(SARSA):
 
-    def __init__(self, sensorObj=None, actionSet=None, gamma=0.95, lam=0.7, alphaStepSize=1e-4, epsilonGreedy=0.2,
-                 cutoff=20, collisionThreshold=None, numInnerBins=5, numOuterBins=5, binCutoff=0.5):
+    def __init__(self, sensorObj=None, actionSet=None, gamma=0.8, lam=0.8, alphaStepSize=0.1, epsilonGreedy=0.2,
+                 cutoff=20, collisionThreshold=None, numInnerBins=4, numOuterBins=4, binCutoff=0.5):
 
         SARSA.__init__(self, sensorObj=sensorObj, actionSet=actionSet, gamma=gamma, lam=lam, alphaStepSize=alphaStepSize,
                        epsilonGreedy=epsilonGreedy, cutoff=cutoff, collisionThreshold=collisionThreshold)
@@ -16,6 +16,8 @@ class SARSADiscrete(SARSA):
         self.binCutoff=binCutoff
         self.initializeQValues()
         self.initializeBinData()
+        self.resetElibilityTraces()
+        self.eligibilityTraceThreshold = 0.1
 
 
     def initializeQValues(self):
@@ -50,6 +52,10 @@ class SARSADiscrete(SARSA):
             d['minRange'] = self.collisionThreshold + (self.rayLength - self.collisionThreshold)*self.binCutoff
             d['maxRange'] = self.rayLength - self.tol
             self.binData+=(d,)
+
+    def resetElibilityTraces(self):
+        print "resetting eligibility traces to zero"
+        self.eligibilityTrace = dict()
 
 
     def computeBinRayIdx(self, numBins):
@@ -89,8 +95,67 @@ class SARSADiscrete(SARSA):
 
         return featureTuple
 
+    def computeQValueVector(self, S):
+        QVec = np.zeros(self.numActions)
+        fVecShort = self.computeFeatureVector(S)
+        for aIdx in xrange(self.numActions):
+            fVecFull = fVecShort + (aIdx,)
+            QVec[aIdx] = self.QValues[fVecFull]
+
+        return QVec
+
+
+    def computeGreedyControlPolicy(self, S, randomize=True):
+        QVec = self.computeQValueVector(S)
+        actionIdx = np.argmax(QVec)
+
+        if QVec[actionIdx] == 0.0:
+            emptyQValue=True
+        else:
+            emptyQValue=False
+
+
+        u = self.actionSet[actionIdx]
+
+        if randomize:
+            if np.random.uniform(0,1,1)[0] < self.epsilonGreedy:
+                # otherActionIdx = np.setdiff1d(self.actionSetIdx, np.array([actionIdx]))
+                # randActionIdx = np.random.choice(otherActionIdx)
+                actionIdx = np.random.choice(self.actionSetIdx)
+                u = self.actionSet[actionIdx]
+
+        return u, actionIdx, emptyQValue
+
+
     def sarsaUpdate(self, S_current, A_idx_current, R, S_next, A_idx_next):
-        pass
+
+        featureVecCurrent = self.computeFeatureVector(S_current, A_idx = A_idx_current)
+        featureVecNext = self.computeFeatureVector(S_current, A_idx=A_idx_next)
+
+        delta = R + self.gamma*self.QValues[featureVecNext] - self.QValues[featureVecCurrent]
+        self.eligibilityTrace[featureVecCurrent] = 1.0
+
+        # now we perform the update, only need to do it for those that have non-zero eliglibility trace
+        # which is exactly those that appear in self.eligibilityTrace
+        keysToRemove = []
+        for key, eVal in self.eligibilityTrace.iteritems():
+
+            self.QValues[key] = self.QValues[key] + self.alphaStepSize*delta*eVal
+            self.eligibilityTrace[key] = self.gamma*self.lam*eVal
+
+            # remove it from dict, i.e. set it to zero, if it gets too small
+            if eVal < self.eligibilityTraceThreshold:
+                keysToRemove.append(key)
+
+        # if elegibility trace is sufficiently small, set it to zero
+        self.deleteKeysFromDict(self.eligibilityTrace, keysToRemove)
+
+
+    def deleteKeysFromDict(self, d, keys):
+        for key in keys:
+            if key in d:
+                del d[key]
+
 
 
     def computeFeatureVectorFromCurrentFrame(self):
@@ -103,5 +168,23 @@ class SARSADiscrete(SARSA):
         print "outerBins", featureVec[self.numInnerBins:]
         print ""
         return featureVec
+
+
+    def computeQValueVectorFromCurrentFrame(self):
+        QVec = np.zeros(3)
+        fVec = self.computeFeatureVectorFromCurrentFrame()
+        for aIdx in xrange(self.numActions):
+            fVecTemp = fVec + (aIdx,)
+            QVec[aIdx] = self.QValues[fVecTemp]
+
+
+        print "QVec is", QVec
+        aIdxMax = np.argmax(QVec)
+        if QVec[aIdxMax] == 0.0:
+            print "table value never updated"
+        else:
+            print "best action is", aIdxMax
+
+
 
 

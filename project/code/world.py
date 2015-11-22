@@ -23,12 +23,18 @@ class World(object):
         return obj
 
     @staticmethod
-    def buildBoundaries(d):
+    def buildBoundaries(d, scale=1.0):
         worldXmin = -20
         worldXmax = 100
 
         worldYmin = -50
         worldYmax = 50
+
+        if scale is not None:
+            worldXmin = -50*scale
+            worldXmax = 50*scale
+            worldYmin = -50*scale
+            worldYmax = 50*scale
 
         # draw boundaries for the world
         NW = (worldXmax, worldYmax, 0)
@@ -92,11 +98,14 @@ class World(object):
 
 
     @staticmethod
-    def buildCircleWorld(percentObsDensity):
+    def buildCircleWorld(percentObsDensity, nonRandom=False, circleRadius=3, scale=None):
         print "building stick world"
 
+        if nonRandom:
+            np.random.seed(2)
+
         d = DebugData()
-        worldXmin, worldXmax, worldYmin, worldYmax = World.buildBoundaries(d)
+        worldXmin, worldXmax, worldYmin, worldYmax = World.buildBoundaries(d, scale=scale)
         print "boundaries done"
 
         worldArea = (worldXmax-worldXmin)*(worldYmax-worldYmin)
@@ -117,7 +126,7 @@ class World(object):
             secondEndpt = (firstX,firstY,-0.2)
 
             #d.addLine(firstEndpt, secondEndpt, radius=2*np.random.randn())
-            d.addLine(firstEndpt, secondEndpt, radius=0.7)
+            d.addLine(firstEndpt, secondEndpt, radius=circleRadius)
 
 
         obj = vis.showPolyData(d.getPolyData(), 'world')
