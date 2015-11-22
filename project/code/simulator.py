@@ -17,7 +17,8 @@ from world import World
 from car import CarPlant
 from sensor import SensorObj
 from controller import ControllerObj
-from sarsa import SARSA
+from sarsaContinuous import SARSAContinuous
+from sarsaDiscrete import SARSADiscrete
 from reward import Reward
 
 
@@ -32,7 +33,10 @@ class Simulator(object):
         self.Car = CarPlant(self.Controller)
         self.collisionThreshold = 1.3
         self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
-        self.Sarsa = SARSA(sensorObj=self.Sensor, actionSet=self.Controller.actionSet, collisionThreshold=self.collisionThreshold)
+        self.SarsaCts = SARSAContinuous(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
+                                        collisionThreshold=self.collisionThreshold)
+        self.SarsaDiscrete = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
+                                           collisionThreshold=self.collisionThreshold)
         self.percentObsDensity = percentObsDensity
         self.endTime = endTime
         # create the visualizer object
@@ -115,7 +119,7 @@ class Simulator(object):
             self.rewardData[idx] = reward
 
             ## SARSA update
-            self.Sarsa.sarsaUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
+            self.SarsaCts.sarsaUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
 
             #bookkeeping
             currentCarState = nextCarState

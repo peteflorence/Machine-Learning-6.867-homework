@@ -2,9 +2,9 @@ __author__ = 'manuelli'
 import numpy as np
 import utils
 import matplotlib.pyplot as plt
+from sarsa import SARSA
 
-
-class SARSA(object):
+class SARSAContinuous(SARSA):
 
     def __init__(self, sensorObj=None, actionSet=None, gamma=0.95, lam=0.7, alphaStepSize=1e-4, epsilonGreedy=0.2,
                  cutoff=20, collisionThreshold=None, useSumFeature=True):
