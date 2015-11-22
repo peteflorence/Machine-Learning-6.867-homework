@@ -229,6 +229,7 @@ class Simulator(object):
         print "playButtonFPS", playButtonFps
         self.playTimer = TimerCallback(targetFps=playButtonFps)
         self.playTimer.callback = self.playTimerCallback
+        self.sliderMovedByPlayTimer = False
 
         panel = QtGui.QWidget()
         l = QtGui.QHBoxLayout(panel)
