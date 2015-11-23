@@ -55,7 +55,7 @@ class Simulator(object):
     def initialize(self):
 
         # create the things needed for simulation
-        self.world = World.buildCircleWorld(percentObsDensity=self.percentObsDensity,
+        self.world = World.buildCircleWorld(percentObsDensity=self.percentObsDensity, circleRadius=self.circleRadius,
                                             nonRandom=self.nonRandomWorld, scale=self.worldScale)
         self.robot, self.frame = World.buildRobot()
         self.locator = World.buildCellLocator(self.world.visObj.polyData)
