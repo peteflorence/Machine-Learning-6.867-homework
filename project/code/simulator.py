@@ -10,6 +10,7 @@ import numpy as np
 import time
 import scipy.integrate as integrate
 import argparse
+import matplotlib.pyplot as plt
 
 from PythonQt import QtCore, QtGui
 
@@ -101,7 +102,12 @@ class Simulator(object):
             S_current = (currentCarState, currentRaycast)
 
             if useQValueController:
-                controlInput, controlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_current)
+                counterForGreedyDecay = self.counter - self.usingQValueControllerIdx
+                controlInput, controlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_current,
+                                                                                                   counter=counterForGreedyDecay)
+                if emptyQValue:
+                    self.emptyQValue[idx] = 1
+
 
             if not useQValueController or emptyQValue:
                 controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
@@ -171,12 +177,16 @@ class Simulator(object):
         self.controlInputData = np.zeros(numTimesteps)
         self.rewardData = np.zeros(numTimesteps)
         self.numTimesteps = numTimesteps
+        self.emptyQValue = np.zeros(numTimesteps)
 
         self.counter = 0
         self.usingQValueControllerIdx = None
+        self.simulationData = []
 
 
         while(self.counter < self.numTimesteps - 1):
+            runData = dict()
+            runData['startIdx'] = self.counter
             if self.counter > (self.supervisedTrainingTime*1.0/self.endTime)*self.numTimesteps:
                 useQValueController = True
                 if self.usingQValueControllerIdx is None:
@@ -187,7 +197,10 @@ class Simulator(object):
             print "starting a new single simulation"
             print "counter is ", self.counter
             self.runSingleSimulation(useQValueController=useQValueController)
-
+            runData['usedQValueController'] = useQValueController
+            runData['duration'] = self.counter - runData['startIdx']
+            runData['endIdx'] = self.counter
+            self.simulationData.append(runData)
 
 
         # BOOKKEEPING
@@ -197,6 +210,7 @@ class Simulator(object):
         self.controlInputData = self.controlInputData[0:self.counter+1]
         self.rewardData = self.rewardData[0:self.counter+1]
         self.endTime = 1.0*self.counter/numTimesteps*self.endTime
+
 
 
 
@@ -234,7 +248,7 @@ class Simulator(object):
         panel = QtGui.QWidget()
         l = QtGui.QHBoxLayout(panel)
 
-        playButton = QtGui.QPushButton('Play')
+        playButton = QtGui.QPushButton('Play/Pause')
         playButton.connect('clicked()', self.onPlayButton)
 
         slider = QtGui.QSlider(QtCore.Qt.Horizontal)
@@ -282,7 +296,7 @@ class Simulator(object):
 
         sliderIdx = self.slider.value
 
-        if self.slider.value >= self.usingQValueControllerIdx:
+        if sliderIdx >= self.usingQValueControllerIdx and not self.emptyQValue[sliderIdx]:
             colorMaxRange = [1,1,0]
         else:
             colorMaxRange = [0,1,0]
@@ -371,6 +385,28 @@ class Simulator(object):
     def onPauseButton(self):
         print 'pause'
         self.playTimer.stop()
+
+    def plotRunData(self):
+
+        numRuns = len(self.simulationData)
+        runStart = np.zeros(numRuns)
+        runDuration = np.zeros(numRuns)
+        usedQValueController = np.zeros(numRuns)
+
+        for idx, val in enumerate(self.simulationData):
+            runStart[idx] = val['startIdx']
+            runDuration[idx] = val['duration']
+            usedQValueController[idx] = val['usedQValueController']
+
+
+        idx = np.where(usedQValueController==False)
+        plt.plot(runStart[idx], runDuration[idx], color='r')
+
+        idx = np.where(usedQValueController==True)
+        plt.plot(runStart[idx], runDuration[idx], color='b')
+        plt.show()
+
+
 
 
 if __name__ == "__main__":

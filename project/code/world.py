@@ -102,7 +102,7 @@ class World(object):
         print "building stick world"
 
         if nonRandom:
-            np.random.seed(2)
+            np.random.seed(3)
 
         d = DebugData()
         worldXmin, worldXmax, worldYmin, worldYmax = World.buildBoundaries(d, scale=scale)

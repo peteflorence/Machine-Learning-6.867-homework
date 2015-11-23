@@ -4,7 +4,7 @@ from sarsa import SARSA
 
 class SARSADiscrete(SARSA):
 
-    def __init__(self, sensorObj=None, actionSet=None, gamma=0.8, lam=0.8, alphaStepSize=0.1, epsilonGreedy=0.2,
+    def __init__(self, sensorObj=None, actionSet=None, gamma=0.8, lam=0.8, alphaStepSize=0.2, epsilonGreedy=0.2,
                  cutoff=20, collisionThreshold=None, numInnerBins=4, numOuterBins=4, binCutoff=0.5):
 
         SARSA.__init__(self, sensorObj=sensorObj, actionSet=actionSet, gamma=gamma, lam=lam, alphaStepSize=alphaStepSize,
@@ -104,8 +104,14 @@ class SARSADiscrete(SARSA):
 
         return QVec
 
+    def epsilonGreedyDecay(self, counter):
+        exponent = 0.5
+        burnIn=500
+        counter = max(1,counter-burnIn)
+        return self.epsilonGreedy/(1+counter**exponent)
 
-    def computeGreedyControlPolicy(self, S, randomize=True):
+
+    def computeGreedyControlPolicy(self, S, randomize=True, counter=None):
         QVec = self.computeQValueVector(S)
         actionIdx = np.argmax(QVec)
 
@@ -118,7 +124,12 @@ class SARSADiscrete(SARSA):
         u = self.actionSet[actionIdx]
 
         if randomize:
-            if np.random.uniform(0,1,1)[0] < self.epsilonGreedy:
+            if counter is not None:
+                epsilon = self.epsilonGreedyDecay(counter)
+            else:
+                epsilon = self.epsilonGreedy
+
+            if np.random.uniform(0,1,1)[0] < epsilon:
                 # otherActionIdx = np.setdiff1d(self.actionSetIdx, np.array([actionIdx]))
                 # randActionIdx = np.random.choice(otherActionIdx)
                 actionIdx = np.random.choice(self.actionSetIdx)
