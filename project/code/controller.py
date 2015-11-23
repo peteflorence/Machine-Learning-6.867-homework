@@ -5,7 +5,7 @@ import ddapp.objectmodel as om
 
 class ControllerObj(object):
 
-    def __init__(self, sensor, u_max=4, epsilonRand=0.3):
+    def __init__(self, sensor, u_max=4, epsilonRand=0.4):
         self.Sensor = sensor
         self.numRays = self.Sensor.numRays
         self.actionSet = np.array([u_max,0,-u_max])
