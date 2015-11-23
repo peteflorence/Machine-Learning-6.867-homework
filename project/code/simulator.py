@@ -26,8 +26,8 @@ from reward import Reward
 class Simulator(object):
 
 
-    def __init__(self, percentObsDensity, endTime=40, randomizeControl=False, nonRandomWorld=False,
-                 circleRadius=0.7, worldScale=1.0, supervisedTrainingTime=500):
+    def __init__(self, percentObsDensity=20, endTime=40, randomizeControl=False, nonRandomWorld=False,
+                 circleRadius=0.7, worldScale=1.0, supervisedTrainingTime=500, autoInitialize=True):
         self.randomizeControl = randomizeControl
         self.startSimTime = time.time()
         self.Sensor = SensorObj()
@@ -49,7 +49,8 @@ class Simulator(object):
         self.app = ConsoleApp()
         # view = app.createView(useGrid=False)
         self.view = self.app.createView(useGrid=False)
-        self.initialize()
+        if autoInitialize:
+            self.initialize()
 
     def initialize(self):
 
@@ -412,7 +413,7 @@ class Simulator(object):
 if __name__ == "__main__":
     # main(sys.argv[1:])
     parser = argparse.ArgumentParser(description='interpret simulation parameters')
-    parser.add_argument('--percentObsDensity', type=float, nargs=1, default=[30])
+    parser.add_argument('--percentObsDensity', type=float, nargs=1, default=[10])
     parser.add_argument('--endTime', type=int, nargs=1, default=[40])
     parser.add_argument('--randomizeControl', action='store_true', default=False)
     parser.add_argument('--nonRandomWorld', action='store_true', default=False)
