@@ -27,7 +27,8 @@ class Simulator(object):
 
 
     def __init__(self, percentObsDensity=20, endTime=40, randomizeControl=False, nonRandomWorld=False,
-                 circleRadius=0.7, worldScale=1.0, supervisedTrainingTime=500, autoInitialize=True):
+                 circleRadius=0.7, worldScale=1.0, supervisedTrainingTime=500, autoInitialize=True, verbose=True):
+        self.verbose = verbose
         self.randomizeControl = randomizeControl
         self.startSimTime = time.time()
         self.Sensor = SensorObj()
@@ -37,8 +38,11 @@ class Simulator(object):
         self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
         # self.SarsaCts = SARSAContinuous(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
         #                                 collisionThreshold=self.collisionThreshold)
-        self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
-                                           collisionThreshold=self.collisionThreshold)
+        
+        self.Sarsa_numInnerBins = 4
+        self.Sarsa_numOuterBins = 4
+        self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet, 
+                                           collisionThreshold=self.collisionThreshold, numInnerBins = self.Sarsa_numInnerBins, numOuterBins = self.Sarsa_numOuterBins)
         self.percentObsDensity = percentObsDensity
         self.endTime = endTime
         self.nonRandomWorld = nonRandomWorld
@@ -74,10 +78,11 @@ class Simulator(object):
         # Simulate
         self.Car.setFrame(self.frame)
         # self.mainLoop()
+        print "Finished initialization"
 
     def runSingleSimulation(self, useQValueController=False):
 
-        print "using QValue based controller = ", useQValueController
+        if self.verbose: print "using QValue based controller = ", useQValueController
 
         self.setCollisionFreeInitialState()
 
@@ -155,7 +160,7 @@ class Simulator(object):
             self.counter+=1
             # break if we are in collision
             if self.checkInCollision(nextRaycast):
-                print "Had a collision, terminating simulation"
+                if self.verbose: print "Had a collision, terminating simulation"
                 break
 
         # fill in the last state by hand
@@ -183,9 +188,10 @@ class Simulator(object):
         self.counter = 0
         self.usingQValueControllerIdx = None
         self.simulationData = []
-
-
+    
+        self.initializeStatusBar()
         while(self.counter < self.numTimesteps - 1):
+            self.printStatusBar()
             runData = dict()
             runData['startIdx'] = self.counter
             if self.counter > (self.supervisedTrainingTime*1.0/self.endTime)*self.numTimesteps:
@@ -195,8 +201,8 @@ class Simulator(object):
             else:
                 useQValueController = False
 
-            print "starting a new single simulation"
-            print "counter is ", self.counter
+            if self.verbose: print "starting a new single simulation"
+            if self.verbose: print "counter is ", self.counter
             self.runSingleSimulation(useQValueController=useQValueController)
             runData['usedQValueController'] = useQValueController
             runData['duration'] = self.counter - runData['startIdx']
@@ -212,6 +218,25 @@ class Simulator(object):
         self.rewardData = self.rewardData[0:self.counter+1]
         self.endTime = 1.0*self.counter/numTimesteps*self.endTime
 
+
+    def initializeStatusBar(self):
+        self.numTicks = 10
+        self.nextTickComplete = 1.0 / float(self.numTicks)
+        self.nextTickIdx = 1
+        print "Simulation percentage complete: (", self.numTicks, " # is complete)"
+    
+    def printStatusBar(self):
+        fractionDone = float(self.counter) / float(self.numTimesteps)
+        if fractionDone > self.nextTickComplete:
+
+            self.nextTickIdx += 1
+            self.nextTickComplete += 1.0 / self.numTicks
+
+            timeSoFar = time.time() - self.startSimTime 
+            estimatedTimeLeft_sec = (1 - fractionDone) * timeSoFar / fractionDone
+            estimatedTimeLeft_minutes = estimatedTimeLeft_sec / 60.0
+
+            print "#" * self.nextTickIdx, "-" * (self.numTicks - self.nextTickIdx), "estimated", estimatedTimeLeft_minutes, "minutes left"
 
 
 

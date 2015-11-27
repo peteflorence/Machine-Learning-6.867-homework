@@ -99,22 +99,22 @@ class World(object):
 
     @staticmethod
     def buildCircleWorld(percentObsDensity, nonRandom=False, circleRadius=3, scale=None):
-        print "building stick world"
+        #print "building circle world"
 
         if nonRandom:
             np.random.seed(3)
 
         d = DebugData()
         worldXmin, worldXmax, worldYmin, worldYmax = World.buildBoundaries(d, scale=scale)
-        print "boundaries done"
+        #print "boundaries done"
 
         worldArea = (worldXmax-worldXmin)*(worldYmax-worldYmin)
-        print worldArea
+        #print worldArea
         obsScalingFactor = 1.0/12.0
         maxNumObstacles = obsScalingFactor * worldArea
         
         numObstacles = int(percentObsDensity/100.0 * maxNumObstacles)
-        print numObstacles
+        #print numObstacles
 
         # draw random stick obstacles
         obsLength = 2.0
@@ -188,7 +188,7 @@ class World(object):
 
     @staticmethod
     def buildRobot(x=0,y=0):
-        print "building robot"
+        #print "building robot"
         polyData = ioUtils.readPolyData('celica.obj')
         
         scale = 0.04
@@ -207,7 +207,7 @@ class World(object):
 
     @staticmethod
     def buildCellLocator(polyData):
-        print "buidling cell locator"
+        #print "buidling cell locator"
 
         loc = vtk.vtkCellLocator()
         loc.SetDataSet(polyData)

@@ -54,7 +54,7 @@ class SARSADiscrete(SARSA):
             self.binData+=(d,)
 
     def resetElibilityTraces(self):
-        print "resetting eligibility traces to zero"
+        #print "resetting eligibility traces to zero"
         self.eligibilityTrace = dict()
 
 
