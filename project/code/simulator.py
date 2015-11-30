@@ -27,22 +27,24 @@ class Simulator(object):
 
 
     def __init__(self, percentObsDensity=20, endTime=40, randomizeControl=False, nonRandomWorld=False,
-                 circleRadius=0.7, worldScale=1.0, supervisedTrainingTime=500, autoInitialize=True, verbose=True):
+                 circleRadius=0.7, worldScale=1.0, supervisedTrainingTime=500, autoInitialize=True, verbose=True,
+                 sarsaType="discrete"):
         self.verbose = verbose
         self.randomizeControl = randomizeControl
         self.startSimTime = time.time()
-        self.Sensor = SensorObj()
-        self.Controller = ControllerObj(self.Sensor)
-        self.Car = CarPlant(self.Controller)
+        # self.Sensor = SensorObj()
+        # self.Controller = ControllerObj(self.Sensor)
+        # self.Car = CarPlant(self.Controller)
         self.collisionThreshold = 1.3
-        self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
-        # self.SarsaCts = SARSAContinuous(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
-        #                                 collisionThreshold=self.collisionThreshold)
-        
+        # self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
+
         self.Sarsa_numInnerBins = 4
         self.Sarsa_numOuterBins = 4
-        self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet, 
-                                           collisionThreshold=self.collisionThreshold, numInnerBins = self.Sarsa_numInnerBins, numOuterBins = self.Sarsa_numOuterBins)
+        self.sarsaType = sarsaType
+        # self.useSARSADiscrete()
+        # self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
+        #                                    collisionThreshold=self.collisionThreshold,
+        #                            numInnerBins = self.Sarsa_numInnerBins, numOuterBins = self.Sarsa_numOuterBins)
         self.percentObsDensity = percentObsDensity
         self.endTime = endTime
         self.nonRandomWorld = nonRandomWorld
@@ -58,6 +60,12 @@ class Simulator(object):
 
     def initialize(self):
 
+        self.Sensor = SensorObj()
+        self.Controller = ControllerObj(self.Sensor)
+        self.Car = CarPlant(self.Controller)
+        self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
+        self.setSARSA()
+
         # create the things needed for simulation
         self.world = World.buildCircleWorld(percentObsDensity=self.percentObsDensity, circleRadius=self.circleRadius,
                                             nonRandom=self.nonRandomWorld, scale=self.worldScale)
@@ -65,8 +73,6 @@ class Simulator(object):
         self.locator = World.buildCellLocator(self.world.visObj.polyData)
         self.Sensor.setLocator(self.locator)
         self.frame = self.robot.getChildFrame()
-
-
         self.frame.setProperty('Scale', 3)
         self.frame.setProperty('Edit', True)
         self.frame.widget.HandleRotationEnabledOff()
@@ -75,10 +81,23 @@ class Simulator(object):
         rep.SetRotateAxisEnabled(0, False)
         rep.SetRotateAxisEnabled(1, False)
 
-        # Simulate
         self.Car.setFrame(self.frame)
-        # self.mainLoop()
         print "Finished initialization"
+
+    def setSARSA(self, type=None):
+        if type is None:
+            type = self.sarsaType
+
+        if type=="discrete":
+            self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
+                                            collisionThreshold=self.collisionThreshold,
+                                   numInnerBins = self.Sarsa_numInnerBins, numOuterBins = self.Sarsa_numOuterBins)
+        elif type=="continuous":
+            self.Sarsa = SARSAContinuous(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
+                                        collisionThreshold=self.collisionThreshold)
+        else:
+            raise ValueError("sarsa type must be either discrete or continuous")
+
 
     def runSingleSimulation(self, useQValueController=False):
 

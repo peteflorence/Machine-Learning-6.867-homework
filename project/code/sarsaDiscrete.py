@@ -18,6 +18,7 @@ class SARSADiscrete(SARSA):
         self.initializeBinData()
         self.resetElibilityTraces()
         self.eligibilityTraceThreshold = 0.1
+        self.burnIn = 500
 
 
     def initializeQValues(self):
@@ -105,9 +106,9 @@ class SARSADiscrete(SARSA):
         return QVec
 
     def epsilonGreedyDecay(self, counter):
-        exponent = 0.5
-        burnIn=500
-        counter = max(1,counter-burnIn)
+        exponent = 0.3
+        self.burnIn=500
+        counter = max(1,counter-self.burnIn)
         return self.epsilonGreedy/(1+counter**exponent)
 
 
