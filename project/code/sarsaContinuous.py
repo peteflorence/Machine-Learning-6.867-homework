@@ -6,35 +6,30 @@ from sarsa import SARSA
 
 class SARSAContinuous(SARSA):
 
-    def __init__(self, sensorObj=None, actionSet=None, gamma=0.95, lam=0.7, alphaStepSize=1e-4, epsilonGreedy=0.2,
-                 cutoff=20, collisionThreshold=None, useSumFeature=True):
-        if sensorObj is None or actionSet is None or collisionThreshold is None:
-            raise ValueError("you must specify the sensorObj and the action set and collisionThreshold")
-        self.numRays = sensorObj.numRays
-        self.rayLength = sensorObj.rayLength
-        self.sensor = sensorObj
-        self.lam = lam
-        self.gamma = gamma # the discount factor
-        self.epsilonGreedy = epsilonGreedy
-        self.actionSet = actionSet
-        self.numActions = np.size(actionSet)
-        self.tol = 1e-3
-        self.alphaStepSize = alphaStepSize
-        self.cutoff = cutoff
-        self.collisionThreshold = collisionThreshold
+    def __init__(self, sensorObj=None, actionSet=None, gamma=0.95, lam=0.8, alphaStepSize=0.2, epsilonGreedy=0.2,
+                 cutoff=20, collisionThreshold=None):
+
+        SARSA.__init__(self, sensorObj=sensorObj, actionSet=actionSet, gamma=gamma, lam=lam, alphaStepSize=alphaStepSize,
+                       epsilonGreedy=epsilonGreedy, cutoff=cutoff, collisionThreshold=collisionThreshold)
+
+
         self.useSumFeature = useSumFeature
 
         self.numFeatures = self.numRays + 1
         self.initializeWeights()
+        self.resetElibilityTraces()
 
         grid = np.arange(0, self.numRays)
         self.plotGrid = grid - np.mean(grid)
 
 
     def initializeWeights(self):
-        self.weights = np.zeros((3,self.numFeatures))
+        self.weights = np.zeros((self.numActions,self.numFeatures))
         if self.useSumFeature:
-            self.weights = (0,np.zeros((3,self.numFeatures)))
+            self.weights = (0,np.zeros((self.numActions,self.numFeatures)))
+
+    def resetElibilityTraces(self):
+        self.eligibilityTraces = np.zeros(self.numActions, self.numFeatures)
 
     def computeFeatureVector(self, S):
         carState, raycastDistance = S
@@ -43,29 +38,22 @@ class SARSAContinuous(SARSA):
         featureVec[1:] = utils.inverseTruncate(raycastDistance, self.cutoff, rayLength=self.rayLength,
                                                collisionThreshold=self.collisionThreshold)
 
-        if self.useSumFeature:
-            featureVec = (np.sum(featureVec[1:]), featureVec)
+        # if self.useSumFeature:
+        #     featureVec = (np.sum(featureVec[1:]), featureVec)
 
         return featureVec
 
-    def computeSingleRayFeature(self, rayLength):
-        pass
 
-    # will probably need some helper functions inside here
-    # so far this is just Sarsa(0), no eligibility traces
+    # implements the general SARSA(lambda) update using function approximation
     def sarsaUpdate(self, S_current, A_idx_current, R, S_next, A_idx_next):
         Q_vec = self.computeQValueVector(S_current)
         Q_next = self.computeQValue(S_next, A_idx_next)
         delta = R + self.gamma*Q_next - Q_vec[A_idx_current]
         gradQ = self.computeGradient(S_current, A_idx_current)
 
-        if self.useSumFeature:
-            newWeights = [a + self.alphaStepSize*delta*b for a,b in zip(self.weights, gradQ)]
-            # for idx in xrange(len(self.weights)):
-            #     newWeights[idx] = self.weights[idx]+self.alphaStepSize*delta*gradQ[idx]
-        else:
-            newWeights = self.weights + self.alphaStepSize*delta*gradQ
-
+        # need to update the eligibility traces
+        self.eligibilityTraces = self.gamma*self.lam*self.eligibilityTraces + gradQ
+        newWeights = self.weights + self.alphaStepSize*delta*self.eligibilityTraces
 
         self.weights = newWeights
 
@@ -73,35 +61,62 @@ class SARSAContinuous(SARSA):
     def computeGradient(self, S, A_idx):
 
 
-        if self.useSumFeature:
-            featureList = self.computeFeatureVector(S)
-            grad = np.zeros((3,self.numFeatures))
-            grad[A_idx,:] = featureList[1]
-            grad = (featureList[0], grad)
-        else:
-            grad = np.zeros((3,self.numFeatures))
-            grad[A_idx,:] = self.computeFeatureVector(S)
+        # if self.useSumFeature:
+        #     featureList = self.computeFeatureVector(S)
+        #     grad = np.zeros((3,self.numFeatures))
+        #     grad[A_idx,:] = featureList[1]
+        #     grad = (featureList[0], grad)
+        # else:
 
+        # this is for linear function approximation
+        grad = np.zeros((self.numActions, self.numFeatures))
+        grad[A_idx,:] = self.computeFeatureVector(S)
         return grad
 
-    # S is a tuple S = (plantState, raycastDistance)
-    def computeGreedyPolicy(self, S):
-        return (u, idx)
+    def epsilonGreedyDecay(self, counter):
+        exponent = 0.5
+        burnIn=500
+        counter = max(1,counter-burnIn)
+        return self.epsilonGreedy/(1+counter**exponent)
 
-    def computeEpsilonGreedyPolicy(self, S):
-        pass
+    def computeGreedyControlPolicy(self, S, randomize=True, counter=None):
+        QVec = self.computeQValueVector(S)
+        actionIdx = np.argmax(QVec)
+
+        if QVec[actionIdx] == 0.0:
+            emptyQValue=True
+        else:
+            emptyQValue=False
+
+
+        u = self.actionSet[actionIdx]
+
+        if randomize:
+            if counter is not None:
+                epsilon = self.epsilonGreedyDecay(counter)
+            else:
+                epsilon = self.epsilonGreedy
+
+            if np.random.uniform(0,1,1)[0] < epsilon:
+                # otherActionIdx = np.setdiff1d(self.actionSetIdx, np.array([actionIdx]))
+                # randActionIdx = np.random.choice(otherActionIdx)
+                actionIdx = np.random.choice(self.actionSetIdx)
+                u = self.actionSet[actionIdx]
+
+        return u, actionIdx, emptyQValue
+
 
     # allow yourself to pass in a feature vector
     def computeQValue(self, S, A_idx, featureVector=None):
         if featureVector is None:
             featureVector = self.computeFeatureVector(S)
 
-        if self.useSumFeature:
-            QVal = self.weights[0]*featureVector[0]
-            QVal += np.dot(self.weights[1][A_idx,:], featureVector[1])
-        else:
-            QVal = np.dot(self.weights[A_idx,:], featureVector)
+        # if self.useSumFeature:
+        #     QVal = self.weights[0]*featureVector[0]
+        #     QVal += np.dot(self.weights[1][A_idx,:], featureVector[1])
+        # else:
 
+        QVal = np.dot(self.weights[A_idx,:], featureVector)
         return QVal
 
     def computeQValueVector(self, S):
