@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 class Reward(object):
 
-    def __init__(self, sensorObj=None, collisionThreshold=None, collisionPenalty=100.0,
+    def __init__(self, sensorObj=None, collisionThreshold=None, collisionPenalty=20.0,
                  actionCost=0.1):
         if sensorObj is None or collisionThreshold is None:
             ValueError("need to specify sensorObj, actionSet and collisionThreshold")
@@ -68,7 +68,6 @@ class Reward(object):
         grid = np.arange(0,self.sensorObj.numRays) - self.sensorObj.numRays/2.0
         plt.plot(grid, self.raycastRewardWeights)
         plt.show()
-
 
 
 
