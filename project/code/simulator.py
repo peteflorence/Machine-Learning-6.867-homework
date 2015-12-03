@@ -32,21 +32,17 @@ class Simulator(object):
         self.verbose = verbose
         self.randomizeControl = randomizeControl
         self.startSimTime = time.time()
-        # self.Sensor = SensorObj()
-        # self.Controller = ControllerObj(self.Sensor)
-        # self.Car = CarPlant(self.Controller)
         self.collisionThreshold = 1.3
-        # self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
-
+        self.randomSeed = 5
         self.Sarsa_numInnerBins = 4
         self.Sarsa_numOuterBins = 4
+        self.Sensor_rayLength = 8
         self.sarsaType = sarsaType
-        # self.useSARSADiscrete()
-        # self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
-        #                                    collisionThreshold=self.collisionThreshold,
-        #                            numInnerBins = self.Sarsa_numInnerBins, numOuterBins = self.Sarsa_numOuterBins)
+
         self.percentObsDensity = percentObsDensity
-        self.endTime = endTime
+        self.supervisedTrainingTime = 3000
+        self.learningTime = 9000
+        self.defaultControllerTime = 1000
         self.nonRandomWorld = nonRandomWorld
         self.circleRadius = circleRadius
         self.worldScale = worldScale
@@ -60,7 +56,8 @@ class Simulator(object):
 
     def initialize(self):
 
-        self.Sensor = SensorObj()
+        self.endTime = self.supervisedTrainingTime + self.learningTime + self.defaultControllerTime
+        self.Sensor = SensorObj(rayLength=self.Sensor_rayLength)
         self.Controller = ControllerObj(self.Sensor)
         self.Car = CarPlant(self.Controller)
         self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
@@ -68,7 +65,8 @@ class Simulator(object):
 
         # create the things needed for simulation
         self.world = World.buildCircleWorld(percentObsDensity=self.percentObsDensity, circleRadius=self.circleRadius,
-                                            nonRandom=self.nonRandomWorld, scale=self.worldScale)
+                                            nonRandom=self.nonRandomWorld, scale=self.worldScale,
+                                            randomSeed=self.randomSeed)
         self.robot, self.frame = World.buildRobot()
         self.locator = World.buildCellLocator(self.world.visObj.polyData)
         self.Sensor.setLocator(self.locator)
@@ -99,7 +97,7 @@ class Simulator(object):
             raise ValueError("sarsa type must be either discrete or continuous")
 
 
-    def runSingleSimulation(self, useQValueController=False):
+    def runSingleSimulation(self, useQValueController=False, randomizeDefaultController=True, updateQValues=True):
 
         if self.verbose: print "using QValue based controller = ", useQValueController
 
@@ -138,7 +136,7 @@ class Simulator(object):
                 controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
                                                                                 currentTime, self.frame,
                                                                                 raycastDistance=currentRaycast,
-                                                                                randomize=self.randomizeControl)
+                                                                                randomize=randomizeDefaultController)
             self.controlInputData[idx] = controlInput
 
             nextCarState = self.Car.simulateOneStep(controlInput=controlInput)
@@ -171,7 +169,8 @@ class Simulator(object):
             self.rewardData[idx] = reward
 
             ## SARSA update
-            self.Sarsa.sarsaUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
+            if updateQValues:
+                self.Sarsa.sarsaUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
 
             #bookkeeping
             currentCarState = nextCarState
@@ -192,8 +191,7 @@ class Simulator(object):
         # for use in playback
         self.dt = dt
 
-        if endTime is not None:
-            self.endTime = endTime
+        self.endTime = self.supervisedTrainingTime + self.learningTime + self.defaultControllerTime
 
         self.t = np.arange(0.0, self.endTime, dt)
         numTimesteps = np.size(self.t)
@@ -205,28 +203,78 @@ class Simulator(object):
         self.emptyQValue = np.zeros(numTimesteps)
 
         self.counter = 0
-        self.usingQValueControllerIdx = None
         self.simulationData = []
     
         self.initializeStatusBar()
-        while(self.counter < self.numTimesteps - 1):
+
+
+        # three while loops for different phases of simulation, supervisedTraining, learning, default
+        while (self.counter < self.supervisedTrainingTime/dt):
             self.printStatusBar()
+            useQValueController = False
             runData = dict()
             runData['startIdx'] = self.counter
-            if self.counter > (self.supervisedTrainingTime*1.0/self.endTime)*self.numTimesteps:
-                useQValueController = True
-                if self.usingQValueControllerIdx is None:
-                    self.usingQValueControllerIdx = self.counter
-            else:
-                useQValueController = False
-
-            if self.verbose: print "starting a new single simulation"
-            if self.verbose: print "counter is ", self.counter
-            self.runSingleSimulation(useQValueController=useQValueController)
-            runData['usedQValueController'] = useQValueController
+            self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=True,
+                                     updateQValues=True)
+            runData['controllerType'] = "defaultRandom"
             runData['duration'] = self.counter - runData['startIdx']
             runData['endIdx'] = self.counter
             self.simulationData.append(runData)
+
+
+        self.usingQValueControllerIdx = self.counter
+        while (self.counter < (self.supervisedTrainingTime + self.learningTime)/dt):
+            self.printStatusBar()
+            runData = dict()
+            runData['startIdx'] = self.counter
+            useQValueController = True
+            self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=True,
+                                     updateQValues=True)
+            runData['controllerType'] = "QValue"
+            runData['duration'] = self.counter - runData['startIdx']
+            runData['endIdx'] = self.counter
+            self.simulationData.append(runData)
+
+
+        self.usingDefaultControllerIdx = self.counter
+        while (self.counter < self.numTimesteps - 1):
+            self.printStatusBar()
+            runData = dict()
+            runData['startIdx'] = self.counter
+            useQValueController = False
+            self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=False,
+                                     updateQValues=False)
+            runData['controllerType'] = "default"
+            runData['duration'] = self.counter - runData['startIdx']
+            runData['endIdx'] = self.counter
+            self.simulationData.append(runData)
+
+
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        # while(self.counter < self.numTimesteps - 1):
+        #     self.printStatusBar()
+        #     runData = dict()
+        #     runData['startIdx'] = self.counter
+        #     if self.counter > (self.supervisedTrainingTime*1.0/self.endTime)*self.numTimesteps:
+        #         useQValueController = True
+        #         if self.usingQValueControllerIdx is None:
+        #             self.usingQValueControllerIdx = self.counter
+        #     else:
+        #         useQValueController = False
+        #
+        #     if self.verbose: print "starting a new single simulation"
+        #     if self.verbose: print "counter is ", self.counter
+        #     self.runSingleSimulation(useQValueController=useQValueController)
+        #     runData['usedQValueController'] = useQValueController
+        #     runData['duration'] = self.counter - runData['startIdx']
+        #     runData['endIdx'] = self.counter
+        #     self.simulationData.append(runData)
 
 
         # BOOKKEEPING
@@ -341,10 +389,13 @@ class Simulator(object):
 
         sliderIdx = self.slider.value
 
-        if sliderIdx >= self.usingQValueControllerIdx and not self.emptyQValue[sliderIdx]:
+        if (sliderIdx >= self.usingQValueControllerIdx) and (sliderIdx < self.usingDefaultControllerIdx) \
+                and not self.emptyQValue[sliderIdx]:
             colorMaxRange = [1,1,0]
-        else:
+        elif sliderIdx >= self.usingDefaultControllerIdx:
             colorMaxRange = [0,1,0]
+        else:
+            colorMaxRange = [0,0,1]
 
         for i in xrange(self.Sensor.numRays):
             ray = self.Sensor.rays[:,i]
@@ -437,18 +488,25 @@ class Simulator(object):
         runStart = np.zeros(numRuns)
         runDuration = np.zeros(numRuns)
         usedQValueController = np.zeros(numRuns)
+        usedDefaultController = np.zeros(numRuns)
+        usedDefaultRandomController= np.zeros(numRuns)
 
         for idx, val in enumerate(self.simulationData):
             runStart[idx] = val['startIdx']
             runDuration[idx] = val['duration']
-            usedQValueController[idx] = val['usedQValueController']
+            usedQValueController[idx] = (val['controllerType'] == "QValue")
+            usedDefaultController[idx] = (val['controllerType'] == "default")
+            usedDefaultRandomController[idx] = (val['controllerType'] == "defaultRandom")
 
 
-        idx = np.where(usedQValueController==False)
-        plt.plot(runStart[idx], runDuration[idx], color='r')
+        idx = np.where(usedDefaultRandomController==True)
+        plt.plot(runStart[idx], runDuration[idx], color='b')
 
         idx = np.where(usedQValueController==True)
-        plt.plot(runStart[idx], runDuration[idx], color='b')
+        plt.plot(runStart[idx], runDuration[idx], color='y')
+
+        idx = np.where(usedDefaultController==True)
+        plt.plot(runStart[idx], runDuration[idx], color='g')
         plt.show()
 
 

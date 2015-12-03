@@ -98,11 +98,11 @@ class World(object):
 
 
     @staticmethod
-    def buildCircleWorld(percentObsDensity, nonRandom=False, circleRadius=3, scale=None):
+    def buildCircleWorld(percentObsDensity, nonRandom=False, circleRadius=3, scale=None, randomSeed=5):
         #print "building circle world"
 
         if nonRandom:
-            np.random.seed(3)
+            np.random.seed(randomSeed)
 
         d = DebugData()
         worldXmin, worldXmax, worldYmin, worldYmax = World.buildBoundaries(d, scale=scale)
