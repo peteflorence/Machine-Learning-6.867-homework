@@ -6,11 +6,9 @@ from sarsa import SARSA
 
 class SARSAContinuous(SARSA):
 
-    def __init__(self, sensorObj=None, actionSet=None, gamma=0.95, lam=0.8, alphaStepSize=1e-3, epsilonGreedy=0.2,
-                 cutoff=20, collisionThreshold=None):
+    def __init__(self, alphaStepSize=1e-4, **kwargs):
 
-        SARSA.__init__(self, sensorObj=sensorObj, actionSet=actionSet, gamma=gamma, lam=lam, alphaStepSize=alphaStepSize,
-                       epsilonGreedy=epsilonGreedy, cutoff=cutoff, collisionThreshold=collisionThreshold)
+        SARSA.__init__(self, alphaStepSize=1e-4, **kwargs)
 
 
         self.numFeatures = self.numRays + 1
@@ -66,11 +64,6 @@ class SARSAContinuous(SARSA):
         grad[A_idx,:] = self.computeFeatureVector(S)
         return grad
 
-    def epsilonGreedyDecay(self, counter):
-        exponent = 0.3
-        burnIn=1000
-        counter = max(1,counter-burnIn)
-        return self.epsilonGreedy/(1+counter**exponent)
 
     def computeGreedyControlPolicy(self, S, randomize=True, counter=None):
         QVec = self.computeQValueVector(S)

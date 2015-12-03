@@ -4,11 +4,9 @@ from sarsa import SARSA
 
 class SARSADiscrete(SARSA):
 
-    def __init__(self, sensorObj=None, actionSet=None, gamma=0.95, lam=0.8, alphaStepSize=0.2, epsilonGreedy=0.2,
-                 cutoff=20, collisionThreshold=None, numInnerBins=4, numOuterBins=4, binCutoff=0.5):
+    def __init__(self, numInnerBins=4, numOuterBins=4, binCutoff=0.5, alphaStepSize=0.2, **kwargs):
 
-        SARSA.__init__(self, sensorObj=sensorObj, actionSet=actionSet, gamma=gamma, lam=lam, alphaStepSize=alphaStepSize,
-                       epsilonGreedy=epsilonGreedy, cutoff=cutoff, collisionThreshold=collisionThreshold)
+        SARSA.__init__(self, alphaStepSize=0.2, **kwargs)
 
         self.numInnerBins=numInnerBins
         self.numOuterBins=numOuterBins
@@ -18,7 +16,6 @@ class SARSADiscrete(SARSA):
         self.initializeBinData()
         self.resetElibilityTraces()
         self.eligibilityTraceThreshold = 0.1
-        self.burnIn = 500
 
 
     def initializeQValues(self):
@@ -104,12 +101,6 @@ class SARSADiscrete(SARSA):
             QVec[aIdx] = self.QValues[fVecFull]
 
         return QVec
-
-    def epsilonGreedyDecay(self, counter):
-        exponent = 0.3
-        self.burnIn=500
-        counter = max(1,counter-self.burnIn)
-        return self.epsilonGreedy/(1+counter**exponent)
 
 
     def computeGreedyControlPolicy(self, S, randomize=True, counter=None):
