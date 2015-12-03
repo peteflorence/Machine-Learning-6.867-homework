@@ -51,8 +51,22 @@ class Simulator(object):
         self.app = ConsoleApp()
         # view = app.createView(useGrid=False)
         self.view = self.app.createView(useGrid=False)
+
+        self.initializeOptions()
         if autoInitialize:
             self.initialize()
+
+    def initializeOptions(self):
+        self.options = dict()
+
+        self.options['Reward'] = dict()
+        self.options['Reward']['actionCost'] = 0.1
+        self.options['Reward']['collisionPenalty'] = 100
+
+        self.options['SARSA'] = dict()
+        self.options['SARSA']['burnInTime'] = 500
+        self.options['SARSA']['epsilonGreedyExponent'] = 0.3
+        self.options['SARSA']['exponentialDiscountFactor'] = 0.05 # so gamma = e^(-rho*dt)
 
     def initialize(self):
 
@@ -60,7 +74,9 @@ class Simulator(object):
         self.Sensor = SensorObj(rayLength=self.Sensor_rayLength)
         self.Controller = ControllerObj(self.Sensor)
         self.Car = CarPlant(self.Controller)
-        self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold)
+        self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold,
+                             actionCost=self.options['Reward']['actionCost'],
+                             collisionPenalty=self.options['Reward']['collisionPenalty'])
         self.setSARSA()
 
         # create the things needed for simulation
@@ -89,10 +105,14 @@ class Simulator(object):
         if type=="discrete":
             self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
                                             collisionThreshold=self.collisionThreshold,
-                                   numInnerBins = self.Sarsa_numInnerBins, numOuterBins = self.Sarsa_numOuterBins)
+                                   numInnerBins = self.Sarsa_numInnerBins, numOuterBins = self.Sarsa_numOuterBins,
+                                       burnInTime = self.options['SARSA']['burnInTime'],
+                                       epsilonGreedyExponent=self.options['SARSA']['epsilonGreedyExponent'])
         elif type=="continuous":
             self.Sarsa = SARSAContinuous(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
-                                        collisionThreshold=self.collisionThreshold)
+                                        collisionThreshold=self.collisionThreshold,
+                                         burnInTime = self.options['SARSA']['burnInTime'],
+                                       epsilonGreedyExponent=self.options['SARSA']['epsilonGreedyExponent'])
         else:
             raise ValueError("sarsa type must be either discrete or continuous")
 
@@ -112,6 +132,7 @@ class Simulator(object):
 
         # record the reward data
         runData = dict()
+        reward = 0
         discountedReward = 0
         avgReward = 0
         startIdx = self.counter
@@ -196,10 +217,13 @@ class Simulator(object):
         self.raycastData[self.counter,:] = currentRaycast
 
         # return the total reward
+        avgRewardNoCollisionPenalty = avgReward - reward
         avgReward = avgReward*1.0/max(1, self.counter -startIdx)
+        avgRewardNoCollisionPenalty = avgRewardNoCollisionPenalty*1.0/max(1, self.counter -startIdx)
         # this extra multiplication is so that it is in the same "units" as avgReward
         runData['discountedReward'] = discountedReward*(1 - self.Sarsa.gamma)
         runData['avgReward'] = avgReward
+        runData['avgRewardNoCollisionPenalty'] = avgRewardNoCollisionPenalty
 
 
         # this just makes sure we don't get stuck in an infinite loop.
@@ -213,6 +237,7 @@ class Simulator(object):
 
         # for use in playback
         self.dt = dt
+        self.Sarsa.setDiscountFactor(dt)
 
         self.endTime = self.supervisedTrainingTime + self.learningTime + self.defaultControllerTime
 
@@ -240,6 +265,7 @@ class Simulator(object):
             rd = self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=True,
                                      updateQValues=True)
             runData['avgReward'] = rd['avgReward']
+            runData['avgRewardNoCollisionPenalty'] = rd['avgRewardNoCollisionPenalty']
             runData['discountedReward'] = rd['discountedReward']
             runData['controllerType'] = "defaultRandom"
             runData['duration'] = self.counter - runData['startIdx']
@@ -257,6 +283,7 @@ class Simulator(object):
                                      updateQValues=True)
 
             runData['avgReward'] = rd['avgReward']
+            runData['avgRewardNoCollisionPenalty'] = rd['avgRewardNoCollisionPenalty']
             runData['discountedReward'] = rd['discountedReward']
             runData['controllerType'] = "QValue"
             runData['duration'] = self.counter - runData['startIdx']
@@ -274,6 +301,7 @@ class Simulator(object):
                                      updateQValues=False)
 
             runData['avgReward'] = rd['avgReward']
+            runData['avgRewardNoCollisionPenalty'] = rd['avgRewardNoCollisionPenalty']
             runData['discountedReward'] = rd['discountedReward']
             runData['controllerType'] = "default"
             runData['duration'] = self.counter - runData['startIdx']
@@ -497,6 +525,7 @@ class Simulator(object):
         grid = np.arange(1,numRuns+1)
         discountedReward = np.zeros(numRuns)
         avgReward = np.zeros(numRuns)
+        avgRewardNoCollisionPenalty = np.zeros(numRuns)
 
 
         for idx, val in enumerate(self.simulationData):
@@ -504,6 +533,7 @@ class Simulator(object):
             runDuration[idx] = val['duration']
             discountedReward[idx] = val['discountedReward']
             avgReward[idx] = val['avgReward']
+            avgRewardNoCollisionPenalty[idx] = val['avgRewardNoCollisionPenalty']
             usedQValueController[idx] = (val['controllerType'] == "QValue")
             usedDefaultController[idx] = (val['controllerType'] == "default")
             usedDefaultRandomController[idx] = (val['controllerType'] == "defaultRandom")
@@ -512,7 +542,7 @@ class Simulator(object):
 
 
         plt.figure(1)
-        plt.subplot(3,1,1)
+
 
         idxDefaultRandom = np.where(usedDefaultRandomController==True)[0]
         idxQValueController = np.where(usedQValueController==True)[0]
@@ -522,8 +552,11 @@ class Simulator(object):
         plotData['defaultRandom'] = {'idx': idxDefaultRandom, 'color': 'b'}
         plotData['QValue'] = {'idx': idxQValueController, 'color': 'y'}
         plotData['default'] = {'idx': idxDefault, 'color': 'g'}
-        plt.title('run duration')
 
+
+
+        plt.subplot(4,1,1)
+        plt.title('run duration')
         for key, val in plotData.iteritems():
             plt.scatter(runStart[val['idx']], runDuration[val['idx']], color=val['color'])
 
@@ -533,16 +566,22 @@ class Simulator(object):
         plt.xlabel('run #')
         plt.ylabel('episode duration')
 
-        plt.subplot(3,1,2)
+        plt.subplot(4,1,2)
         plt.title('discounted reward')
         for key, val in plotData.iteritems():
             plt.scatter(grid[val['idx']],discountedReward[val['idx']], color=val['color'])
 
 
-        plt.subplot(3,1,3)
+        plt.subplot(4,1,3)
         plt.title("average reward")
         for key, val in plotData.iteritems():
             plt.scatter(grid[val['idx']],avgReward[val['idx']], color=val['color'])
+
+
+        plt.subplot(4,1,4)
+        plt.title("average reward no collision penalty")
+        for key, val in plotData.iteritems():
+            plt.scatter(grid[val['idx']],avgRewardNoCollisionPenalty[val['idx']], color=val['color'])
 
 
         plt.show()
