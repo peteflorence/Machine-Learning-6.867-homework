@@ -4,7 +4,7 @@ from sarsa import SARSA
 
 class SARSADiscrete(SARSA):
 
-    def __init__(self, sensorObj=None, actionSet=None, gamma=0.8, lam=0.8, alphaStepSize=0.2, epsilonGreedy=0.2,
+    def __init__(self, sensorObj=None, actionSet=None, gamma=0.95, lam=0.8, alphaStepSize=0.2, epsilonGreedy=0.2,
                  cutoff=20, collisionThreshold=None, numInnerBins=4, numOuterBins=4, binCutoff=0.5):
 
         SARSA.__init__(self, sensorObj=sensorObj, actionSet=actionSet, gamma=gamma, lam=lam, alphaStepSize=alphaStepSize,

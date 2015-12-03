@@ -6,14 +6,12 @@ from sarsa import SARSA
 
 class SARSAContinuous(SARSA):
 
-    def __init__(self, sensorObj=None, actionSet=None, gamma=0.95, lam=0.8, alphaStepSize=0.2, epsilonGreedy=0.2,
+    def __init__(self, sensorObj=None, actionSet=None, gamma=0.95, lam=0.8, alphaStepSize=0.05, epsilonGreedy=0.2,
                  cutoff=20, collisionThreshold=None):
 
         SARSA.__init__(self, sensorObj=sensorObj, actionSet=actionSet, gamma=gamma, lam=lam, alphaStepSize=alphaStepSize,
                        epsilonGreedy=epsilonGreedy, cutoff=cutoff, collisionThreshold=collisionThreshold)
 
-
-        self.useSumFeature = useSumFeature
 
         self.numFeatures = self.numRays + 1
         self.initializeWeights()
@@ -25,11 +23,9 @@ class SARSAContinuous(SARSA):
 
     def initializeWeights(self):
         self.weights = np.zeros((self.numActions,self.numFeatures))
-        if self.useSumFeature:
-            self.weights = (0,np.zeros((self.numActions,self.numFeatures)))
 
     def resetElibilityTraces(self):
-        self.eligibilityTraces = np.zeros(self.numActions, self.numFeatures)
+        self.eligibilityTraces = np.zeros((self.numActions, self.numFeatures))
 
     def computeFeatureVector(self, S):
         carState, raycastDistance = S
@@ -37,9 +33,6 @@ class SARSAContinuous(SARSA):
         featureVec[0] = 1
         featureVec[1:] = utils.inverseTruncate(raycastDistance, self.cutoff, rayLength=self.rayLength,
                                                collisionThreshold=self.collisionThreshold)
-
-        # if self.useSumFeature:
-        #     featureVec = (np.sum(featureVec[1:]), featureVec)
 
         return featureVec
 
@@ -74,8 +67,8 @@ class SARSAContinuous(SARSA):
         return grad
 
     def epsilonGreedyDecay(self, counter):
-        exponent = 0.5
-        burnIn=500
+        exponent = 0.3
+        burnIn=1000
         counter = max(1,counter-burnIn)
         return self.epsilonGreedy/(1+counter**exponent)
 
@@ -129,10 +122,7 @@ class SARSAContinuous(SARSA):
 
     def plotWeights(self):
 
-        if self.useSumFeature:
-            weights = self.weights[1]
-        else:
-            weights = self.weights
+        weights = self.weights
 
         for idx in xrange(0,self.numActions):
             plt.plot(self.plotGrid, weights[idx,1:], label=str(self.actionSet[idx]))

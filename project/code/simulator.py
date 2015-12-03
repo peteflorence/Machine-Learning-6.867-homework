@@ -110,6 +110,12 @@ class Simulator(object):
         nextRaycast = np.zeros(self.Sensor.numRays)
         self.Sarsa.resetElibilityTraces()
 
+        # record the reward data
+        runData = dict()
+        discountedReward = 0
+        avgReward = 0
+        startIdx = self.counter
+
 
         while (self.counter < self.numTimesteps - 1):
             idx = self.counter
@@ -168,6 +174,9 @@ class Simulator(object):
             reward = self.Reward.computeReward(S_next, controlInput)
             self.rewardData[idx] = reward
 
+            discountedReward += self.Sarsa.gamma**(self.counter-startIdx)*reward
+            avgReward += reward
+
             ## SARSA update
             if updateQValues:
                 self.Sarsa.sarsaUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
@@ -181,9 +190,23 @@ class Simulator(object):
                 if self.verbose: print "Had a collision, terminating simulation"
                 break
 
+
         # fill in the last state by hand
         self.stateOverTime[self.counter,:] = currentCarState
         self.raycastData[self.counter,:] = currentRaycast
+
+        # return the total reward
+        avgReward = avgReward*1.0/max(1, self.counter -startIdx)
+        # this extra multiplication is so that it is in the same "units" as avgReward
+        runData['discountedReward'] = discountedReward*(1 - self.Sarsa.gamma)
+        runData['avgReward'] = avgReward
+
+
+        # this just makes sure we don't get stuck in an infinite loop.
+        if startIdx == self.counter:
+            self.counter += 1
+
+        return runData
 
 
     def runBatchSimulation(self, endTime=None, dt=0.05):
@@ -214,8 +237,10 @@ class Simulator(object):
             useQValueController = False
             runData = dict()
             runData['startIdx'] = self.counter
-            self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=True,
+            rd = self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=True,
                                      updateQValues=True)
+            runData['avgReward'] = rd['avgReward']
+            runData['discountedReward'] = rd['discountedReward']
             runData['controllerType'] = "defaultRandom"
             runData['duration'] = self.counter - runData['startIdx']
             runData['endIdx'] = self.counter
@@ -228,8 +253,11 @@ class Simulator(object):
             runData = dict()
             runData['startIdx'] = self.counter
             useQValueController = True
-            self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=True,
+            rd = self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=True,
                                      updateQValues=True)
+
+            runData['avgReward'] = rd['avgReward']
+            runData['discountedReward'] = rd['discountedReward']
             runData['controllerType'] = "QValue"
             runData['duration'] = self.counter - runData['startIdx']
             runData['endIdx'] = self.counter
@@ -242,39 +270,15 @@ class Simulator(object):
             runData = dict()
             runData['startIdx'] = self.counter
             useQValueController = False
-            self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=False,
+            rd = self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=False,
                                      updateQValues=False)
+
+            runData['avgReward'] = rd['avgReward']
+            runData['discountedReward'] = rd['discountedReward']
             runData['controllerType'] = "default"
             runData['duration'] = self.counter - runData['startIdx']
             runData['endIdx'] = self.counter
             self.simulationData.append(runData)
-
-
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        # while(self.counter < self.numTimesteps - 1):
-        #     self.printStatusBar()
-        #     runData = dict()
-        #     runData['startIdx'] = self.counter
-        #     if self.counter > (self.supervisedTrainingTime*1.0/self.endTime)*self.numTimesteps:
-        #         useQValueController = True
-        #         if self.usingQValueControllerIdx is None:
-        #             self.usingQValueControllerIdx = self.counter
-        #     else:
-        #         useQValueController = False
-        #
-        #     if self.verbose: print "starting a new single simulation"
-        #     if self.verbose: print "counter is ", self.counter
-        #     self.runSingleSimulation(useQValueController=useQValueController)
-        #     runData['usedQValueController'] = useQValueController
-        #     runData['duration'] = self.counter - runData['startIdx']
-        #     runData['endIdx'] = self.counter
-        #     self.simulationData.append(runData)
 
 
         # BOOKKEEPING
@@ -490,23 +494,57 @@ class Simulator(object):
         usedQValueController = np.zeros(numRuns)
         usedDefaultController = np.zeros(numRuns)
         usedDefaultRandomController= np.zeros(numRuns)
+        grid = np.arange(1,numRuns+1)
+        discountedReward = np.zeros(numRuns)
+        avgReward = np.zeros(numRuns)
+
 
         for idx, val in enumerate(self.simulationData):
             runStart[idx] = val['startIdx']
             runDuration[idx] = val['duration']
+            discountedReward[idx] = val['discountedReward']
+            avgReward[idx] = val['avgReward']
             usedQValueController[idx] = (val['controllerType'] == "QValue")
             usedDefaultController[idx] = (val['controllerType'] == "default")
             usedDefaultRandomController[idx] = (val['controllerType'] == "defaultRandom")
 
 
-        idx = np.where(usedDefaultRandomController==True)
-        plt.plot(runStart[idx], runDuration[idx], color='b')
 
-        idx = np.where(usedQValueController==True)
-        plt.plot(runStart[idx], runDuration[idx], color='y')
 
-        idx = np.where(usedDefaultController==True)
-        plt.plot(runStart[idx], runDuration[idx], color='g')
+        plt.figure(1)
+        plt.subplot(3,1,1)
+
+        idxDefaultRandom = np.where(usedDefaultRandomController==True)[0]
+        idxQValueController = np.where(usedQValueController==True)[0]
+        idxDefault = np.where(usedDefaultController==True)[0]
+
+        plotData = dict()
+        plotData['defaultRandom'] = {'idx': idxDefaultRandom, 'color': 'b'}
+        plotData['QValue'] = {'idx': idxQValueController, 'color': 'y'}
+        plotData['default'] = {'idx': idxDefault, 'color': 'g'}
+        plt.title('run duration')
+
+        for key, val in plotData.iteritems():
+            plt.scatter(runStart[val['idx']], runDuration[val['idx']], color=val['color'])
+
+        # plt.scatter(runStart[idxDefaultRandom], runDuration[idxDefaultRandom], color='b')
+        # plt.scatter(runStart[idxQValueController], runDuration[idxQValueController], color='y')
+        # plt.scatter(runStart[idxDefault], runDuration[idxDefault], color='g')
+        plt.xlabel('run #')
+        plt.ylabel('episode duration')
+
+        plt.subplot(3,1,2)
+        plt.title('discounted reward')
+        for key, val in plotData.iteritems():
+            plt.scatter(grid[val['idx']],discountedReward[val['idx']], color=val['color'])
+
+
+        plt.subplot(3,1,3)
+        plt.title("average reward")
+        for key, val in plotData.iteritems():
+            plt.scatter(grid[val['idx']],avgReward[val['idx']], color=val['color'])
+
+
         plt.show()
 
 
