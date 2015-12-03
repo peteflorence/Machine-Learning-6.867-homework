@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 class Reward(object):
 
-    def __init__(self, sensorObj=None, collisionThreshold=None, collisionPenalty=10.0,
-                 actionCost=0.05):
+    def __init__(self, sensorObj=None, collisionThreshold=None, collisionPenalty=100.0,
+                 actionCost=0.1):
         if sensorObj is None or collisionThreshold is None:
             ValueError("need to specify sensorObj, actionSet and collisionThreshold")
         self.numRays = sensorObj.numRays
