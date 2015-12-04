@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 class Reward(object):
 
     def __init__(self, sensorObj=None, collisionThreshold=None, collisionPenalty=100.0,
-                 actionCost=0.1):
+                 actionCost=0.1, raycastCost=20.0):
         if sensorObj is None or collisionThreshold is None:
             ValueError("need to specify sensorObj, actionSet and collisionThreshold")
         self.numRays = sensorObj.numRays
@@ -17,15 +17,15 @@ class Reward(object):
         self.collisionThreshold = collisionThreshold
         self.collisionPenalty = collisionPenalty
         self.actionCost = actionCost
+        self.raycastCost = raycastCost
         self.initializeRaycastRewardWeights()
         self.largeConstant = 1e5*1.0
         self.tol = 1e-3
         self.cutoff = 20
 
     def initializeRaycastRewardWeights(self):
-        constant = -20
         self.raycastRewardWeights = np.cos(self.sensorObj.angleGrid)
-        self.raycastRewardWeights = constant*self.raycastRewardWeights/self.raycastRewardWeights.sum()
+        self.raycastRewardWeights = -self.raycastCost*self.raycastRewardWeights/self.raycastRewardWeights.sum()
 
     def checkInCollision(self, raycastDistance):
         if np.min(raycastDistance) < self.collisionThreshold:
@@ -68,7 +68,6 @@ class Reward(object):
         grid = np.arange(0,self.sensorObj.numRays) - self.sensorObj.numRays/2.0
         plt.plot(grid, self.raycastRewardWeights)
         plt.show()
-
 
 
 

@@ -4,21 +4,20 @@ from sarsa import SARSA
 
 class SARSADiscrete(SARSA):
 
-    def __init__(self, sensorObj=None, actionSet=None, gamma=0.8, lam=0.8, alphaStepSize=0.2, epsilonGreedy=0.2,
-                 cutoff=20, collisionThreshold=None, numInnerBins=4, numOuterBins=4, binCutoff=0.5):
+    def __init__(self, numInnerBins=4, numOuterBins=4, binCutoff=0.5, alphaStepSize=0.2,
+                 useQLearningUpdate= False, **kwargs):
 
-        SARSA.__init__(self, sensorObj=sensorObj, actionSet=actionSet, gamma=gamma, lam=lam, alphaStepSize=alphaStepSize,
-                       epsilonGreedy=epsilonGreedy, cutoff=cutoff, collisionThreshold=collisionThreshold)
+        SARSA.__init__(self, alphaStepSize=0.2, **kwargs)
 
         self.numInnerBins=numInnerBins
         self.numOuterBins=numOuterBins
         self.numBins=numInnerBins + numOuterBins
         self.binCutoff=binCutoff
+        self.useQLearningUpdate = useQLearningUpdate
         self.initializeQValues()
         self.initializeBinData()
         self.resetElibilityTraces()
         self.eligibilityTraceThreshold = 0.1
-        self.burnIn = 500
 
 
     def initializeQValues(self):
@@ -105,12 +104,6 @@ class SARSADiscrete(SARSA):
 
         return QVec
 
-    def epsilonGreedyDecay(self, counter):
-        exponent = 0.3
-        self.burnIn=500
-        counter = max(1,counter-self.burnIn)
-        return self.epsilonGreedy/(1+counter**exponent)
-
 
     def computeGreedyControlPolicy(self, S, randomize=True, counter=None):
         QVec = self.computeQValueVector(S)
@@ -142,7 +135,7 @@ class SARSADiscrete(SARSA):
     def sarsaUpdate(self, S_current, A_idx_current, R, S_next, A_idx_next):
 
         featureVecCurrent = self.computeFeatureVector(S_current, A_idx = A_idx_current)
-        featureVecNext = self.computeFeatureVector(S_current, A_idx=A_idx_next)
+        featureVecNext = self.computeFeatureVector(S_next, A_idx=A_idx_next)
 
         delta = R + self.gamma*self.QValues[featureVecNext] - self.QValues[featureVecCurrent]
         self.eligibilityTrace[featureVecCurrent] = 1.0
