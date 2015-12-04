@@ -36,6 +36,16 @@ sim.worldScale             = 1
 sim.options['World']['obstaclesInnerFraction'] = 0.8
 
 
+# testing
+# world from Test
+sim.randomSeed = 8
+sim.randomizeControl       = True
+sim.percentObsDensity      = 5
+sim.nonRandomWorld         = True
+sim.circleRadius           = 2.5
+sim.worldScale             = 1
+
+
 # sim.supervisedTrainingTime = 10
 # sim.learningRandomTime = 10
 # sim.learningEvalTime = 10
