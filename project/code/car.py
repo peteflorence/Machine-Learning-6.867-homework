@@ -3,7 +3,7 @@ import scipy.integrate as integrate
 
 class CarPlant(object):
 
-    def __init__(self, controller=None):
+    def __init__(self, controller=None, velocity=12):
         # initial state
         self.x = 0.0
         self.y = 0.0
@@ -14,7 +14,7 @@ class CarPlant(object):
         self.state = np.array([self.x, self.y, self.psi*rad])
 
         # constant velocity
-        self.v = 12
+        self.v = velocity
 
         self.Controller = controller
 
