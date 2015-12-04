@@ -83,6 +83,8 @@ class Simulator(object):
         self.options['Sensor']['rayLength'] = 10
         self.options['Sensor']['numRays'] = 20
 
+
+        self.options['Car'] = dict()
         self.options['Car']['velocity'] = 12
 
 
@@ -150,7 +152,7 @@ class Simulator(object):
             raise ValueError("sarsa type must be either discrete or continuous")
 
 
-    def runSingleSimulation(self, updateQValues=True, controllerType='default'):
+    def runSingleSimulation(self, updateQValues=True, controllerType='default', simulationCutoff=None):
 
         if self.verbose: print "using QValue based controller = ", useQValueController
 
@@ -294,6 +296,9 @@ class Simulator(object):
                 if self.verbose: print "Had a collision, terminating simulation"
                 break
 
+            if self.counter >= simulationCutoff:
+                break
+
 
         # fill in the last state by hand
         self.stateOverTime[self.counter,:] = currentCarState
@@ -346,11 +351,13 @@ class Simulator(object):
         # three while loops for different phases of simulation, supervisedTraining, learning, default
         self.idxDict['defaultRandom'] = self.counter
         loopStartIdx = self.counter
+        simCutoff = min(loopStartIdx + self.supervisedTrainingTime/dt, self.numTimesteps)
         while ((self.counter - loopStartIdx <  self.supervisedTrainingTime/dt) and self.counter < self.numTimesteps):
             self.printStatusBar()
             useQValueController = False
             startIdx = self.counter
-            runData = self.runSingleSimulation(updateQValues=True, controllerType='defaultRandom')
+            runData = self.runSingleSimulation(updateQValues=True, controllerType='defaultRandom',
+                                               simulationCutoff=simCutoff)
 
             runData['startIdx'] = startIdx
             runData['controllerType'] = "defaultRandom"
@@ -363,10 +370,12 @@ class Simulator(object):
 
         self.idxDict['learnedRandom'] = self.counter
         loopStartIdx = self.counter
+        simCutoff = min(loopStartIdx + self.learningRandomTime/dt, self.numTimesteps)
         while ((self.counter - loopStartIdx < self.learningRandomTime/dt) and self.counter < self.numTimesteps):
             self.printStatusBar()
             startIdx = self.counter
-            runData = self.runSingleSimulation(updateQValues=True, controllerType='learnedRandom')
+            runData = self.runSingleSimulation(updateQValues=True, controllerType='learnedRandom',
+                                               simulationCutoff=simCutoff)
             runData['startIdx'] = startIdx
             runData['controllerType'] = "learnedRandom"
             runData['duration'] = self.counter - runData['startIdx']
@@ -379,11 +388,13 @@ class Simulator(object):
 
         self.idxDict['learned'] = self.counter
         loopStartIdx = self.counter
+        simCutoff = min(loopStartIdx + self.learningEvalTime/dt, self.numTimesteps)
         while ((self.counter - loopStartIdx < self.learningEvalTime/dt) and self.counter < self.numTimesteps):
 
             self.printStatusBar()
             startIdx = self.counter
-            runData = self.runSingleSimulation(updateQValues=False, controllerType='learned')
+            runData = self.runSingleSimulation(updateQValues=False, controllerType='learned',
+                                               simulationCutoff=simCutoff)
             runData['startIdx'] = startIdx
             runData['controllerType'] = "learned"
             runData['duration'] = self.counter - runData['startIdx']
@@ -396,10 +407,12 @@ class Simulator(object):
 
         self.idxDict['default'] = self.counter
         loopStartIdx = self.counter
+        simCutoff = min(loopStartIdx + self.defaultControllerTime/dt, self.numTimesteps)
         while ((self.counter - loopStartIdx < self.defaultControllerTime/dt) and self.counter < self.numTimesteps-1):
             self.printStatusBar()
             startIdx = self.counter
-            runData = self.runSingleSimulation(updateQValues=False, controllerType='default')
+            runData = self.runSingleSimulation(updateQValues=False, controllerType='default',
+                                               simulationCutoff=simCutoff)
             runData['startIdx'] = startIdx
             runData['controllerType'] = "default"
             runData['duration'] = self.counter - runData['startIdx']

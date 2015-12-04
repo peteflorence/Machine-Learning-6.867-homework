@@ -18,6 +18,11 @@ sim.options['Reward']['raycastCost'] = 40.0
 
 
 
+sim.supervisedTrainingTime = 3000
+sim.learningRandomTime = 4000
+sim.learningEvalTime = 1000
+sim.defaultControllerTime = 500
+
 
 
 # world from Test
