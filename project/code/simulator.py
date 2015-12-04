@@ -40,19 +40,20 @@ class Simulator(object):
         self.sarsaType = sarsaType
 
         self.percentObsDensity = percentObsDensity
-        self.supervisedTrainingTime = 3000
-        self.learningTime = 9000
-        self.defaultControllerTime = 1000
+        self.supervisedTrainingTime = 10
+        self.learningRandomTime = 10
+        self.learningEvalTime = 10
+        self.defaultControllerTime = 10
         self.nonRandomWorld = nonRandomWorld
         self.circleRadius = circleRadius
         self.worldScale = worldScale
-        self.supervisedTrainingTime = supervisedTrainingTime
         # create the visualizer object
         self.app = ConsoleApp()
         # view = app.createView(useGrid=False)
         self.view = self.app.createView(useGrid=False)
 
         self.initializeOptions()
+        self.initializeColorMap()
         if autoInitialize:
             self.initialize()
 
@@ -68,9 +69,15 @@ class Simulator(object):
         self.options['SARSA']['epsilonGreedyExponent'] = 0.3
         self.options['SARSA']['exponentialDiscountFactor'] = 0.05 # so gamma = e^(-rho*dt)
 
+    def initializeColorMap(self):
+        self.colorMap = dict()
+        self.colorMap['defaultRandom'] = [0,0,1]
+        self.colorMap['learnedRandom'] = [1.0,  0.54901961,  0.] # this is orange
+        self.colorMap['learned'] = [ 0.58039216,  0.        ,  0.82745098] # this is yellow
+        self.colorMap['default'] = [0,1,0]
+
     def initialize(self):
 
-        self.endTime = self.supervisedTrainingTime + self.learningTime + self.defaultControllerTime
         self.Sensor = SensorObj(rayLength=self.Sensor_rayLength)
         self.Controller = ControllerObj(self.Sensor)
         self.Car = CarPlant(self.Controller)
@@ -117,7 +124,7 @@ class Simulator(object):
             raise ValueError("sarsa type must be either discrete or continuous")
 
 
-    def runSingleSimulation(self, useQValueController=False, randomizeDefaultController=True, updateQValues=True):
+    def runSingleSimulation(self, updateQValues=True, controllerType='default'):
 
         if self.verbose: print "using QValue based controller = ", useQValueController
 
@@ -151,19 +158,42 @@ class Simulator(object):
             self.raycastData[idx,:] = currentRaycast
             S_current = (currentCarState, currentRaycast)
 
-            if useQValueController:
-                counterForGreedyDecay = self.counter - self.usingQValueControllerIdx
-                controlInput, controlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_current,
-                                                                                                   counter=counterForGreedyDecay)
-                if emptyQValue:
-                    self.emptyQValue[idx] = 1
+
+            if controllerType not in self.colorMap.keys():
+                print
+                raise ValueError("controller of type " + controllerType + " not supported")
 
 
-            if not useQValueController or emptyQValue:
-                controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
+            if controllerType in ["default", "defaultRandom"]:
+                if controllerType == "defaultRandom":
+                    controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
                                                                                 currentTime, self.frame,
                                                                                 raycastDistance=currentRaycast,
-                                                                                randomize=randomizeDefaultController)
+                                                                                randomize=True)
+                else:
+                    controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
+                                                                                currentTime, self.frame,
+                                                                                raycastDistance=currentRaycast,
+                                                                                randomize=False)
+
+
+            if controllerType in ["learned","learnedRandom"]:
+                if controllerType == "learned":
+                    randomizeControl = True
+                else:
+                    randomizeControl = False
+
+                counterForGreedyDecay = self.counter - self.idxDict["learnedRandom"]
+                controlInput, controlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_current,
+                                                                                                   counter=counterForGreedyDecay,
+                                                                                                   randomize=randomizeControl)
+                if emptyQValue:
+                    self.emptyQValue[idx] = 1
+                    controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
+                                                                                currentTime, self.frame,
+                                                                                raycastDistance=currentRaycast,
+                                                                                randomize=False)
+
             self.controlInputData[idx] = controlInput
 
             nextCarState = self.Car.simulateOneStep(controlInput=controlInput)
@@ -176,18 +206,45 @@ class Simulator(object):
             nextRaycast = self.Sensor.raycastAll(self.frame)
 
 
-            # Gather all the information we have
+            # Compute the next control input
             S_next = (nextCarState, nextRaycast)
 
-            if useQValueController:
-                nextControlInput, nextControlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_next)
+            if controllerType in ["default", "defaultRandom"]:
+                if controllerType == "defaultRandom":
+                    nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState,
+                                                                                currentTime, self.frame,
+                                                                                raycastDistance=nextRaycast,
+                                                                                randomize=True)
+                else:
+                    nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState,
+                                                                                currentTime, self.frame,
+                                                                                raycastDistance=nextRaycast,
+                                                                                randomize=False)
 
-            if not useQValueController or emptyQValue:
-                nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState, currentTime, self.frame,
-                                                                                        raycastDistance=nextRaycast)
 
+            if controllerType in ["learned","learnedRandom"]:
+                if controllerType == "learned":
+                    randomizeControl = True
+                else:
+                    randomizeControl = False
 
-            # compute the next control input, this is needed for SARSA
+                counterForGreedyDecay = self.counter - self.idxDict["learnedRandom"]
+                nextControlInput, nextControlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_next,
+                                                                                                   counter=counterForGreedyDecay,
+                                                                                                   randomize=randomizeControl)
+                if emptyQValue:
+                    self.emptyQValue[idx] = 1
+                    nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState,
+                                                                                currentTime, self.frame,
+                                                                                raycastDistance=nextRaycast,
+                                                                                randomize=False)
+
+            # if useQValueController:
+            #     nextControlInput, nextControlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_next)
+            #
+            # if not useQValueController or emptyQValue:
+            #     nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState, currentTime, self.frame,
+            #                                                                             raycastDistance=nextRaycast)
 
 
 
@@ -239,83 +296,104 @@ class Simulator(object):
         self.dt = dt
         self.Sarsa.setDiscountFactor(dt)
 
-        self.endTime = self.supervisedTrainingTime + self.learningTime + self.defaultControllerTime
+        self.endTime = self.supervisedTrainingTime + self.learningRandomTime + self.learningEvalTime + self.defaultControllerTime
 
         self.t = np.arange(0.0, self.endTime, dt)
-        numTimesteps = np.size(self.t)
-        self.stateOverTime = np.zeros((numTimesteps, 3))
-        self.raycastData = np.zeros((numTimesteps, self.Sensor.numRays))
-        self.controlInputData = np.zeros(numTimesteps)
-        self.rewardData = np.zeros(numTimesteps)
-        self.numTimesteps = numTimesteps
-        self.emptyQValue = np.zeros(numTimesteps)
+        maxNumTimesteps = np.size(self.t)
+        self.stateOverTime = np.zeros((maxNumTimesteps+1, 3))
+        self.raycastData = np.zeros((maxNumTimesteps+1, self.Sensor.numRays))
+        self.controlInputData = np.zeros(maxNumTimesteps+1)
+        self.rewardData = np.zeros(maxNumTimesteps+1)
+        self.emptyQValue = np.zeros(maxNumTimesteps+1)
+        self.numTimesteps = maxNumTimesteps
 
+        self.controllerTypeOrder = ['defaultRandom', 'learnedRandom', 'learned', 'default']
         self.counter = 0
         self.simulationData = []
     
         self.initializeStatusBar()
 
+        self.idxDict = dict()
+        numRunsCounter = 0
+
 
         # three while loops for different phases of simulation, supervisedTraining, learning, default
-        while (self.counter < self.supervisedTrainingTime/dt):
+        self.idxDict['defaultRandom'] = self.counter
+        loopStartIdx = self.counter
+        while ((self.counter - loopStartIdx <  self.supervisedTrainingTime/dt) and self.counter < self.numTimesteps):
             self.printStatusBar()
             useQValueController = False
-            runData = dict()
-            runData['startIdx'] = self.counter
-            rd = self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=True,
-                                     updateQValues=True)
-            runData['avgReward'] = rd['avgReward']
-            runData['avgRewardNoCollisionPenalty'] = rd['avgRewardNoCollisionPenalty']
-            runData['discountedReward'] = rd['discountedReward']
+            startIdx = self.counter
+            runData = self.runSingleSimulation(updateQValues=True, controllerType='defaultRandom')
+
+            runData['startIdx'] = startIdx
             runData['controllerType'] = "defaultRandom"
             runData['duration'] = self.counter - runData['startIdx']
             runData['endIdx'] = self.counter
+            runData['runNumber'] = numRunsCounter
+            numRunsCounter+=1
             self.simulationData.append(runData)
 
 
-        self.usingQValueControllerIdx = self.counter
-        while (self.counter < (self.supervisedTrainingTime + self.learningTime)/dt):
+        self.idxDict['learnedRandom'] = self.counter
+        loopStartIdx = self.counter
+        while ((self.counter - loopStartIdx < self.learningRandomTime/dt) and self.counter < self.numTimesteps):
             self.printStatusBar()
-            runData = dict()
-            runData['startIdx'] = self.counter
-            useQValueController = True
-            rd = self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=True,
-                                     updateQValues=True)
-
-            runData['avgReward'] = rd['avgReward']
-            runData['avgRewardNoCollisionPenalty'] = rd['avgRewardNoCollisionPenalty']
-            runData['discountedReward'] = rd['discountedReward']
-            runData['controllerType'] = "QValue"
+            startIdx = self.counter
+            runData = self.runSingleSimulation(updateQValues=True, controllerType='learnedRandom')
+            runData['startIdx'] = startIdx
+            runData['controllerType'] = "learnedRandom"
             runData['duration'] = self.counter - runData['startIdx']
             runData['endIdx'] = self.counter
+            runData['runNumber'] = numRunsCounter
+            numRunsCounter+=1
             self.simulationData.append(runData)
 
 
-        self.usingDefaultControllerIdx = self.counter
-        while (self.counter < self.numTimesteps - 1):
-            self.printStatusBar()
-            runData = dict()
-            runData['startIdx'] = self.counter
-            useQValueController = False
-            rd = self.runSingleSimulation(useQValueController=useQValueController, randomizeDefaultController=False,
-                                     updateQValues=False)
 
-            runData['avgReward'] = rd['avgReward']
-            runData['avgRewardNoCollisionPenalty'] = rd['avgRewardNoCollisionPenalty']
-            runData['discountedReward'] = rd['discountedReward']
+        self.idxDict['learned'] = self.counter
+        loopStartIdx = self.counter
+        while ((self.counter - loopStartIdx < self.learningEvalTime/dt) and self.counter < self.numTimesteps):
+
+            self.printStatusBar()
+            startIdx = self.counter
+            runData = self.runSingleSimulation(updateQValues=False, controllerType='learned')
+            runData['startIdx'] = startIdx
+            runData['controllerType'] = "learned"
+            runData['duration'] = self.counter - runData['startIdx']
+            runData['endIdx'] = self.counter
+            runData['runNumber'] = numRunsCounter
+            numRunsCounter+=1
+            self.simulationData.append(runData)
+
+
+
+        self.idxDict['default'] = self.counter
+        loopStartIdx = self.counter
+        while ((self.counter - loopStartIdx < self.defaultControllerTime/dt) and self.counter < self.numTimesteps-1):
+            self.printStatusBar()
+            startIdx = self.counter
+            runData = self.runSingleSimulation(updateQValues=False, controllerType='default')
+            runData['startIdx'] = startIdx
             runData['controllerType'] = "default"
             runData['duration'] = self.counter - runData['startIdx']
             runData['endIdx'] = self.counter
+            runData['runNumber'] = numRunsCounter
+            numRunsCounter+=1
             self.simulationData.append(runData)
 
 
         # BOOKKEEPING
         # truncate stateOverTime, raycastData, controlInputs to be the correct size
+        self.numTimesteps = self.counter + 1
         self.stateOverTime = self.stateOverTime[0:self.counter+1, :]
         self.raycastData = self.raycastData[0:self.counter+1, :]
         self.controlInputData = self.controlInputData[0:self.counter+1]
         self.rewardData = self.rewardData[0:self.counter+1]
-        self.endTime = 1.0*self.counter/numTimesteps*self.endTime
+        self.endTime = 1.0*self.counter/self.numTimesteps*self.endTime
+
+
+
 
 
     def initializeStatusBar(self):
@@ -421,13 +499,17 @@ class Simulator(object):
 
         sliderIdx = self.slider.value
 
-        if (sliderIdx >= self.usingQValueControllerIdx) and (sliderIdx < self.usingDefaultControllerIdx) \
-                and not self.emptyQValue[sliderIdx]:
-            colorMaxRange = [1,1,0]
-        elif sliderIdx >= self.usingDefaultControllerIdx:
-            colorMaxRange = [0,1,0]
-        else:
-            colorMaxRange = [0,0,1]
+        controllerType = self.getControllerTypeFromCounter(sliderIdx)
+        colorMaxRange = self.colorMap[controllerType]
+        if self.emptyQValue[sliderIdx]:
+            colorMaxRange = self.colorMap['default']
+        # if (sliderIdx >= self.usingQValueControllerIdx) and (sliderIdx < self.usingDefaultControllerIdx) \
+        #         and not self.emptyQValue[sliderIdx]:
+        #     colorMaxRange = [1,1,0]
+        # elif sliderIdx >= self.usingDefaultControllerIdx:
+        #     colorMaxRange = [0,1,0]
+        # else:
+        #     colorMaxRange = [0,0,1]
 
         for i in xrange(self.Sensor.numRays):
             ray = self.Sensor.rays[:,i]
@@ -445,6 +527,17 @@ class Simulator(object):
         #camera = self.view.camera()
         #camera.SetFocalPoint(frame.transform.GetPosition())
         #camera.SetPosition(frame.transform.TransformPoint((-30,0,10)))
+
+
+    def getControllerTypeFromCounter(self, counter):
+        name = self.controllerTypeOrder[0]
+
+        for controllerType in self.controllerTypeOrder[1:]:
+            if counter >= self.idxDict[controllerType]:
+                name = controllerType
+
+
+        return name
 
 
     def setRobotFrameState(self, x, y, theta):
@@ -519,13 +612,16 @@ class Simulator(object):
         numRuns = len(self.simulationData)
         runStart = np.zeros(numRuns)
         runDuration = np.zeros(numRuns)
-        usedQValueController = np.zeros(numRuns)
-        usedDefaultController = np.zeros(numRuns)
-        usedDefaultRandomController= np.zeros(numRuns)
         grid = np.arange(1,numRuns+1)
         discountedReward = np.zeros(numRuns)
         avgReward = np.zeros(numRuns)
         avgRewardNoCollisionPenalty = np.zeros(numRuns)
+
+
+        idxMap = dict()
+
+        for controllerType, color in self.colorMap.iteritems():
+            idxMap[controllerType] = np.zeros(numRuns, dtype=bool)
 
 
         for idx, val in enumerate(self.simulationData):
@@ -534,31 +630,40 @@ class Simulator(object):
             discountedReward[idx] = val['discountedReward']
             avgReward[idx] = val['avgReward']
             avgRewardNoCollisionPenalty[idx] = val['avgRewardNoCollisionPenalty']
-            usedQValueController[idx] = (val['controllerType'] == "QValue")
-            usedDefaultController[idx] = (val['controllerType'] == "default")
-            usedDefaultRandomController[idx] = (val['controllerType'] == "defaultRandom")
+            controllerType = val['controllerType']
+            idxMap[controllerType][idx] = True
+
+            # usedQValueController[idx] = (val['controllerType'] == "QValue")
+            # usedDefaultController[idx] = (val['controllerType'] == "default")
+            # usedDefaultRandomController[idx] = (val['controllerType'] == "defaultRandom")
+            # usedQValueRandomController[idx] = (val['controllerType'] == "QValueRandom")
 
 
 
 
         plt.figure(1)
 
+        #
+        # idxDefaultRandom = np.where(usedDefaultRandomController==True)[0]
+        # idxQValueController = np.where(usedQValueController==True)[0]
+        # idxQValueControllerRandom = np.where(usedQValueControllerRandom==True)[0]
+        # idxDefault = np.where(usedDefaultController==True)[0]
+        #
+        # plotData = dict()
+        # plotData['defaultRandom'] = {'idx': idxDefaultRandom, 'color': 'b'}
+        # plotData['QValue'] = {'idx': idxQValueController, 'color': 'y'}
+        # plotData['default'] = {'idx': idxDefault, 'color': 'g'}
 
-        idxDefaultRandom = np.where(usedDefaultRandomController==True)[0]
-        idxQValueController = np.where(usedQValueController==True)[0]
-        idxDefault = np.where(usedDefaultController==True)[0]
-
-        plotData = dict()
-        plotData['defaultRandom'] = {'idx': idxDefaultRandom, 'color': 'b'}
-        plotData['QValue'] = {'idx': idxQValueController, 'color': 'y'}
-        plotData['default'] = {'idx': idxDefault, 'color': 'g'}
-
+        def scatterPlot(dataToPlot):
+            for controllerType, idx in idxMap.iteritems():
+                plt.scatter(grid[idx], dataToPlot[idx], color=self.colorMap[controllerType])
 
 
         plt.subplot(4,1,1)
         plt.title('run duration')
-        for key, val in plotData.iteritems():
-            plt.scatter(runStart[val['idx']], runDuration[val['idx']], color=val['color'])
+        scatterPlot(runDuration)
+        # for controllerType, idx in idxMap.iteritems():
+        #     plt.scatter(grid[idx], runDuration[idx], color=self.colorMap[controllerType])
 
         # plt.scatter(runStart[idxDefaultRandom], runDuration[idxDefaultRandom], color='b')
         # plt.scatter(runStart[idxQValueController], runDuration[idxQValueController], color='y')
@@ -568,23 +673,28 @@ class Simulator(object):
 
         plt.subplot(4,1,2)
         plt.title('discounted reward')
-        for key, val in plotData.iteritems():
-            plt.scatter(grid[val['idx']],discountedReward[val['idx']], color=val['color'])
+        scatterPlot(discountedReward)
+        # for key, val in plotData.iteritems():
+        #     plt.scatter(grid[idx], discountedReward[idx], color=self.colorMap[controllerType])
 
 
         plt.subplot(4,1,3)
         plt.title("average reward")
-        for key, val in plotData.iteritems():
-            plt.scatter(grid[val['idx']],avgReward[val['idx']], color=val['color'])
+        scatterPlot(avgReward)
+        # for key, val in plotData.iteritems():
+        #     plt.scatter(grid[val['idx']],avgReward[val['idx']], color=val['color'])
 
 
         plt.subplot(4,1,4)
         plt.title("average reward no collision penalty")
-        for key, val in plotData.iteritems():
-            plt.scatter(grid[val['idx']],avgRewardNoCollisionPenalty[val['idx']], color=val['color'])
+        scatterPlot(avgRewardNoCollisionPenalty)
+        # for key, val in plotData.iteritems():
+        #     plt.scatter(grid[val['idx']],avgRewardNoCollisionPenalty[val['idx']], color=val['color'])
 
 
         plt.show()
+
+
 
 
 
