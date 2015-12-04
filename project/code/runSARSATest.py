@@ -19,9 +19,17 @@ sim.worldScale             = 1
 # sim.defaultControllerTime = 1000
 
 
-sim.supervisedTrainingTime = 10
-sim.learningTime = 10
-sim.defaultControllerTime = 10
+
+sim.supervisedTrainingTime = 100
+sim.learningRandomTime = 100
+sim.learningEvalTime = 100
+sim.defaultControllerTime = 100
+
+
+# sim.supervisedTrainingTime = 10
+# sim.learningRandomTime = 10
+# sim.learningEvalTime = 10
+# sim.defaultControllerTime = 10
 
 sim.options['SARSA']['burnInTime'] = sim.supervisedTrainingTime/2.0
 sim.options['Reward']['actionCost'] = 0.5
