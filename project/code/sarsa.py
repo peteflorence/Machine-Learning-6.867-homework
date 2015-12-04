@@ -5,7 +5,7 @@ class SARSA(object):
 
     def __init__(self, sensorObj=None, actionSet=None, gamma=0.95, lam=0.7, alphaStepSize=1e-4, epsilonGreedy=0.2,
                  cutoff=20, collisionThreshold=None, burnInTime=500, epsilonGreedyExponent=0.3,
-                 exponentialDiscountFactor = 0.05):
+                 exponentialDiscountFactor = 1.025865):
 
         if sensorObj is None or actionSet is None or collisionThreshold is None:
             raise ValueError("you must specify the sensorObj and the action set and collisionThreshold")
@@ -37,6 +37,9 @@ class SARSA(object):
         raise ValueError("subclass must implement this method")
 
     def resetElibilityTraces(self):
+        raise ValueError("subclass must implement this method")
+
+    def computeGreedyControlPolicy(self, S, randomize=True, counter=None):
         raise ValueError("subclass must implement this method")
 
 
