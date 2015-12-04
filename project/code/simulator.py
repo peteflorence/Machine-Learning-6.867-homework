@@ -66,12 +66,25 @@ class Simulator(object):
         self.options['Reward']['raycastCost'] = 20.0
 
         self.options['SARSA'] = dict()
+        self.options['SARSA']['lam'] = 0.7
+        self.options['SARSA']['epsilonGreedy'] = 0.2
         self.options['SARSA']['burnInTime'] = 500
         self.options['SARSA']['epsilonGreedyExponent'] = 0.3
-        self.options['SARSA']['exponentialDiscountFactor'] = 0.05 # so gamma = e^(-rho*dt)
+        self.options['SARSA']['exponentialDiscountFactor'] = 0.05 #so gamma = e^(-rho*dt)
+        self.options['SARSA']['numInnerBins'] = 5
+        self.options['SARSA']['numOuterBins'] = 4
+        self.options['SARSA']['binCutoff'] = 0.5
+
 
         self.options['World'] = dict()
         self.options['World']['obstaclesInnerFraction'] = 0.7
+
+        self.options['Sensor'] = dict()
+        self.options['Sensor']['rayLength'] = 10
+        self.options['Sensor']['numRays'] = 20
+
+        self.options['Car']['velocity'] = 12
+
 
     def initializeColorMap(self):
         self.colorMap = dict()
@@ -82,9 +95,10 @@ class Simulator(object):
 
     def initialize(self):
 
-        self.Sensor = SensorObj(rayLength=self.Sensor_rayLength)
+        self.Sensor = SensorObj(rayLength=self.options['Sensor']['rayLength'],
+                                numRays=self.options['Sensor']['numRays'])
         self.Controller = ControllerObj(self.Sensor)
-        self.Car = CarPlant(self.Controller)
+        self.Car = CarPlant(self.Controller, velocity=self.options['Car']['velocity'])
         self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold,
                              actionCost=self.options['Reward']['actionCost'],
                              collisionPenalty=self.options['Reward']['collisionPenalty'],
@@ -118,13 +132,19 @@ class Simulator(object):
         if type=="discrete":
             self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
                                             collisionThreshold=self.collisionThreshold,
-                                   numInnerBins = self.Sarsa_numInnerBins, numOuterBins = self.Sarsa_numOuterBins,
+                                       lam=self.options['SARSA']['lam'],
+                                   numInnerBins = self.options['SARSA']['numInnerBins'],
+                                       numOuterBins = self.options['SARSA']['numOuterBins'],
+                                       binCutoff=self.options['SARSA']['binCutoff'],
                                        burnInTime = self.options['SARSA']['burnInTime'],
+                                       epsilonGreedy=self.options['SARSA']['epsilonGreedy'],
                                        epsilonGreedyExponent=self.options['SARSA']['epsilonGreedyExponent'])
         elif type=="continuous":
             self.Sarsa = SARSAContinuous(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
+                                         lam=self.options['SARSA']['lam'],
                                         collisionThreshold=self.collisionThreshold,
                                          burnInTime = self.options['SARSA']['burnInTime'],
+                                         epsilonGreedy=self.options['SARSA']['epsilonGreedy'],
                                        epsilonGreedyExponent=self.options['SARSA']['epsilonGreedyExponent'])
         else:
             raise ValueError("sarsa type must be either discrete or continuous")
