@@ -4,7 +4,8 @@ from sarsa import SARSA
 
 class SARSADiscrete(SARSA):
 
-    def __init__(self, numInnerBins=4, numOuterBins=4, binCutoff=0.5, alphaStepSize=0.2, **kwargs):
+    def __init__(self, numInnerBins=4, numOuterBins=4, binCutoff=0.5, alphaStepSize=0.2,
+                 useQLearningUpdate= False, **kwargs):
 
         SARSA.__init__(self, alphaStepSize=0.2, **kwargs)
 
@@ -12,6 +13,7 @@ class SARSADiscrete(SARSA):
         self.numOuterBins=numOuterBins
         self.numBins=numInnerBins + numOuterBins
         self.binCutoff=binCutoff
+        self.useQLearningUpdate = useQLearningUpdate
         self.initializeQValues()
         self.initializeBinData()
         self.resetElibilityTraces()
@@ -133,7 +135,7 @@ class SARSADiscrete(SARSA):
     def sarsaUpdate(self, S_current, A_idx_current, R, S_next, A_idx_next):
 
         featureVecCurrent = self.computeFeatureVector(S_current, A_idx = A_idx_current)
-        featureVecNext = self.computeFeatureVector(S_current, A_idx=A_idx_next)
+        featureVecNext = self.computeFeatureVector(S_next, A_idx=A_idx_next)
 
         delta = R + self.gamma*self.QValues[featureVecNext] - self.QValues[featureVecCurrent]
         self.eligibilityTrace[featureVecCurrent] = 1.0
