@@ -137,6 +137,15 @@ class SARSADiscrete(SARSA):
         featureVecCurrent = self.computeFeatureVector(S_current, A_idx = A_idx_current)
         featureVecNext = self.computeFeatureVector(S_next, A_idx=A_idx_next)
 
+
+
+        # this does QLearning update, if this isn't specified then we do sarsa
+        if self.useQLearningUpdate:
+            u, actionIdx, emptyQValue = self.computeGreedyControlPolicy(S_next, randomize=False)
+            featureVecNext = self.computeFeatureVector(S_next, A_idx=actionIdx)
+
+
+
         delta = R + self.gamma*self.QValues[featureVecNext] - self.QValues[featureVecCurrent]
         self.eligibilityTrace[featureVecCurrent] = 1.0
 
