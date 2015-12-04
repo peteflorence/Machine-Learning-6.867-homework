@@ -98,7 +98,8 @@ class World(object):
 
 
     @staticmethod
-    def buildCircleWorld(percentObsDensity, nonRandom=False, circleRadius=3, scale=None, randomSeed=5):
+    def buildCircleWorld(percentObsDensity, nonRandom=False, circleRadius=3, scale=None, randomSeed=5,
+                         obstaclesInnerFraction=1.0):
         #print "building circle world"
 
         if nonRandom:
@@ -113,15 +114,20 @@ class World(object):
         obsScalingFactor = 1.0/12.0
         maxNumObstacles = obsScalingFactor * worldArea
         
-        numObstacles = int(percentObsDensity/100.0 * maxNumObstacles)
+        numObstacles = int(obstaclesInnerFraction**2 * percentObsDensity/100.0 * maxNumObstacles)
         #print numObstacles
 
         # draw random stick obstacles
         obsLength = 2.0
 
+        obsXmin = worldXmin + (1-obstaclesInnerFraction)/2.0*(worldXmax - worldXmin)
+        obsXmax = worldXmax - (1-obstaclesInnerFraction)/2.0*(worldXmax - worldXmin)
+        obsYmin = worldYmin + (1-obstaclesInnerFraction)/2.0*(worldYmax - worldYmin)
+        obsYmax = worldYmax - (1-obstaclesInnerFraction)/2.0*(worldYmax - worldYmin)
+
         for i in xrange(numObstacles):
-            firstX = worldXmin + np.random.rand()*(worldXmax-worldXmin)
-            firstY = worldYmin + np.random.rand()*(worldYmax-worldYmin)
+            firstX = obsXmin + np.random.rand()*(obsXmax-obsXmin)
+            firstY = obsYmin + np.random.rand()*(obsYmax-obsYmin)
             firstEndpt = (firstX,firstY,+0.2)
             secondEndpt = (firstX,firstY,-0.2)
 

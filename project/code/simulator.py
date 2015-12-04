@@ -62,18 +62,22 @@ class Simulator(object):
 
         self.options['Reward'] = dict()
         self.options['Reward']['actionCost'] = 0.1
-        self.options['Reward']['collisionPenalty'] = 100
+        self.options['Reward']['collisionPenalty'] = 100.0
+        self.options['Reward']['raycastCost'] = 20.0
 
         self.options['SARSA'] = dict()
         self.options['SARSA']['burnInTime'] = 500
         self.options['SARSA']['epsilonGreedyExponent'] = 0.3
         self.options['SARSA']['exponentialDiscountFactor'] = 0.05 # so gamma = e^(-rho*dt)
 
+        self.options['World'] = dict()
+        self.options['World']['obstaclesInnerFraction'] = 0.7
+
     def initializeColorMap(self):
         self.colorMap = dict()
         self.colorMap['defaultRandom'] = [0,0,1]
         self.colorMap['learnedRandom'] = [1.0,  0.54901961,  0.] # this is orange
-        self.colorMap['learned'] = [ 0.58039216,  0.        ,  0.82745098] # this is yellow
+        self.colorMap['learned'] = [ 0.58039216,  0.0,  0.82745098] # this is yellow
         self.colorMap['default'] = [0,1,0]
 
     def initialize(self):
@@ -83,13 +87,15 @@ class Simulator(object):
         self.Car = CarPlant(self.Controller)
         self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold,
                              actionCost=self.options['Reward']['actionCost'],
-                             collisionPenalty=self.options['Reward']['collisionPenalty'])
+                             collisionPenalty=self.options['Reward']['collisionPenalty'],
+                             raycastCost=self.options['Reward']['raycastCost'])
         self.setSARSA()
 
         # create the things needed for simulation
         self.world = World.buildCircleWorld(percentObsDensity=self.percentObsDensity, circleRadius=self.circleRadius,
                                             nonRandom=self.nonRandomWorld, scale=self.worldScale,
-                                            randomSeed=self.randomSeed)
+                                            randomSeed=self.randomSeed,
+                                            obstaclesInnerFraction=self.options['World']['obstaclesInnerFraction'])
         self.robot, self.frame = World.buildRobot()
         self.locator = World.buildCellLocator(self.world.visObj.polyData)
         self.Sensor.setLocator(self.locator)
@@ -179,9 +185,9 @@ class Simulator(object):
 
             if controllerType in ["learned","learnedRandom"]:
                 if controllerType == "learned":
-                    randomizeControl = True
-                else:
                     randomizeControl = False
+                else:
+                    randomizeControl = True
 
                 counterForGreedyDecay = self.counter - self.idxDict["learnedRandom"]
                 controlInput, controlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_current,
@@ -224,9 +230,9 @@ class Simulator(object):
 
             if controllerType in ["learned","learnedRandom"]:
                 if controllerType == "learned":
-                    randomizeControl = True
-                else:
                     randomizeControl = False
+                else:
+                    randomizeControl = True
 
                 counterForGreedyDecay = self.counter - self.idxDict["learnedRandom"]
                 nextControlInput, nextControlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_next,
@@ -255,7 +261,7 @@ class Simulator(object):
             discountedReward += self.Sarsa.gamma**(self.counter-startIdx)*reward
             avgReward += reward
 
-            ## SARSA update
+            ###### SARSA update
             if updateQValues:
                 self.Sarsa.sarsaUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
 
@@ -607,8 +613,8 @@ class Simulator(object):
         print 'pause'
         self.playTimer.stop()
 
-    def plotRunData(self):
 
+    def computeRunStatistics(self):
         numRuns = len(self.simulationData)
         runStart = np.zeros(numRuns)
         runDuration = np.zeros(numRuns)
@@ -633,6 +639,37 @@ class Simulator(object):
             controllerType = val['controllerType']
             idxMap[controllerType][idx] = True
 
+
+    def plotRunData(self, controllerTypeToPlot=None, showPlot=True):
+
+        if controllerTypeToPlot==None:
+            controllerTypeToPlot = self.colorMap.keys()
+
+        numRuns = len(self.simulationData)
+        runStart = np.zeros(numRuns)
+        runDuration = np.zeros(numRuns)
+        grid = np.arange(1,numRuns+1)
+        discountedReward = np.zeros(numRuns)
+        avgReward = np.zeros(numRuns)
+        avgRewardNoCollisionPenalty = np.zeros(numRuns)
+
+
+        idxMap = dict()
+
+
+        for controllerType, color in self.colorMap.iteritems():
+            idxMap[controllerType] = np.zeros(numRuns, dtype=bool)
+
+
+        for idx, val in enumerate(self.simulationData):
+            runStart[idx] = val['startIdx']
+            runDuration[idx] = val['duration']
+            discountedReward[idx] = val['discountedReward']
+            avgReward[idx] = val['avgReward']
+            avgRewardNoCollisionPenalty[idx] = val['avgRewardNoCollisionPenalty']
+            controllerType = val['controllerType']
+            idxMap[controllerType][idx] = True
+
             # usedQValueController[idx] = (val['controllerType'] == "QValue")
             # usedDefaultController[idx] = (val['controllerType'] == "default")
             # usedDefaultRandomController[idx] = (val['controllerType'] == "defaultRandom")
@@ -640,8 +677,26 @@ class Simulator(object):
 
 
 
+        self.runStatistics = dict()
+        dataMap = {'duration': runDuration, 'discountedReward':discountedReward,
+                   'avgReward':avgReward, 'avgRewardNoCollisionPenalty':avgRewardNoCollisionPenalty}
 
-        plt.figure(1)
+
+        def computeRunStatistics(dataMap):
+            for controllerType, idx in idxMap.iteritems():
+                d = dict()
+                for dataName, dataSet in dataMap.iteritems():
+                    # average the appropriate values in dataset
+                    d[dataName] = np.sum(dataSet[idx])/(1.0*np.size(dataSet[idx]))
+
+                self.runStatistics[controllerType] = d
+
+        computeRunStatistics(dataMap)
+
+        if not showPlot:
+            return
+
+        plt.figure()
 
         #
         # idxDefaultRandom = np.where(usedDefaultRandomController==True)[0]
@@ -655,8 +710,22 @@ class Simulator(object):
         # plotData['default'] = {'idx': idxDefault, 'color': 'g'}
 
         def scatterPlot(dataToPlot):
-            for controllerType, idx in idxMap.iteritems():
+            for controllerType in controllerTypeToPlot:
+                idx = idxMap[controllerType]
                 plt.scatter(grid[idx], dataToPlot[idx], color=self.colorMap[controllerType])
+
+        def barPlot(dataName):
+            plt.title(dataName)
+            barWidth = 0.5
+            barCounter = 0
+            index = np.arange(len(controllerTypeToPlot))
+
+            for controllerType in controllerTypeToPlot:
+                val = self.runStatistics[controllerType]
+                plt.bar(barCounter, val[dataName], barWidth, color=self.colorMap[controllerType], label=controllerType)
+                barCounter += 1
+
+            plt.xticks(index + barWidth/2.0, controllerTypeToPlot)
 
 
         plt.subplot(4,1,1)
@@ -690,6 +759,22 @@ class Simulator(object):
         scatterPlot(avgRewardNoCollisionPenalty)
         # for key, val in plotData.iteritems():
         #     plt.scatter(grid[val['idx']],avgRewardNoCollisionPenalty[val['idx']], color=val['color'])
+
+
+        ## plot summary statistics
+        plt.figure()
+
+        plt.subplot(4,1,1)
+        barPlot("duration")
+
+        plt.subplot(4,1,2)
+        barPlot("discountedReward")
+
+        plt.subplot(4,1,3)
+        barPlot("avgReward")
+
+        plt.subplot(4,1,4)
+        barPlot("avgRewardNoCollisionPenalty")
 
 
         plt.show()
