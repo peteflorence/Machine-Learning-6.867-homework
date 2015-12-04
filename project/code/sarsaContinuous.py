@@ -117,6 +117,7 @@ class SARSAContinuous(SARSA):
 
         weights = self.weights
 
+        plt.figure()
         for idx in xrange(0,self.numActions):
             plt.plot(self.plotGrid, weights[idx,1:], label=str(self.actionSet[idx]))
 
@@ -127,6 +128,7 @@ class SARSAContinuous(SARSA):
         carState = 0
         raycastDistance = self.sensor.raycastAllFromCurrentFrameLocation()
         featureVec = self.computeFeatureVector((carState, raycastDistance))
+        plt.figure()
         plt.plot(self.plotGrid, featureVec[1:])
         plt.show()
 
