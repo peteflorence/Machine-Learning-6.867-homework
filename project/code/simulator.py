@@ -67,6 +67,7 @@ class Simulator(object):
 
         self.options['SARSA'] = dict()
         self.options['SARSA']['lam'] = 0.7
+        self.options['SARSA']['useQLearningUpdate'] = False
         self.options['SARSA']['epsilonGreedy'] = 0.2
         self.options['SARSA']['burnInTime'] = 500
         self.options['SARSA']['epsilonGreedyExponent'] = 0.3
@@ -134,6 +135,7 @@ class Simulator(object):
         if type=="discrete":
             self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
                                             collisionThreshold=self.collisionThreshold,
+                                       useQLearningUpdate=self.options['SARSA']['useQLearningUpdate'],
                                        lam=self.options['SARSA']['lam'],
                                    numInnerBins = self.options['SARSA']['numInnerBins'],
                                        numOuterBins = self.options['SARSA']['numOuterBins'],
@@ -215,7 +217,7 @@ class Simulator(object):
                 controlInput, controlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_current,
                                                                                                    counter=counterForGreedyDecay,
                                                                                                    randomize=randomizeControl)
-                if emptyQValue:
+                if emptyQValue and self.options['SARSA']['useSupervisedTraining']:
                     self.emptyQValue[idx] = 1
                     controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
                                                                                 currentTime, self.frame,
@@ -260,7 +262,7 @@ class Simulator(object):
                 nextControlInput, nextControlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_next,
                                                                                                    counter=counterForGreedyDecay,
                                                                                                    randomize=randomizeControl)
-                if emptyQValue:
+                if emptyQValue and self.options['SARSA']['useSupervisedTraining']:
                     self.emptyQValue[idx] = 1
                     nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState,
                                                                                 currentTime, self.frame,
