@@ -9,6 +9,7 @@ sim.options['SARSA']['useQLearningUpdate'] = True
 sim.options['SARSA']['numInnerBins'] = 5
 sim.options['SARSA']['numOuterBins'] = 4
 sim.options['SARSA']['binCutoff'] = 0.5
+sim.options['SARSA']['epsilonGreedy'] = 0.4
 
 sim.options['SARSA']['useSupervisedTraining'] = False
 
@@ -26,11 +27,13 @@ sim.options['Car']['velocity'] = 18
 
 sim.options['World']['obstaclesInnerFraction'] = 0.85
 
+sim.options['dt'] = 0.05
+
 
 
 # setup the training time
 sim.supervisedTrainingTime = 0
-sim.learningRandomTime = 4000
+sim.learningRandomTime = 8000
 sim.learningEvalTime = 1000
 sim.defaultControllerTime = 500
 
@@ -50,11 +53,12 @@ sim.worldScale             = 1
 
 
 
-# # Testing
-# sim.supervisedTrainingTime = 10
-# sim.learningRandomTime = 10
-# sim.learningEvalTime = 10
-# sim.defaultControllerTime = 10
+# Testing
+sim.supervisedTrainingTime = 10
+sim.learningRandomTime = 10
+sim.learningEvalTime = 10
+sim.defaultControllerTime = 10
+
 
 
 

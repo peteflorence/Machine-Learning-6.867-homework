@@ -88,6 +88,8 @@ class Simulator(object):
         self.options['Car'] = dict()
         self.options['Car']['velocity'] = 12
 
+        self.options['dt'] = 0.05
+
 
     def initializeColorMap(self):
         self.colorMap = dict()
@@ -101,7 +103,8 @@ class Simulator(object):
         self.Sensor = SensorObj(rayLength=self.options['Sensor']['rayLength'],
                                 numRays=self.options['Sensor']['numRays'])
         self.Controller = ControllerObj(self.Sensor)
-        self.Car = CarPlant(self.Controller, velocity=self.options['Car']['velocity'])
+        self.Car = CarPlant( controller=self.Controller,
+                            velocity=self.options['Car']['velocity'])
         self.Reward = Reward(self.Sensor, collisionThreshold=self.collisionThreshold,
                              actionCost=self.options['Reward']['actionCost'],
                              collisionPenalty=self.options['Reward']['collisionPenalty'],
@@ -217,8 +220,9 @@ class Simulator(object):
                 controlInput, controlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_current,
                                                                                                    counter=counterForGreedyDecay,
                                                                                                    randomize=randomizeControl)
+
+                self.emptyQValue[idx] = emptyQValue
                 if emptyQValue and self.options['SARSA']['useSupervisedTraining']:
-                    self.emptyQValue[idx] = 1
                     controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
                                                                                 currentTime, self.frame,
                                                                                 raycastDistance=currentRaycast,
@@ -226,7 +230,7 @@ class Simulator(object):
 
             self.controlInputData[idx] = controlInput
 
-            nextCarState = self.Car.simulateOneStep(controlInput=controlInput)
+            nextCarState = self.Car.simulateOneStep(controlInput=controlInput, dt=self.dt)
 
             # want to compute nextRaycast so we can do the SARSA algorithm
             x = nextCarState[0]
@@ -262,8 +266,8 @@ class Simulator(object):
                 nextControlInput, nextControlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_next,
                                                                                                    counter=counterForGreedyDecay,
                                                                                                    randomize=randomizeControl)
+
                 if emptyQValue and self.options['SARSA']['useSupervisedTraining']:
-                    self.emptyQValue[idx] = 1
                     nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState,
                                                                                 currentTime, self.frame,
                                                                                 raycastDistance=nextRaycast,
@@ -326,7 +330,7 @@ class Simulator(object):
     def runBatchSimulation(self, endTime=None, dt=0.05):
 
         # for use in playback
-        self.dt = dt
+        self.dt = self.options['dt']
         self.Sarsa.setDiscountFactor(dt)
 
         self.endTime = self.supervisedTrainingTime + self.learningRandomTime + self.learningEvalTime + self.defaultControllerTime
@@ -337,7 +341,7 @@ class Simulator(object):
         self.raycastData = np.zeros((maxNumTimesteps+1, self.Sensor.numRays))
         self.controlInputData = np.zeros(maxNumTimesteps+1)
         self.rewardData = np.zeros(maxNumTimesteps+1)
-        self.emptyQValue = np.zeros(maxNumTimesteps+1)
+        self.emptyQValue = np.zeros(maxNumTimesteps+1, dtype='bool')
         self.numTimesteps = maxNumTimesteps
 
         self.controllerTypeOrder = ['defaultRandom', 'learnedRandom', 'learned', 'default']
@@ -542,15 +546,11 @@ class Simulator(object):
 
         controllerType = self.getControllerTypeFromCounter(sliderIdx)
         colorMaxRange = self.colorMap[controllerType]
+
+        # if the QValue was empty then color it green
         if self.emptyQValue[sliderIdx]:
-            colorMaxRange = self.colorMap['default']
-        # if (sliderIdx >= self.usingQValueControllerIdx) and (sliderIdx < self.usingDefaultControllerIdx) \
-        #         and not self.emptyQValue[sliderIdx]:
-        #     colorMaxRange = [1,1,0]
-        # elif sliderIdx >= self.usingDefaultControllerIdx:
-        #     colorMaxRange = [0,1,0]
-        # else:
-        #     colorMaxRange = [0,0,1]
+            colorMaxRange = [1,1,0] # this is yellow
+
 
         for i in xrange(self.Sensor.numRays):
             ray = self.Sensor.rays[:,i]

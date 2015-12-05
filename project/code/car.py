@@ -4,6 +4,8 @@ import scipy.integrate as integrate
 class CarPlant(object):
 
     def __init__(self, controller=None, velocity=12):
+        # if dt is None:
+        #     raise ValueError("must specify timestep dt when constructing CarPlant")
         # initial state
         self.x = 0.0
         self.y = 0.0
