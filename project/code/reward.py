@@ -24,7 +24,7 @@ class Reward(object):
         self.cutoff = 20
 
     def initializeRaycastRewardWeights(self):
-        self.raycastRewardWeights = np.cos(self.sensorObj.angleGrid)
+        self.raycastRewardWeights = np.cos(self.sensorObj.angleGrid) + 0.2
         self.raycastRewardWeights = -self.raycastCost*self.raycastRewardWeights/self.raycastRewardWeights.sum()
 
     def checkInCollision(self, raycastDistance):

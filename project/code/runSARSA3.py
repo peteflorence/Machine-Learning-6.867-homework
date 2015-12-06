@@ -23,7 +23,7 @@ sim.options['Reward']['raycastCost'] = 40.0
 # sim.options['Reward']['collisionPenalty'] = 200
 
 
-sim.options['Car']['velocity'] = 18
+sim.options['Car']['velocity'] = 16
 
 sim.options['World']['obstaclesInnerFraction'] = 0.85
 
@@ -33,9 +33,9 @@ sim.options['dt'] = 0.05
 
 # setup the training time
 sim.supervisedTrainingTime = 0
-sim.learningRandomTime = 8000
+sim.learningRandomTime = 5000
 sim.learningEvalTime = 1000
-sim.defaultControllerTime = 500
+sim.defaultControllerTime = 1000
 
 
 sim.options['SARSA']['burnInTime'] = sim.learningRandomTime/2.0

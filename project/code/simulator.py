@@ -11,6 +11,7 @@ import time
 import scipy.integrate as integrate
 import argparse
 import matplotlib.pyplot as plt
+import shelve
 
 from PythonQt import QtCore, QtGui
 
@@ -66,6 +67,7 @@ class Simulator(object):
         self.options['Reward']['raycastCost'] = 20.0
 
         self.options['SARSA'] = dict()
+        self.options['SARSA']['type'] = "discrete"
         self.options['SARSA']['lam'] = 0.7
         self.options['SARSA']['useQLearningUpdate'] = False
         self.options['SARSA']['epsilonGreedy'] = 0.2
@@ -78,7 +80,13 @@ class Simulator(object):
 
 
         self.options['World'] = dict()
-        self.options['World']['obstaclesInnerFraction'] = 0.7
+        self.options['World']['obstaclesInnerFraction'] = 0.85
+        self.options['World']['randomSeed'] = 40
+        self.options['World']['percentObsDensity'] = 7.5
+        self.options['World']['nonRandomWorld'] = True
+        self.options['World']['circleRadius'] = 1.75
+        self.options['World']['scale'] = 1.0
+
 
         self.options['Sensor'] = dict()
         self.options['Sensor']['rayLength'] = 10
@@ -91,6 +99,75 @@ class Simulator(object):
         self.options['dt'] = 0.05
 
 
+        self.options['runTime'] = dict()
+        self.options['runTime']['supervisedTrainingTime'] = 10
+        self.options['runTime']['learningRandomTime'] = 10
+        self.options['runTime']['learningEvalTime'] = 10
+        self.options['runTime']['defaultControllerTime'] = 10
+
+
+    def setDefaultOptions(self):
+
+        defaultOptions = dict()
+
+        defaultOptions['Reward'] = dict()
+        defaultOptions['Reward']['actionCost'] = 0.1
+        defaultOptions['Reward']['collisionPenalty'] = 100.0
+        defaultOptions['Reward']['raycastCost'] = 20.0
+
+        defaultOptions['SARSA'] = dict()
+        defaultOptions['SARSA']['type'] = "discrete"
+        defaultOptions['SARSA']['lam'] = 0.7
+        defaultOptions['SARSA']['useQLearningUpdate'] = False
+        defaultOptions['SARSA']['useSupervisedTraining'] = True
+        defaultOptions['SARSA']['epsilonGreedy'] = 0.2
+        defaultOptions['SARSA']['burnInTime'] = 500
+        defaultOptions['SARSA']['epsilonGreedyExponent'] = 0.3
+        defaultOptions['SARSA']['exponentialDiscountFactor'] = 0.05 #so gamma = e^(-rho*dt)
+        defaultOptions['SARSA']['numInnerBins'] = 5
+        defaultOptions['SARSA']['numOuterBins'] = 4
+        defaultOptions['SARSA']['binCutoff'] = 0.5
+
+
+        defaultOptions['World'] = dict()
+        defaultOptions['World']['obstaclesInnerFraction'] = 0.85
+        defaultOptions['World']['randomSeed'] = 40
+        defaultOptions['World']['percentObsDensity'] = 7.5
+        defaultOptions['World']['nonRandomWorld'] = True
+        defaultOptions['World']['circleRadius'] = 1.75
+        defaultOptions['World']['scale'] = 1.0
+
+
+        defaultOptions['Sensor'] = dict()
+        defaultOptions['Sensor']['rayLength'] = 10
+        defaultOptions['Sensor']['numRays'] = 20
+
+
+        defaultOptions['Car'] = dict()
+        defaultOptions['Car']['velocity'] = 12
+
+        defaultOptions['dt'] = 0.05
+
+
+        defaultOptions['runTime'] = dict()
+        defaultOptions['runTime']['supervisedTrainingTime'] = 10
+        defaultOptions['runTime']['learningRandomTime'] = 10
+        defaultOptions['runTime']['learningEvalTime'] = 10
+        defaultOptions['runTime']['defaultControllerTime'] = 10
+
+
+        for k in defaultOptions:
+            self.options.setdefault(k, defaultOptions[k])
+
+
+        for k in defaultOptions:
+            if not isinstance(defaultOptions[k], dict):
+                continue
+
+            for j in defaultOptions[k]:
+                self.options[k].setdefault(j, defaultOptions[k][j])
+
+
     def initializeColorMap(self):
         self.colorMap = dict()
         self.colorMap['defaultRandom'] = [0,0,1]
@@ -99,6 +176,8 @@ class Simulator(object):
         self.colorMap['default'] = [0,1,0]
 
     def initialize(self):
+
+        self.setDefaultOptions()
 
         self.Sensor = SensorObj(rayLength=self.options['Sensor']['rayLength'],
                                 numRays=self.options['Sensor']['numRays'])
@@ -112,10 +191,15 @@ class Simulator(object):
         self.setSARSA()
 
         # create the things needed for simulation
-        self.world = World.buildCircleWorld(percentObsDensity=self.percentObsDensity, circleRadius=self.circleRadius,
-                                            nonRandom=self.nonRandomWorld, scale=self.worldScale,
-                                            randomSeed=self.randomSeed,
+        om.removeFromObjectModel(om.findObjectByName('world'))
+        self.world = World.buildCircleWorld(percentObsDensity=self.options['World']['percentObsDensity'],
+                                            circleRadius=self.options['World']['circleRadius'],
+                                            nonRandom=self.options['World']['nonRandomWorld'],
+                                            scale=self.options['World']['scale'],
+                                            randomSeed=self.options['World']['randomSeed'],
                                             obstaclesInnerFraction=self.options['World']['obstaclesInnerFraction'])
+
+        om.removeFromObjectModel(om.findObjectByName('robot'))
         self.robot, self.frame = World.buildRobot()
         self.locator = World.buildCellLocator(self.world.visObj.polyData)
         self.Sensor.setLocator(self.locator)
@@ -128,12 +212,17 @@ class Simulator(object):
         rep.SetRotateAxisEnabled(0, False)
         rep.SetRotateAxisEnabled(1, False)
 
+        self.supervisedTrainingTime = self.options['runTime']['supervisedTrainingTime']
+        self.learningRandomTime = self.options['runTime']['learningRandomTime']
+        self.learningEvalTime = self.options['runTime']['learningEvalTime']
+        self.defaultControllerTime = self.options['runTime']['defaultControllerTime']
+
         self.Car.setFrame(self.frame)
         print "Finished initialization"
 
     def setSARSA(self, type=None):
         if type is None:
-            type = self.sarsaType
+            type = self.options['SARSA']['type']
 
         if type=="discrete":
             self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
@@ -530,11 +619,13 @@ class Simulator(object):
         print "Number of steps taken", self.counter
         self.app.start()
 
-    def run(self):
+    def run(self, launchApp=True):
         self.counter = 1
         self.runBatchSimulation()
         # self.Sarsa.plotWeights()
-        self.setupPlayback()
+
+        if launchApp:
+            self.setupPlayback()
 
     def updateDrawIntersection(self, frame):
 
@@ -815,6 +906,58 @@ class Simulator(object):
         plt.show()
 
 
+    def plotMultipleRunData(self, simList, toPlot=['duration', 'discountedReward'], controllerType='learned'):
+
+        plt.figure()
+        numPlots = len(toPlot)
+
+        grid = np.arange(len(simList))
+        def plot(fieldToPlot, plotNum):
+            plt.subplot(numPlots,1, plotNum)
+            plt.title(fieldToPlot)
+            val = 0*grid
+            barWidth = 0.5
+            barCounter = 0
+            for idx, sim in enumerate(simList):
+                value = sim.runStatistics[controllerType][fieldToPlot]
+                plt.bar(idx, value, barWidth)
+
+
+        counter = 1
+        for fieldToPlot in toPlot:
+            plot(fieldToPlot, counter)
+            counter += 1
+
+
+        plt.show()
+
+
+
+    def saveToFile(self, filename):
+        filename "/data/" + filename + ".out"
+        my_shelf = shelve.open(filename,'n')
+
+        my_shelf['options'] = self.options
+
+        if self.options['SARSA']['type'] == "discrete":
+        my_shelf['SARSA_QValues'] = self.Sarsa.QValues
+
+        my_shelf.close()
+
+
+    @staticmethod
+    def loadFromFile():
+        sim = Simulator(autoInitialize=False, verbose=False)
+
+        my_shelf = shelve.open(filename)
+        sim.options = my_shelf['options']
+
+        sim.initialize()
+        sim.Sarsa.QValues = np.array(my_shelf['SARSA_QValues'])
+
+        my_shelf.close()
+
+        return sim
 
 
 
