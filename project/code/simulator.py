@@ -22,6 +22,7 @@ from controller import ControllerObj
 from sarsaContinuous import SARSAContinuous
 from sarsaDiscrete import SARSADiscrete
 from reward import Reward
+from policySearchREINFORCE import PolicySearchREINFORCE
 
 
 class Simulator(object):
@@ -188,7 +189,10 @@ class Simulator(object):
                              actionCost=self.options['Reward']['actionCost'],
                              collisionPenalty=self.options['Reward']['collisionPenalty'],
                              raycastCost=self.options['Reward']['raycastCost'])
-        self.setSARSA()
+        
+        #self.setSARSA()
+        self.setPolicySearch()
+
 
         # create the things needed for simulation
         om.removeFromObjectModel(om.findObjectByName('world'))
@@ -245,6 +249,19 @@ class Simulator(object):
         else:
             raise ValueError("sarsa type must be either discrete or continuous")
 
+    def setPolicySearch(self):
+
+        self.PolicySearchObj = PolicySearchREINFORCE(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
+                                        collisionThreshold=self.collisionThreshold,
+                                   useQLearningUpdate=self.options['SARSA']['useQLearningUpdate'],
+                                   lam=self.options['SARSA']['lam'],
+                               numInnerBins = self.options['SARSA']['numInnerBins'],
+                                   numOuterBins = self.options['SARSA']['numOuterBins'],
+                                   binCutoff=self.options['SARSA']['binCutoff'],
+                                   burnInTime = self.options['SARSA']['burnInTime'],
+                                   epsilonGreedy=self.options['SARSA']['epsilonGreedy'],
+                                   epsilonGreedyExponent=self.options['SARSA']['epsilonGreedyExponent'])
+
 
     def runSingleSimulation(self, updateQValues=True, controllerType='default', simulationCutoff=None):
 
@@ -257,7 +274,7 @@ class Simulator(object):
         self.setRobotFrameState(currentCarState[0], currentCarState[1], currentCarState[2])
         currentRaycast = self.Sensor.raycastAll(self.frame)
         nextRaycast = np.zeros(self.Sensor.numRays)
-        self.Sarsa.resetElibilityTraces()
+        #self.Sarsa.resetElibilityTraces()
 
         # record the reward data
         runData = dict()
@@ -306,16 +323,16 @@ class Simulator(object):
                     randomizeControl = True
 
                 counterForGreedyDecay = self.counter - self.idxDict["learnedRandom"]
-                controlInput, controlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_current,
+                controlInput, controlInputIdx = self.PolicySearchObj.computeDummyControlPolicy(S_current,
                                                                                                    counter=counterForGreedyDecay,
                                                                                                    randomize=randomizeControl)
 
-                self.emptyQValue[idx] = emptyQValue
-                if emptyQValue and self.options['SARSA']['useSupervisedTraining']:
-                    controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
-                                                                                currentTime, self.frame,
-                                                                                raycastDistance=currentRaycast,
-                                                                                randomize=False)
+                #self.emptyQValue[idx] = emptyQValue
+                #if emptyQValue and self.options['SARSA']['useSupervisedTraining']:
+                #    controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
+                #                                                                currentTime, self.frame,
+                #                                                                raycastDistance=currentRaycast,
+                #                                                                randomize=False)
 
             self.controlInputData[idx] = controlInput
 
@@ -352,15 +369,15 @@ class Simulator(object):
                     randomizeControl = True
 
                 counterForGreedyDecay = self.counter - self.idxDict["learnedRandom"]
-                nextControlInput, nextControlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_next,
+                nextControlInput, nextControlInputIdx = self.PolicySearchObj.computeDummyControlPolicy(S_next,
                                                                                                    counter=counterForGreedyDecay,
                                                                                                    randomize=randomizeControl)
 
-                if emptyQValue and self.options['SARSA']['useSupervisedTraining']:
-                    nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState,
-                                                                                currentTime, self.frame,
-                                                                                raycastDistance=nextRaycast,
-                                                                                randomize=False)
+                #if emptyQValue and self.options['SARSA']['useSupervisedTraining']:
+                #    nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState,
+                #                                                                currentTime, self.frame,
+                #                                                                raycastDistance=nextRaycast,
+                #                                                                randomize=False)
 
             # if useQValueController:
             #     nextControlInput, nextControlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_next)
@@ -375,12 +392,12 @@ class Simulator(object):
             reward = self.Reward.computeReward(S_next, controlInput)
             self.rewardData[idx] = reward
 
-            discountedReward += self.Sarsa.gamma**(self.counter-startIdx)*reward
+            discountedReward += self.PolicySearchObj.gamma**(self.counter-startIdx)*reward
             avgReward += reward
 
-            ###### SARSA update
+            ###### Policy Search update
             if updateQValues:
-                self.Sarsa.sarsaUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
+                self.PolicySearchObj.policySearchUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
 
             #bookkeeping
             currentCarState = nextCarState
@@ -404,7 +421,7 @@ class Simulator(object):
         avgReward = avgReward*1.0/max(1, self.counter -startIdx)
         avgRewardNoCollisionPenalty = avgRewardNoCollisionPenalty*1.0/max(1, self.counter -startIdx)
         # this extra multiplication is so that it is in the same "units" as avgReward
-        runData['discountedReward'] = discountedReward*(1 - self.Sarsa.gamma)
+        runData['discountedReward'] = discountedReward*(1 - self.PolicySearchObj.gamma)
         runData['avgReward'] = avgReward
         runData['avgRewardNoCollisionPenalty'] = avgRewardNoCollisionPenalty
 
@@ -420,7 +437,7 @@ class Simulator(object):
 
         # for use in playback
         self.dt = self.options['dt']
-        self.Sarsa.setDiscountFactor(dt)
+        #self.Sarsa.setDiscountFactor(dt)
 
         self.endTime = self.supervisedTrainingTime + self.learningRandomTime + self.learningEvalTime + self.defaultControllerTime
 

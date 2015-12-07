@@ -1,6 +1,6 @@
 __author__ = 'manuelli'
 import numpy as np
-from sarsa import SARSA
+from policySearch import PolicySearch
 
 class PolicySearchREINFORCE(PolicySearch):
 
@@ -32,6 +32,9 @@ class PolicySearchREINFORCE(PolicySearch):
                 u = self.actionSet[actionIdx]
 
         return u, actionIdx
+
+    def policySearchUpdate(self, S_current, A_idx_current, R, S_next, A_idx_next):
+        self.updated = True
         
 
     def initializeBinData(self):
