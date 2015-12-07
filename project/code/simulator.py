@@ -934,13 +934,13 @@ class Simulator(object):
 
 
     def saveToFile(self, filename):
-        filename "/data/" + filename + ".out"
+        filename = "/data/" + filename + ".out"
         my_shelf = shelve.open(filename,'n')
 
         my_shelf['options'] = self.options
 
         if self.options['SARSA']['type'] == "discrete":
-        my_shelf['SARSA_QValues'] = self.Sarsa.QValues
+            my_shelf['SARSA_QValues'] = self.Sarsa.QValues
 
         my_shelf.close()
 
