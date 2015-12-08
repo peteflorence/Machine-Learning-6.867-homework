@@ -21,6 +21,7 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{todonotes}
 
 % As of 2011, we use the hyperref package to produce hyperlinks in the
@@ -101,7 +102,7 @@ For our car model we consider a simplified Dubin's car model. The location of th
 %
 %
 \subsection{Sensor Model}
-For our sensor model we use a LIDAR. Namely it consists of $N$ beams spread evenly over the field of view $[\theta_min,\theta_max]$. Each laser has a maximum range of $d_{max}$. The $n^th$ laser then returns $x_n$, which the distance to the first obstacle it encounters, or $d_{max}$ if no obstacle is detected. Then one laser measurement can be summarized as $X = (x_1,\ldots,x_N)$.
+For our sensor model we use a LIDAR. Namely it consists of $N$ beams spread evenly over the field of view $[\theta_{min},\theta_{max}]$. Each laser has a maximum range of $d_{max}$. The $n^th$ laser then returns $x_n$, which the distance to the first obstacle it encounters, or $d_{max}$ if no obstacle is detected. Then one laser measurement can be summarized as $X = (x_1,\ldots,x_N)$.
 
 
 \subsection{Simulation Environment}
@@ -116,7 +117,7 @@ Describe it here, maybe this is where we should introduce the $\phi(\cdot)$ func
 Two of the most popular methods in reinforcement learning are SARSA and Q-Learning. These methods both aim to find the optimal policy of a dynamic programming problem. Thus the first step is to reformulate our problem as a dynamic programming problem. 
 
 \subsection{Dynamic Programming Formulation}
-The first step to formulating our as a dynamic programming problem is to define a ``state.'' Let $S_c = (x,y,\theta)$ be the state of the car, and let $X  = (x_1,\ldots,x_n)$ be the sensor state. Then let $S = (S_c,X)$ be our ``state''. Since this is not a state in the true sense of the word let us call it a reward state. Next we need to define our action set. In principle our model has continuous action set. However, for the purposes of SARSA and Q-Learning it much easier to have a discrete action space. Thus we restrict ourselves to $a \in \{-4,0,4\} = \mathcal{A}$, which correspond to left, straight, and right actions. Let $\theta_n$ be the angle of $n^th$ laser where $\theta_n = 0$ corresponds to straight ahead. Now we need to define the reward function. First define weights
+The first step to formulating our as a dynamic programming problem is to define a ``state.'' Let $S_c = (x,y,\theta)$ be the state of the car, and let $X  = (x_1,\ldots,x_n)$ be the sensor state. Then let $S = (S_c,X)$ be our ``state''. Since this is not a state in the true sense of the word let us call it a reward state. In fact our reward will only depend on $X$, thus we can just take $S = X$. Note that $(x,y,\theta)$ don't matter for us since we are assuming we are in an unknown map, i.e. the controller doesn't have global information about the map. Rather it only has the local information coming from the sensor $X$. Next we need to define our action set. In principle our model has continuous action set. However, for the purposes of SARSA and Q-Learning it much easier to have a discrete action space. Thus we restrict ourselves to $a \in \{-4,0,4\} = \mathcal{A}$, which correspond to left, straight, and right actions. Let $\theta_n$ be the angle of $n^th$ laser where $\theta_n = 0$ corresponds to straight ahead. Now we need to define the reward function. First define weights
 %
 %
 \begin{equation}
@@ -159,7 +160,8 @@ Now that we have the reward function we can formulate our problem as a dynamic p
 %
 The expectation is over the reward states that result from taking actions according to policy $\pi$. Here $\gamma \in (0,1)$ is a discount factor. In a standard dynamic programing framework the state $S_t$ would be markov. That is, future states depend only on the current state and future actions. In our case however our reward state is non-markov since the map of the world is not included as part of our state. 
 
-\subsection{SARSA}
+\subsection{SARSA($\lambda$)}
+\label{discrete_sarsa}
 The difficulty with applying standard dynamic programming techniques to the current problem is that it is hard to write down the transition law $(S_t,a_t) \to S_{t+1}$ since this requires knowing how the sensor measurements will evolve. The SARSA technique allows us to circumvent this problem if we have access to runs/simulations of the true system. The Q-Values are defined as 
 %
 %
@@ -204,16 +206,49 @@ Things to do
 \item Compare multiple runs for Q-Learning and SARSA, is one more consistent than the other?
 \end{itemize}
 
+\subsubsection{Failure Modes}
+\label{failure_modes}
+
+Occasionally our learned controller would end up spinning us in circles, quite literally. Now we try to understand why this might have happened. What actually happened is that for the case where there are no controller would end up spinning us in circles. Let $X_{max} = (d_{max}, \ldots, d_{max})$ which corresponds to a laser measurement where no obstacles are detected. Then what is happening is that $Q(X,0) < \max_{a \in \{-4,4\}} Q(X,a)$. Thus we end up turning a given direction, suppose it is left without loss of generality, even when we don't see an obstacle. The reason this actually works quite well is that in our randomly generated maps there tends to be pockets of space that are obstacle free. If the vehicle happens to enter or be initialized into one of these ``obstacle free'' zones then by aggressively turning a given direction it can keep itself inside the ``obstacle free'' zone and avoid ever running into something. Although this controller actually produces a high reward (since it never crashes) it is not what one would consider a ``good'' controller. There are several reasons that SARSA may end up learning this behavior. The most important is that our reward-state is not Markov. This means that when we are in reward state $X_{max}$ we don't know our transition probabilities to the next reward state. This is because we have only local information in the reward-state and have no information about the global map. This is an example of our learning algorithm exploiting structure in the problem that we didn't mean for it to take advantage of.
+
+Possible solutions to this problem are to redesign the reward function. We could include reaching a goal as part of the reward function, so then the learning algorithm would have an incentive to make progress towards this goal rather than spin in circles. Another solution approach is to increase the number of obstacles in the world to eliminate these ``obstacle free zones.''
+
 
 \subsection{Watkins Q-Learning}
+\label{discrete_q_learning}
 
-Q-Learning is almost the same as SARSA but with a slight variation in the update. While SARSA is an on-policy learning method (that is we are learning the Q-value for the current policy), Q-Learning is an off-policy method (we are learning the Q-Values under the optimal policy (even though we not currently controlling according that policy). The same preferred parameter set for SARSA given in Table \todo{reference} works well for Q-Learning also. The resulting controller exhibits similar qualitative performance to the SARSA controller described above. However the quantitative performance is a bit better.
-
+Q-Learning is almost the same as SARSA but with a slight variation in the update. While SARSA is an on-policy learning method (that is we are learning the Q-value for the current policy), Q-Learning is an off-policy method (we are learning the Q-Values under the optimal policy (even though we not currently controlling according that policy). The same preferred parameter set for SARSA given in Table \todo{reference} also works well for Q-Learning. The resulting controller exhibits similar qualitative performance to the SARSA controller described above. However the quantitative performance seems to be better.
 
 
 
 \subsection{SARSA with function approximation}
 \label{sarsa_function_approximation}
+
+One of the major drawbacks of the methods presented in sections \ref{discrete_sarsa} and \ref{discrete_q_learning} is that they require discretizing the state-action space. In reality however our state is really continuous since the laser measurements really lie in $\mathbb{R}_+^N$. An alternative to discretizing the state space is to use function approximation to approximate the Q-Values. As described in Chapter 9 of \todo{Barto Sutton ref} this still requires a discrete action space. We consider a linear function approximation to the Q-Values given by
+%
+%
+%
+\begin{equation}
+\label{q_value_approx}
+Q(S,a) = w_a(0) + \sum_{n = 1}^N w_a(n)\phi(x_n)
+\end{equation}
+%
+%
+We think this is a reasonable approximation to the q-values since it has almost the same form as the reward function. We include an intercept term $w_a(0)$ to capture the fact that even when the feature vector $\phi(X)$ is identically zero we prefer action $a = 0$ to actions $a=4,-4$. In this case the SARSA($\lambda$) algorithm is given by
+%
+%
+\todo{describe algorithm here using algorithmic package}
+%
+%
+Intuitively this corresponds to adjusting the weights $w_a(n)$ to get the best approximation to the Q-Values in a least squares sense (see Button-Sarto Ch. 9 for a precise statement) \todo{Barto-Sutton ref}. 
+
+
+\subsubsection{Results}
+
+It is notoriously difficult to get function approximation methods for SARSA to perform well. Performance fundamentally depends on whether the chosen parametric form, given by (\ref{q_value_approx}), provides a good approximation of the Q-Values. Ultimately we were not able to get a meaningful controller out of this approach. In what follows I will try to describe why this might be and what the lessons learned were. the fist thing we noticed was that a much smaller step-size $\alpha$ was needed. After experimenting we found that $\alpha = 1e-4$ was small enough that the weights wouldn't diverge to $\infty$. For the training in sections \ref{discrete_sarsa} and \ref{discrete_q_learning} we initialized the Q-Values to zero. This approach didn't yield very good results for the function approximation SARSA method \todo{maybe need to elaborate on this, we end up spinning in circles etc.} An alternative, as outline in \todo{reference Leslie's practical reinforcement learning for mobile robots paper} to help the learning algorithms perform better is to run a known controller to help learn some baseline Q-Values. Essentially during a supervised learning period we are learning weights $\{w_a(n)\}$ which approximate the Q-Values under the known policy $\pi_{default}$. During this phase we are performing the weight updates from \todo{reference cts sarsa figure} but the policy is chosen according to $\pi_{default}$ rather than the epsilon greedy policy. In this setup we run this supervised training for a while before switching the standard SARSA($\lambda$) updates specified in \todo{table}. If we use the standard environment used in sections \ref{discrete_sarsa} and \ref{discrete_q_learning} we end up falling into the ``drive in circles'' failure mode outline in \ref{failure_modes}. Increasing the obstacle density to eliminate the ``obstacle free'' zones resolves this problem and we are able to get a function controller.
+
+
+
 %
 %
 % \begin{align}
