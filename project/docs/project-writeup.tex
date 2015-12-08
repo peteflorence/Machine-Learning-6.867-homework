@@ -33,6 +33,7 @@
 % Packages hyperref and algorithmic misbehave sometimes.  We can fix
 % this with the following command.
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
+\def\code#1{\texttt{#1}}
 
 % Employ the following version of the ``usepackage'' statement for
 % submitting the draft version of the paper for review.  This will set
@@ -43,6 +44,8 @@
 % been accepted, when creating the final version.  This will set the
 % note in the first column to ``Proceedings of the...''
 \usepackage[accepted]{icml2015}
+
+\usepackage{enumitem}
 
 
 % The \icmltitle you define below is probably too long as a header.
@@ -83,14 +86,14 @@
 %\end{abstract} 
 
 \section{Introduction}
-In this project we evaluate the ability of several reinforcement learning methods to autonomously drive a car through a cluttered environment. We don't assume a map of the environment a priori but rather rely on our sensor (in this case a LIDAR) to make control decisions. A standard approach to solving this problem would require building up a map of the environment, possibly using an occupancy grid, and then planning a collision free path through this estimated map using a planner such as RRT*. On the other hand one notes that simple output feedback controllers such as Braitenburg controllers, can be quite effective for obstacle avoidance tasks. Guided by this example we want to see how reinforcement learning performs in learning an output feedback controller.
+In this project we evaluate the ability of several reinforcement learning methods to autonomously drive a car through a cluttered environment. We don't assume a map of the environment a priori but rather rely on our sensor (in this case a LIDAR) to make control decisions. A standard approach to solving this problem would require building up a map of the environment, possibly using an occupancy grid, and then planning a collision free path through this estimated map using a planner such as RRT*. On the other hand one notes that simple output feedback controllers such as Braitenberg controllers, can be quite effective for obstacle avoidance tasks. Guided by this example we want to see how reinforcement learning performs in learning an output feedback controller.
 
 \section{Experiment Setup and Simulation Environment}
 
 \subsection{Car Model}
 
 For our car model we consider a simplified Dubin's car model. The location of the vehicle is described by $(x,y,\theta)$, where $(x,y)$ denote cartesian position and $\theta$ denotes the orientation. For our purposes we suppose that we can control the derivative of the orientation, namely our control is $u = \dot{\theta}$. We also suppose a fixed speed $v$. Then the dynamics of the vehicle are given by
-
+\todo{figure illustrating car + lidars}
 %
 %
 \begin{align}
@@ -101,23 +104,48 @@ For our car model we consider a simplified Dubin's car model. The location of th
 %
 %
 %
-\subsection{Sensor Model}
-For our sensor model we use a LIDAR. Namely it consists of $N$ beams spread evenly over the field of view $[\theta_{min},\theta_{max}]$. Each laser has a maximum range of $d_{max}$. The $n^th$ laser then returns $x_n$, which the distance to the first obstacle it encounters, or $d_{max}$ if no obstacle is detected. Then one laser measurement can be summarized as $X = (x_1,\ldots,x_N)$.
 
+\subsection{Sensor Model}
+For our sensor model we use a small array of point LIDARs. In particular, $N$ beams are spread evenly over the field of view $[\theta_{min},\theta_{max}]$.  All experiments shown use $N=20$ and $[\theta_{min}=-\pi,\theta_{max}=\pi]$    Each laser has a maximum range of $d_{max}$. The $n^th$ laser then returns $x_n$, which the distance to the first obstacle it encounters, or $d_{max}$ if no obstacle is detected. Then one laser measurement can be summarized as $X = (x_1,\ldots,x_N)$.
+
+\subsection{Obstacle Environment}
+Picking the right obstacle environment for our task required some trial-and-error.  Obstacles that were too thin along one direction were not a good choice, as they could hide in between the ``array of point LIDARs'' as the robot approached.  Thus circular obstacles were chosen, as they circumvented this problem.  Picking the right density of obstacles and obstacle size was another trial-and-error process.  A listing of approximate parameters for the obstacle environments used is provided below.  Generalizations across obstacle environments it outside the scope of this project.
+
+\scalebox{0.7}{
+  \begin{tabular}{l|c|c|l|c|c|c|c|c}
+	\textbf{Car and sensor parameters}\\
+	Car velocity, $v$ & 16 m/s \\ 
+	Maximum turning rate, $u_{max}$, 4 \\
+	Number of point LIDARS, N & 20 \\
+	Maximum laser range, $d_{max}$ & 10 m \\
+	Field of view $[\theta_{min},\theta_{max}]$ & $[-\pi, \pi]$ \\
+	\\
+	
+	\textbf{Obstacle environment parameters}\\
+	Area of square world & 250 $m^2$ \\
+	Obstacle density & 0.18 / $m^2$ (45 obstacles in 250 $m^2$)\\
+	Circular obstacle radius & 1.75 m \\
+	
+  \end{tabular}
+}
 
 \subsection{Simulation Environment}
 
-Our software stack is integrated with a robotics visualization tool called Director \todo{director citation}. We use the director code for visualization and raycasting. This is the only external code that we use. Our simulation environment is written in python. We have a main class called simulator which combines together several other modules, e.g. car, sensor, world, controller, reward, sarsa etc, to construct a working simulation class. All of this code was written by us for the project. As mentioned before, the only fundamental pieces of code that we didn't write were the visualization tools and the raycasting method which we use for computing our sensor model. One nice feature of the Director application is that it uses Visualization Toolkit as the underlying graphics engine, and thus our raycast calls are actually in C++ and thus very efficient. We use a timestep of $dt = 0.05$ in all our experiments.
+Our software stack is integrated with a robotics visualization tool called Director \todo{director citation}. We use the Director code for visualization and raycasting. This is the only external code that we use in addition to standard Python modules. Our simulation environment is written in Python. We have a main class called \code{Simulator} which combines together several other modules, e.g. \code{Car}, \code{Sensor}, \code{World}, \code{Controller}, \code{Reward}, \code{Sarsa}, etc, to construct a working simulation class. All of this code was written by us for the project. As mentioned before, the only fundamental pieces of code that we didn't write were the visualization tools and the raycasting method which we use for computing our sensor model. One nice feature of the Director application is that it uses Visualization Toolkit as the underlying graphics engine, and thus our raycast calls are actually in C++ and thus very efficient. We use a timestep of $dt = 0.05$ in all our experiments, and \code{spicy.integrate} is used to for integrating forward the dynamics.
 
-\subsection{Default Controller}
+\todo{add world generation details}
+
+\subsection{Braitenberg (Hand-Designed) Controller}
 \label{default_controller}
-Describe it here, maybe this is where we should introduce the $\phi(\cdot)$ function.
+As a baseline against which to compare our learned controllers, we used a simple hand-designed controller inspired by the controllers of Valentino Braitenberg.  The simplest controller we tried used simply counted the number of non-max sensor returns on the left ($n_{left} = \sum_i [x_i < d_{max}]$ for $i = 1, ..., N/2)$ and compared to the number of non-max sensor returns on the right ($n_{right} = \sum_i [x_i < d_{max}]$ for $i = N/2 + 1, ..., N)$), and then selected the action to turn towards the direction $min(n_{left}, n_{right})$.  If no obstacles were seen ($n_{left} = n_{right} = 0$), then the controller would select to go straight.  Thus the action space for this simple controller is $A = \{-u_{max}, 0, u_{max} \}$.  
+
+Then describe controller based on $\phi$...
 
 \section{Dynamic Programming: SARSA and Q-Learning}
 Two of the most popular methods in reinforcement learning are SARSA and Q-Learning. These methods both aim to find the optimal policy of a dynamic programming problem. Thus the first step is to reformulate our problem as a dynamic programming problem. 
 
 \subsection{Dynamic Programming Formulation}
-The first step to formulating our as a dynamic programming problem is to define a ``state.'' Let $S_c = (x,y,\theta)$ be the state of the car, and let $X  = (x_1,\ldots,x_n)$ be the sensor state. Then let $S = (S_c,X)$ be our ``state''. Since this is not a state in the true sense of the word let us call it a reward state. In fact our reward will only depend on $X$, thus we can just take $S = X$. Note that $(x,y,\theta)$ don't matter for us since we are assuming we are in an unknown map, i.e. the controller doesn't have global information about the map. Rather it only has the local information coming from the sensor $X$. Next we need to define our action set. In principle our model has continuous action set. However, for the purposes of SARSA and Q-Learning it much easier to have a discrete action space. Thus we restrict ourselves to $a \in \{-4,0,4\} = \mathcal{A}$, which correspond to left, straight, and right actions. Let $\theta_n$ be the angle of $n^th$ laser where $\theta_n = 0$ corresponds to straight ahead. Now we need to define the reward function. First define weights
+The first step to formulating our as a dynamic programming problem is to define a ``state.'' Let $S_c = (x,y,\theta)$ be the state of the car, and let $X  = (x_1,\ldots,x_n)$ be the sensor state. In order to satisfy the Markov property, our reinforcement learning agent would also need to have access to the full state of the world, $S_{world}$, i.e. a complete description of each of the obstacles.  To make our problem similar to the limitations of a real car robot with just the described LIDAR sensor model, we only allow our reinforcement learning agent to access $X$, and so we consider $S = X$. Since this is not a state in the true sense of the word let us call it a reward state.  Next we need to define our action set. In principle our model has continuous action set. However, for the purposes of SARSA and Q-Learning it is much easier to have a discrete action space. Thus we restrict ourselves to $a \in \{-4,0,4\} = \mathcal{A}$, which correspond to left, straight, and right actions. Let $\theta_n$ be the angle of $n^th$ laser where $\theta_n = 0$ corresponds to straight ahead. Now we need to define the reward function. First define weights
 %
 %
 \begin{equation}
