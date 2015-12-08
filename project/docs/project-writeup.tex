@@ -108,6 +108,10 @@ For our sensor model we use a LIDAR. Namely it consists of $N$ beams spread even
 
 Our software stack is integrated with a robotics visualization tool called Director \todo{director citation}. We use the director code for visualization and raycasting. This is the only external code that we use. Our simulation environment is written in python. We have a main class called simulator which combines together several other modules, e.g. car, sensor, world, controller, reward, sarsa etc, to construct a working simulation class. All of this code was written by us for the project. As mentioned before, the only fundamental pieces of code that we didn't write were the visualization tools and the raycasting method which we use for computing our sensor model. One nice feature of the Director application is that it uses Visualization Toolkit as the underlying graphics engine, and thus our raycast calls are actually in C++ and thus very efficient. We use a timestep of $dt = 0.05$ in all our experiments.
 
+\subsection{Default Controller}
+\label{default_controller}
+Describe it here, maybe this is where we should introduce the $\phi(\cdot)$ function.
+
 \section{Dynamic Programming: SARSA and Q-Learning}
 Two of the most popular methods in reinforcement learning are SARSA and Q-Learning. These methods both aim to find the optimal policy of a dynamic programming problem. Thus the first step is to reformulate our problem as a dynamic programming problem. 
 
@@ -172,6 +176,44 @@ a = \arg \max_{a'} q_{\pi}(s,a)
 \end{equation}
 %
 The ultimate goal of SARSA($\lambda$). Is to find the optimal policy $\pi^*$. The approach is to estimate $q_{\pi^*}$. Then the optimal policy is found by appling equation (\ref{q-policy}). Using the Bellman equation for the Q-Values the SARSA($\lambda$) update is given by \todo{use algorithmic package to do description of SARSA() here }
+
+
+In order to apply SARSA in the form described above we need to discretize the state-action space. In section \ref{sarsa_function_approximation} we describe an approach that doesn't require discretizing the state. In order for the SARSA algorithm to be effective without drastically increasing the training time, we must keep the size of the discretization relatively small. With this in mind we chose a discretization based on bins. The discretization is paramaterized by three parameters. $N_{inner}$, the number of inner bins, $N_{outer}$ the number of outer bins and $\beta_{cutoff}$, the cutoff distance between inner and outer bins. \todo{could use a picture here that describes the discretization}.
+
+
+Bins are labeled with a $1$ if they are occupied. We have already discretized the action space into $\mathcal{A} = \{-4,0,4\}$. Thus the discretization of the state-action space lies in the space $\{0,1\}^{N_{inner} + N_{outer}} \times \mathcal{A}$. Thus it has size $2^{N_{inner} + N_{outer}} \times |\mathcal{A}|$.
+
+
+
+\subsubsection{Results}
+
+There are many parameters that must be chosen in order to run the SARSA lambda algorithm. We discuss some of the most important here and give intuition on how we chose them. Then we will analyse how varying a few key parameters (such as $\lambda$) around our baseline setup affects performance. show plots illustrating  Then we show plots of performance as we vary certain key parameters.
+
+Two of the most important parameters are the number of bins $N_{inner}, N_{outer}$ in the discretization. You need enough bins that so that the state is informative enough to pass through relatively narrow gaps between obstacles. However adding more bins comes at the cost of increasing the size of the state space which can increase training time. In addition if a particular action-state pair is not visited sufficiently many times then that Q-value $Q(s,a)$ will not be a good approximation to the true Q-value, and hence control decisions taken based on that Q-value will not be optimal (and in fact will be quite poor usually). Through many experiments we found that $N_{inner} = 5, N_{outer} = 4$ provided good performance while keeping the size of the discretized state-action space relatively small at $2^9 * 3 = 1536$. Another set of parameters that had a large impact on performance were those of the cost function. It turned out to be important to balance the reward for staying away from obstacles with the penalty for using large control action, $C_{action}$. If $C_{action}$ was too small the controller could end up learning to spin in circles, see Section \ref{failure_modes} for more discussion of this problem. Alternatively if $C_{action}$ was too high the behavior would bias too much towards driving straight and wouldn't do enough to avoid obstacles. Another important parameter was the step size $\alpha$ in the SARSA update. It needs to be small enough so that the Q-Value estimates don't diverge. However, if it is too small then the Q-values are updated only a small amount in each iteration and convergence would take a long time. For the discrete state-action case we found that $\alpha = 0.2$ worked well, although it is difficult to evaluate what the ``correct'' step size is. See Table \todo{make a table with default parameter values, put it in the appendix} for our preferred set of parameters.
+
+First we provide a qualitative discussion of the results of the Q-Learning using parameters from Table \todo{make a table with default parameter values, put it in the appendix}. We initialize all of the Q-value to zero and run the SARSA algorithm for 8000 seconds. Since our simulation timestep is $dt = 0.05$ this amounts to $8000/dt = 160,000$ iterations of the SARSA update. Our simulation runs at approximately $700$ Hz. Since it takes $20$ ticks of the simulator to complete one second this amounts to a simulation of 35 $\times$ normal speed. Thus this training takes approximately $3.8$ minutes. The controller that we get out of this performs reasonably well. Specifically it manages to drive around the obstacle field shown in figure \todo{picture of the obstacle field} at a reasonably high speed with mean time between crashes of \todo{figure this out, currently it is 600} 30 seconds. One thing to note is that this is much worse than the performance of our default controller described in section \ref{default_controller}. At the given car speed in this run the default controller can essentially drive around indefinitely without crashing. However, it's behavior is to make a hard turn as soon as it detects an obstacle. Thus it has a tendency to get trapped within an area just going in circles as in figure \todo{show figure}. Since the default controller turns very agressively it never will go through a small gap. On the other hand since our reward function penalizes taking control actions (by $C_{action}$) it rewards our controller for going straight. Thus the learned controller will continue to go straight in some situations where we are detecting obstacles, but they are not in our direct path see figure \todo{include graphic}. This is an interesting behavior that is learned. Thus qualitatively our learned controller turns much less than the default controller and thus doesn't tend to get stuck circling in one spot. Another interesting feature of the controller is that learns how to drive through narrow gaps, see figure \todo{include graphic}.
+
+For a more quantitative analysis we can consider plots showing the average and discounted reward. The plots show that as time progresses the algorithm improves it's performance as is to be expected. Both the discounted reward and the run duration increase over time as the learning improves. 
+
+
+
+Things to do
+\begin{itemize}
+\item Same parameters many runs, show the variance in the learning
+\item Different lambdas, see if there is noticeable difference in performance.
+\item Compare multiple runs for Q-Learning and SARSA, is one more consistent than the other?
+\end{itemize}
+
+
+\subsection{Watkins Q-Learning}
+
+Q-Learning is almost the same as SARSA but with a slight variation in the update. While SARSA is an on-policy learning method (that is we are learning the Q-value for the current policy), Q-Learning is an off-policy method (we are learning the Q-Values under the optimal policy (even though we not currently controlling according that policy). The same preferred parameter set for SARSA given in Table \todo{reference} works well for Q-Learning also. The resulting controller exhibits similar qualitative performance to the SARSA controller described above. However the quantitative performance is a bit better.
+
+
+
+
+\subsection{SARSA with function approximation}
+\label{sarsa_function_approximation}
 %
 %
 % \begin{align}
@@ -185,8 +227,8 @@ The ultimate goal of SARSA($\lambda$). Is to find the optimal policy $\pi^*$. Th
 
 
 \subsection{Failure Modes}
-
-We spin around in circles because we are non-markov domain
+\label{failure_modes}
+We end up spinning around in circles. Maybe this is because we are assuming we are Markov when really we are not?
 
 
  so that we penalize being close to obstacles, i.e. 
@@ -195,6 +237,21 @@ We spin around in circles because we are non-markov domain
 
 \section{Division of Labor}
 
+\section{Figures}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{figures/sarsaDiscrete_lam_0_7_6500_bar_all_controllers.png}
+\caption{$\lambda = 0.7$}
+\label{figures/sarsaDiscrete_lam_0_7_6500_bar_all_controllers.png}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{figures/sarsaDiscrete_lam_0_7_6500_time_series_learned_controllers.png}
+\caption{$\lambda = 0.7$}
+\label{figures/sarsaDiscrete_lam_0_7_6500_time_series_learned_controllers.png}
+\end{figure}
 
 
 
