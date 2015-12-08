@@ -5,14 +5,14 @@ import copy
 
 options = dict()
 options['SARSA'] = dict()
-options['SARSA']['type'] = "discrete"
-options['SARSA']['lam'] = 0.7
+options['SARSA']['type'] = "continuous"
+options['SARSA']['lam'] = 0.2
 options['SARSA']['useQLearningUpdate'] = False
 options['SARSA']['numInnerBins'] = 5
 options['SARSA']['numOuterBins'] = 4
 options['SARSA']['binCutoff'] = 0.5
 options['SARSA']['epsilonGreedy'] = 0.4
-options['SARSA']['alphaStepSize'] = 0.2
+options['SARSA']['alphaStepSize'] = 1e-3
 options['SARSA']['epsilonGreedyExponent'] = 0.3
 
 options['SARSA']['useSupervisedTraining'] = False

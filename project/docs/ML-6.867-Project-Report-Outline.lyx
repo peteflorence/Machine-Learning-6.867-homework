@@ -1,0 +1,376 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+6.867 Project Report Outline
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Itemize
+Explain the overall goals of the project, use RL for obstacle avoidance.
+\end_layout
+
+\begin_layout Itemize
+Mention the techniques that we will use
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+SARSA
+\end_layout
+
+\begin_layout Itemize
+Q-Learning
+\end_layout
+
+\begin_layout Itemize
+Policy Search
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Really want to do output feedback .
+ .
+ .
+\end_layout
+
+\begin_layout Section
+Car Dynamics, Sensor Model, Simulator Overview
+\end_layout
+
+\begin_layout Itemize
+Explanation of the simulator using director codebase
+\end_layout
+
+\begin_layout Itemize
+Using vtk to do raycast (this is what makes it fast)
+\end_layout
+
+\begin_layout Itemize
+Allow for playback and logging
+\end_layout
+
+\begin_layout Itemize
+Include a picture of the simulator, show what a typical world that we trained
+ in looks like.
+\end_layout
+
+\begin_layout Section
+SARSA and Q-Learning
+\end_layout
+
+\begin_layout Itemize
+Technical descriptions of the methods.
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+What is our 
+\begin_inset Quotes eld
+\end_inset
+
+state
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Challenge: this state is really non-markov.
+ Don't really have any performance guarantees.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Describe the cost function
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+talk about reward shaping
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Discuss discretization 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+What worked, what didn't
+\end_layout
+
+\begin_layout Itemize
+Think about which plots I want to emphasize
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Effect of different parameters .
+ .
+ .
+ problem is that there are so many
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula $\alpha$
+\end_inset
+
+ step size
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\lambda$
+\end_inset
+
+ parameter for eligibility traces
+\end_layout
+
+\begin_layout Itemize
+number of inner/outer bins .
+ .
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+SARSA vs.
+ Q-Learning vs.
+ Hand-Designed Controller
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+compare the performance, need to think about how to do that
+\end_layout
+
+\begin_layout Itemize
+how to think about training time
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Failure Modes: and what we could have done to overcome them if we had more
+ time?
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Theory doesn't apply to our scenario.
+\end_layout
+
+\begin_layout Itemize
+Q-Learning would discover an 
+\begin_inset Quotes eld
+\end_inset
+
+always turn left
+\begin_inset Quotes erd
+\end_inset
+
+ type controller that works well in certain situations
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Continuous Function Approximation:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+This didn't work, not exactly sure why .
+ .
+ .
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+Plots
+\end_layout
+
+\begin_layout Itemize
+Performance vs.
+ lambda
+\end_layout
+
+\begin_layout Itemize
+Performance vs.
+ alpha???
+\end_layout
+
+\begin_layout Itemize
+Performance of multiple runs with all the same parameters, i.e.
+ how sensitive is it to local minima etc.
+\end_layout
+
+\begin_layout Itemize
+Q-Learning vs.
+ SARSA, maybe for a given lambda and multiple runs?? what is the difference
+ here .
+ .
+ .
+ 
+\end_layout
+
+\begin_layout Itemize
+Single trajectory of training, for lam = 0.7 maybe.
+ Show how the performance improves over time .
+ .
+ .
+ 
+\end_layout
+
+\begin_layout Section
+Policy Search/Policy Gradient Methods
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Itemize
+Overall what worked and what didn't
+\end_layout
+
+\begin_layout Itemize
+What required lots of tuning?
+\end_layout
+
+\begin_layout Itemize
+What worked out of the box?
+\end_layout
+
+\begin_layout Itemize
+Comparison to hand-designed controller.
+\end_layout
+
+\begin_layout Itemize
+General strengths/weaknesses of the methods.
+\end_layout
+
+\begin_layout Section
+Division of Labor
+\end_layout
+
+\begin_layout Subsection
+Pete
+\end_layout
+
+\begin_layout Enumerate
+Car dynamics simulator
+\end_layout
+
+\begin_layout Enumerate
+Sensor Model
+\end_layout
+
+\begin_layout Enumerate
+Random world generation
+\end_layout
+
+\begin_layout Subsection
+Lucas
+\end_layout
+
+\begin_layout Itemize
+Logging and playback
+\end_layout
+
+\begin_layout Itemize
+Computation of reward function
+\end_layout
+
+\begin_layout Itemize
+Plotting of run data
+\end_layout
+
+\begin_layout Itemize
+Discrete SARSA(
+\begin_inset Formula $\lambda$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+Discrete Q-Learning(
+\begin_inset Formula $\lambda$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+Continuous SARSA(
+\begin_inset Formula $\lambda$
+\end_inset
+
+)
+\end_layout
+
+\end_body
+\end_document

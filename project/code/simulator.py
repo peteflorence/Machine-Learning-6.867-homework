@@ -69,6 +69,7 @@ class Simulator(object):
         self.options['SARSA'] = dict()
         self.options['SARSA']['type'] = "discrete"
         self.options['SARSA']['lam'] = 0.7
+        self.options['SARSA']['alphaStepSize'] = 0.2
         self.options['SARSA']['useQLearningUpdate'] = False
         self.options['SARSA']['epsilonGreedy'] = 0.2
         self.options['SARSA']['burnInTime'] = 500
@@ -118,6 +119,7 @@ class Simulator(object):
         defaultOptions['SARSA'] = dict()
         defaultOptions['SARSA']['type'] = "discrete"
         defaultOptions['SARSA']['lam'] = 0.7
+        defaultOptions['SARSA']['alphaStepSize'] = 0.2
         defaultOptions['SARSA']['useQLearningUpdate'] = False
         defaultOptions['SARSA']['useSupervisedTraining'] = True
         defaultOptions['SARSA']['epsilonGreedy'] = 0.2
@@ -177,6 +179,9 @@ class Simulator(object):
 
     def initialize(self):
 
+        self.dt = self.options['dt']
+        self.controllerTypeOrder = ['defaultRandom', 'learnedRandom', 'learned', 'default']
+
         self.setDefaultOptions()
 
         self.Sensor = SensorObj(rayLength=self.options['Sensor']['rayLength'],
@@ -227,6 +232,7 @@ class Simulator(object):
         if type=="discrete":
             self.Sarsa = SARSADiscrete(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
                                             collisionThreshold=self.collisionThreshold,
+                                       alphaStepSize= self.options['SARSA']['alphaStepSize'],
                                        useQLearningUpdate=self.options['SARSA']['useQLearningUpdate'],
                                        lam=self.options['SARSA']['lam'],
                                    numInnerBins = self.options['SARSA']['numInnerBins'],
@@ -238,6 +244,7 @@ class Simulator(object):
         elif type=="continuous":
             self.Sarsa = SARSAContinuous(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
                                          lam=self.options['SARSA']['lam'],
+                                         alphaStepSize= self.options['SARSA']['alphaStepSize'],
                                         collisionThreshold=self.collisionThreshold,
                                          burnInTime = self.options['SARSA']['burnInTime'],
                                          epsilonGreedy=self.options['SARSA']['epsilonGreedy'],
@@ -866,41 +873,41 @@ class Simulator(object):
         plt.xlabel('run #')
         plt.ylabel('episode duration')
 
-        plt.subplot(4,1,2)
+        plt.subplot(2,1,2)
         plt.title('discounted reward')
         scatterPlot(discountedReward)
         # for key, val in plotData.iteritems():
         #     plt.scatter(grid[idx], discountedReward[idx], color=self.colorMap[controllerType])
 
 
-        plt.subplot(4,1,3)
-        plt.title("average reward")
-        scatterPlot(avgReward)
+        # plt.subplot(3,1,3)
+        # plt.title("average reward")
+        # scatterPlot(avgReward)
         # for key, val in plotData.iteritems():
         #     plt.scatter(grid[val['idx']],avgReward[val['idx']], color=val['color'])
 
 
-        plt.subplot(4,1,4)
-        plt.title("average reward no collision penalty")
-        scatterPlot(avgRewardNoCollisionPenalty)
-        # for key, val in plotData.iteritems():
-        #     plt.scatter(grid[val['idx']],avgRewardNoCollisionPenalty[val['idx']], color=val['color'])
+        # plt.subplot(4,1,4)
+        # plt.title("average reward no collision penalty")
+        # scatterPlot(avgRewardNoCollisionPenalty)
+        # # for key, val in plotData.iteritems():
+        # #     plt.scatter(grid[val['idx']],avgRewardNoCollisionPenalty[val['idx']], color=val['color'])
 
 
         ## plot summary statistics
         plt.figure()
 
-        plt.subplot(4,1,1)
+        plt.subplot(2,1,1)
         barPlot("duration")
 
-        plt.subplot(4,1,2)
+        plt.subplot(2,1,2)
         barPlot("discountedReward")
 
-        plt.subplot(4,1,3)
-        barPlot("avgReward")
-
-        plt.subplot(4,1,4)
-        barPlot("avgRewardNoCollisionPenalty")
+        # plt.subplot(3,1,3)
+        # barPlot("avgReward")
+        #
+        # plt.subplot(4,1,4)
+        # barPlot("avgRewardNoCollisionPenalty")
 
 
         plt.show()
@@ -934,7 +941,10 @@ class Simulator(object):
 
 
     def saveToFile(self, filename):
-        filename = "/data/" + filename + ".out"
+
+        # should also save the run data if it is available, i.e. stateOverTime, rewardOverTime
+
+        filename = 'data/' + filename + ".out"
         my_shelf = shelve.open(filename,'n')
 
         my_shelf['options'] = self.options
@@ -942,18 +952,36 @@ class Simulator(object):
         if self.options['SARSA']['type'] == "discrete":
             my_shelf['SARSA_QValues'] = self.Sarsa.QValues
 
+
+        my_shelf['simulationData'] = self.simulationData
+        my_shelf['stateOverTime'] = self.stateOverTime
+        my_shelf['raycastData'] = self.raycastData
+        my_shelf['controlInputData'] = self.controlInputData
+        my_shelf['emptyQValue'] = self.emptyQValue
+        my_shelf['numTimesteps'] = self.numTimesteps
+        my_shelf['idxDict'] = self.idxDict
+        my_shelf['counter'] = self.counter
         my_shelf.close()
 
 
     @staticmethod
-    def loadFromFile():
+    def loadFromFile(filename):
+        filename = 'data/' + filename + ".out"
         sim = Simulator(autoInitialize=False, verbose=False)
 
         my_shelf = shelve.open(filename)
         sim.options = my_shelf['options']
-
         sim.initialize()
         sim.Sarsa.QValues = np.array(my_shelf['SARSA_QValues'])
+        sim.simulationData = my_shelf['simulationData']
+        # sim.runStatistics = my_shelf['runStatistics']
+        sim.stateOverTime = np.array(my_shelf['stateOverTime'])
+        sim.raycastData = np.array( my_shelf['raycastData'])
+        sim.controlInputData = np.array(my_shelf['controlInputData'])
+        sim.emptyQValue = np.array(my_shelf['emptyQValue'])
+        sim.numTimesteps = my_shelf['numTimesteps']
+        sim.idxDict = my_shelf['idxDict']
+        sim.counter = my_shelf['counter']
 
         my_shelf.close()
 

@@ -12,6 +12,7 @@ options['SARSA']['numInnerBins'] = 5
 options['SARSA']['numOuterBins'] = 4
 options['SARSA']['binCutoff'] = 0.5
 options['SARSA']['epsilonGreedy'] = 0.4
+options['SARSA']['alphaStepSize'] = 0.3
 
 options['SARSA']['useSupervisedTraining'] = False
 
@@ -43,9 +44,9 @@ options['dt'] = 0.05
 # setup the training time
 options['runTime'] = dict()
 options['runTime']['supervisedTrainingTime'] = 0
-options['runTime']['learningRandomTime'] = 5000
+options['runTime']['learningRandomTime'] = 8000
 options['runTime']['learningEvalTime'] = 1500
-options['runTime']['defaultControllerTime'] = 0
+options['runTime']['defaultControllerTime'] = 1000
 #
 # sim.supervisedTrainingTime = 0
 # sim.learningRandomTime = 5000
@@ -58,48 +59,54 @@ options['SARSA']['burnInTime'] = options['runTime']['learningRandomTime']/2.0
 
 
 # # setup the training time
-# options['runTime']['supervisedTrainingTime'] = 10
-# options['runTime']['learningRandomTime'] = 20
-# options['runTime']['learningEvalTime'] = 10
-# options['runTime']['defaultControllerTime'] = 10
+options['runTime']['supervisedTrainingTime'] = 10
+options['runTime']['learningRandomTime'] = 20
+options['runTime']['learningEvalTime'] = 10
+options['runTime']['defaultControllerTime'] = 10
 
 
 
 
-# sim = Simulator(autoInitialize=False, verbose=False)
-# sim.options = copy.deepcopy(options)
-# sim.initialize()
-# sim.run(launchApp=True)
+sim = Simulator(autoInitialize=False, verbose=False)
+sim.options = copy.deepcopy(options)
+sim.initialize()
+sim.run(launchApp=False)
+
+
+
+# save it to a file
+sim.saveToFile('test')
+sim.setupPlayback()
 
 # Testing
-
-
-
-# sim2 = Simulator(autoInitialize=False, verbose=False)
-# sim2.options = sim.options
-# sim2.options['SARSA']['useQLearningUpdate'] = False
 #
-# sim2.initialize()
-# sim2.run()
-
-
-simList = []
-lamList = [0.0, 0.2, 0.4, 0.6, 0.8, 0.9]
-lamList = [0.2]
-
-for lam in lamList:
-    sim = Simulator(autoInitialize=False, verbose=False)
-    sim.options = copy.deepcopy(options)
-    sim.options['SARSA']['lam'] = lam
-    simList.append(sim)
-    sim.initialize()
-    sim.run(launchApp=False)
-    sim.plotRunData(showPlot=False)
-
-
-
-sim = simList[-1]
-sim.setupPlayback()
+#
+#
+# # sim2 = Simulator(autoInitialize=False, verbose=False)
+# # sim2.options = sim.options
+# # sim2.options['SARSA']['useQLearningUpdate'] = False
+# #
+# # sim2.initialize()
+# # sim2.run()
+#
+#
+# simList = []
+# lamList = [0.0, 0.2, 0.4, 0.6, 0.8, 0.9]
+# lamList = [0.2]
+#
+# for lam in lamList:
+#     sim = Simulator(autoInitialize=False, verbose=False)
+#     sim.options = copy.deepcopy(options)
+#     sim.options['SARSA']['lam'] = lam
+#     simList.append(sim)
+#     sim.initialize()
+#     sim.run(launchApp=False)
+#     sim.plotRunData(showPlot=False)
+#
+#
+#
+# sim = simList[-1]
+# sim.setupPlayback()
 
 
 

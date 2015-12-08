@@ -1,6 +1,8 @@
 __author__ = 'manuelli'
 from simulator import Simulator
 import copy
+import argparse
+
 
 
 options = dict()
@@ -46,62 +48,61 @@ options['dt'] = 0.05
 options['runTime'] = dict()
 options['runTime']['supervisedTrainingTime'] = 0
 options['runTime']['learningRandomTime'] = 6500
-options['runTime']['learningEvalTime'] = 1500
+options['runTime']['learningEvalTime'] = 2000
 options['runTime']['defaultControllerTime'] = 1000
-#
-# sim.supervisedTrainingTime = 0
-# sim.learningRandomTime = 5000
-# sim.learningEvalTime = 1000
-# sim.defaultControllerTime = 1000
+
+
 
 
 options['SARSA']['burnInTime'] = options['runTime']['learningRandomTime']/(2.0*options['dt'])
 
 
-
-# setup the training time
-# options['runTime']['supervisedTrainingTime'] = 10
-# options['runTime']['learningRandomTime'] = 20
-# options['runTime']['learningEvalTime'] = 10
-# options['runTime']['defaultControllerTime'] = 10
+filenameBase = "discrete_sarsa_multiple_runs_"
+numRuns = 10
 
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='interpret simulation parameters')
+    parser.add_argument('--runSim', action='store_true', default=False)
+    parser.add_argument('--test', action='store_true', default=False)
+    argNamespace = parser.parse_args()
+    runSim = argNamespace.runSim
+    test = argNamespace.test
+
+if test:
+    options['runTime']['supervisedTrainingTime'] = 10
+    options['runTime']['learningRandomTime'] = 20
+    options['runTime']['learningEvalTime'] = 10
+    options['runTime']['defaultControllerTime'] = 10
 
 
-sim = Simulator(autoInitialize=False, verbose=False)
-sim.options = copy.deepcopy(options)
-sim.initialize()
-sim.run(launchApp=True)
+if runSim:
+    print "WARNING!!!!"
+    print "running simulation, break now to avoid overwriting files!!!!"
 
-# Testing
-#
-#
-#
-# # sim2 = Simulator(autoInitialize=False, verbose=False)
-# # sim2.options = sim.options
-# # sim2.options['SARSA']['useQLearningUpdate'] = False
-# #
-# # sim2.initialize()
-# # sim2.run()
-#
-#
-# simList = []
-# lamList = [0.0, 0.2, 0.4, 0.6, 0.8, 0.9]
-# lamList = [0.2]
-#
-# for lam in lamList:
-#     sim = Simulator(autoInitialize=False, verbose=False)
-#     sim.options = copy.deepcopy(options)
-#     sim.options['SARSA']['lam'] = lam
-#     simList.append(sim)
-#     sim.initialize()
-#     sim.run(launchApp=False)
-#     sim.plotRunData(showPlot=False)
-#
-#
-#
-# sim = simList[-1]
-# sim.setupPlayback()
 
+simList = []
+
+for runNum in range(1,numRuns+1):
+    filename = filenameBase + str(runNum)
+
+    if runSim:
+        sim = Simulator(autoInitialize=False, verbose=False)
+        sim.options = copy.deepcopy(options)
+        sim.initialize()
+        sim.run(launchApp=False)
+        sim.saveToFile(filename)
+
+    else:
+        sim = Simulator.loadFromFile(filename)
+        simList.append(sim)
+
+# om.removeFromObjectModel(om.findObjectByName("world"))
+# om.removeFromObjectModel(om.findObjectByName("robot"))
+# simList[0].initialize()
+
+if not runSim:
+    sim = simList[0]
+    sim.setupPlayback()
 
 
