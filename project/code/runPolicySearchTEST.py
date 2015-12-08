@@ -43,8 +43,8 @@ options['dt'] = 0.05
 # setup the training time
 options['runTime'] = dict()
 options['runTime']['supervisedTrainingTime'] = 0
-options['runTime']['learningRandomTime'] = 0
-options['runTime']['learningEvalTime'] = 150
+options['runTime']['learningRandomTime'] = 15000
+options['runTime']['learningEvalTime'] = 0
 options['runTime']['defaultControllerTime'] = 0
 #
 # sim.supervisedTrainingTime = 0
@@ -94,8 +94,7 @@ for lam in lamList:
     simList.append(sim)
     sim.initialize()
     sim.run(launchApp=False)
-    sim.plotRunData(showPlot=False)
-
+    #sim.plotRunData(showPlot=False)
 
 
 sim = simList[-1]

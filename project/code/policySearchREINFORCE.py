@@ -13,41 +13,37 @@ class PolicySearchREINFORCE(PolicySearch):
         self.numOuterBins=numOuterBins
         self.numBins=numInnerBins + numOuterBins
         self.binCutoff=binCutoff
-        self.initializePolicyParams()
 
-    def initializePolicyParams(self):
-        np.random.seed(4)
-        self.policyTheta = np.random.randn(self.numRays,1)
-
-    def computeControlPolicy(self, S):
-        raycastDistance = S[1]
-        print "raycastDistance shape", np.shape(raycastDistance)
-        u = np.dot(policyTheta.T, raycastDistance)
-        print "dot product is", u
-
-        return u
-
-    def computeBetaControlPolicy(self, S):
+    def computeBetaControlPolicy(self, S, randomize=True, counter=None):
         raycastDistance = S[1]
         feature = raycastDistance * 0.0
 
         for idx, i in enumerate(feature):
-            feature[idx] = (1/raycast[idx]) **2
+            feature[idx] = (1/raycastDistance[idx]) **2
 
+        # Not terrible parameters
         theta_a = raycastDistance * 0.0
-        theta_a[:len(theta_a)/2] = 1.0
+        theta_a[:len(theta_a)/2] = 1.0 * 100
         theta_a0 = 0
 
         theta_b = raycastDistance * 0.0
-        theta_b[len(theta_b)/2:] = 1.0
+        theta_b[len(theta_b)/2:] = 1.0 * 100
         theta_b0 = 0
+
+        # theta_a = raycastDistance * 0.0
+        # theta_a[:6] = 1.0 * 100
+        # theta_a0 = 0
+
+        # theta_b = raycastDistance * 0.0
+        # theta_b[13:] = 1.0 * 100
+        # theta_b0 = 0
+
 
         a = np.dot(theta_a.T, feature) + theta_a0
         b = np.dot(theta_b.T, feature) + theta_b0
 
-        u = np.random.beta(a, b) * 8 - 4
-
-        return u
+        u = -(np.random.beta(a, b) * 8 - 4)
+        return u, 0
 
 
     def computeDummyControlPolicy(self, S, randomize=True, counter=None):
@@ -80,34 +76,6 @@ class PolicySearchREINFORCE(PolicySearch):
 
         return featureVec
 
-
-
-    def computeFeatureVectorFromCurrentFrame(self):
-        raycastDistance = self.sensor.raycastAllFromCurrentFrameLocation()
-        carState = 0
-        S = (carState, raycastDistance)
-        featureVec = self.computeFeatureVector(S)
-        print ""
-        print "innerBins ", featureVec[:self.numInnerBins]
-        print "outerBins", featureVec[self.numInnerBins:]
-        print ""
-        return featureVec
-
-
-    def computeQValueVectorFromCurrentFrame(self):
-        QVec = np.zeros(3)
-        fVec = self.computeFeatureVectorFromCurrentFrame()
-        for aIdx in xrange(self.numActions):
-            fVecTemp = fVec + (aIdx,)
-            QVec[aIdx] = self.QValues[fVecTemp]
-
-
-        print "QVec is", QVec
-        aIdxMax = np.argmax(QVec)
-        if QVec[aIdxMax] == 0.0:
-            print "table value never updated"
-        else:
-            print "best action is", aIdxMax
 
 
 

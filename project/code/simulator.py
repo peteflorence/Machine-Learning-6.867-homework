@@ -23,6 +23,7 @@ from sarsaContinuous import SARSAContinuous
 from sarsaDiscrete import SARSADiscrete
 from reward import Reward
 from policySearchREINFORCE import PolicySearchREINFORCE
+from policySearchSGD import PolicySearchSGD
 
 
 class Simulator(object):
@@ -171,9 +172,8 @@ class Simulator(object):
 
     def initializeColorMap(self):
         self.colorMap = dict()
-        self.colorMap['defaultRandom'] = [0,0,1]
-        self.colorMap['learnedRandom'] = [1.0,  0.54901961,  0.] # this is orange
-        self.colorMap['learned'] = [ 0.58039216,  0.0,  0.82745098] # this is yellow
+        self.colorMap['training'] = [1.0,  0.54901961,  0.] # this is orange
+        self.colorMap['learnedEval'] = [ 0.58039216,  0.0,  0.82745098] # this is yellow
         self.colorMap['default'] = [0,1,0]
 
     def initialize(self):
@@ -251,7 +251,7 @@ class Simulator(object):
 
     def setPolicySearch(self):
 
-        self.PolicySearchObj = PolicySearchREINFORCE(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
+        self.PolicySearchObj = PolicySearchSGD(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
                                         collisionThreshold=self.collisionThreshold,
                                    useQLearningUpdate=self.options['SARSA']['useQLearningUpdate'],
                                    lam=self.options['SARSA']['lam'],
@@ -265,8 +265,6 @@ class Simulator(object):
 
     def runSingleSimulation(self, updateQValues=True, controllerType='default', simulationCutoff=None):
 
-        if self.verbose: print "using QValue based controller = ", useQValueController
-
         self.setCollisionFreeInitialState()
 
         currentCarState = np.copy(self.Car.state)
@@ -274,13 +272,13 @@ class Simulator(object):
         self.setRobotFrameState(currentCarState[0], currentCarState[1], currentCarState[2])
         currentRaycast = self.Sensor.raycastAll(self.frame)
         nextRaycast = np.zeros(self.Sensor.numRays)
-        #self.Sarsa.resetElibilityTraces()
 
         # record the reward data
         runData = dict()
         reward = 0
         discountedReward = 0
         avgReward = 0
+        totalReward = 0
         startIdx = self.counter
 
 
@@ -292,47 +290,24 @@ class Simulator(object):
             y = self.stateOverTime[idx,1]
             theta = self.stateOverTime[idx,2]
             self.setRobotFrameState(x,y,theta)
-            # self.setRobotState(currentCarState[0], currentCarState[1], currentCarState[2])
             currentRaycast = self.Sensor.raycastAll(self.frame)
             self.raycastData[idx,:] = currentRaycast
             S_current = (currentCarState, currentRaycast)
-
 
             if controllerType not in self.colorMap.keys():
                 print
                 raise ValueError("controller of type " + controllerType + " not supported")
 
 
-            if controllerType in ["default", "defaultRandom"]:
-                if controllerType == "defaultRandom":
-                    controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
-                                                                                currentTime, self.frame,
-                                                                                raycastDistance=currentRaycast,
-                                                                                randomize=True)
-                else:
-                    controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
+            if controllerType in ["training","learnedEval"]:
+
+                controlInput, controlInputIdx = self.PolicySearchObj.computeSigmoidedControlPolicy(S_current)
+
+            if controllerType in ["default"]:
+                controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
                                                                                 currentTime, self.frame,
                                                                                 raycastDistance=currentRaycast,
                                                                                 randomize=False)
-
-
-            if controllerType in ["learned","learnedRandom"]:
-                if controllerType == "learned":
-                    randomizeControl = False
-                else:
-                    randomizeControl = True
-
-                counterForGreedyDecay = self.counter - self.idxDict["learnedRandom"]
-                controlInput, controlInputIdx = self.PolicySearchObj.computeDummyControlPolicy(S_current,
-                                                                                                   counter=counterForGreedyDecay,
-                                                                                                   randomize=randomizeControl)
-
-                #self.emptyQValue[idx] = emptyQValue
-                #if emptyQValue and self.options['SARSA']['useSupervisedTraining']:
-                #    controlInput, controlInputIdx = self.Controller.computeControlInput(currentCarState,
-                #                                                                currentTime, self.frame,
-                #                                                                raycastDistance=currentRaycast,
-                #                                                                randomize=False)
 
             self.controlInputData[idx] = controlInput
 
@@ -345,64 +320,19 @@ class Simulator(object):
             self.setRobotFrameState(x,y,theta)
             nextRaycast = self.Sensor.raycastAll(self.frame)
 
-
-            # Compute the next control input
-            S_next = (nextCarState, nextRaycast)
-
-            if controllerType in ["default", "defaultRandom"]:
-                if controllerType == "defaultRandom":
-                    nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState,
-                                                                                currentTime, self.frame,
-                                                                                raycastDistance=nextRaycast,
-                                                                                randomize=True)
-                else:
-                    nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState,
-                                                                                currentTime, self.frame,
-                                                                                raycastDistance=nextRaycast,
-                                                                                randomize=False)
-
-
-            if controllerType in ["learned","learnedRandom"]:
-                if controllerType == "learned":
-                    randomizeControl = False
-                else:
-                    randomizeControl = True
-
-                counterForGreedyDecay = self.counter - self.idxDict["learnedRandom"]
-                nextControlInput, nextControlInputIdx = self.PolicySearchObj.computeDummyControlPolicy(S_next,
-                                                                                                   counter=counterForGreedyDecay,
-                                                                                                   randomize=randomizeControl)
-
-                #if emptyQValue and self.options['SARSA']['useSupervisedTraining']:
-                #    nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState,
-                #                                                                currentTime, self.frame,
-                #                                                                raycastDistance=nextRaycast,
-                #                                                                randomize=False)
-
-            # if useQValueController:
-            #     nextControlInput, nextControlInputIdx, emptyQValue = self.Sarsa.computeGreedyControlPolicy(S_next)
-            #
-            # if not useQValueController or emptyQValue:
-            #     nextControlInput, nextControlInputIdx = self.Controller.computeControlInput(nextCarState, currentTime, self.frame,
-            #                                                                             raycastDistance=nextRaycast)
-
-
-
             # compute the reward
-            reward = self.Reward.computeReward(S_next, controlInput)
+            reward = self.Reward.computeReward(S_current, controlInput)
             self.rewardData[idx] = reward
 
             discountedReward += self.PolicySearchObj.gamma**(self.counter-startIdx)*reward
-            avgReward += reward
+            totalReward += reward
 
-            ###### Policy Search update
-            if updateQValues:
-                self.PolicySearchObj.policySearchUpdate(S_current, controlInputIdx, reward, S_next, nextControlInputIdx)
-
+            
             #bookkeeping
             currentCarState = nextCarState
             currentRaycast = nextRaycast
             self.counter+=1
+
             # break if we are in collision
             if self.checkInCollision(nextRaycast):
                 if self.verbose: print "Had a collision, terminating simulation"
@@ -416,30 +346,29 @@ class Simulator(object):
         self.stateOverTime[self.counter,:] = currentCarState
         self.raycastData[self.counter,:] = currentRaycast
 
-        # return the total reward
-        avgRewardNoCollisionPenalty = avgReward - reward
-        avgReward = avgReward*1.0/max(1, self.counter -startIdx)
-        avgRewardNoCollisionPenalty = avgRewardNoCollisionPenalty*1.0/max(1, self.counter -startIdx)
+        # compute the average reward
+        avgReward = totalReward*1.0/max(1, self.counter -startIdx)
+        
         # this extra multiplication is so that it is in the same "units" as avgReward
         runData['discountedReward'] = discountedReward*(1 - self.PolicySearchObj.gamma)
         runData['avgReward'] = avgReward
-        runData['avgRewardNoCollisionPenalty'] = avgRewardNoCollisionPenalty
-
+        runData['totalReward'] = totalReward
+        
 
         # this just makes sure we don't get stuck in an infinite loop.
         if startIdx == self.counter:
             self.counter += 1
 
-        return runData
+        return runData, totalReward
 
 
     def runBatchSimulation(self, endTime=None, dt=0.05):
 
+
         # for use in playback
         self.dt = self.options['dt']
-        #self.Sarsa.setDiscountFactor(dt)
 
-        self.endTime = self.supervisedTrainingTime + self.learningRandomTime + self.learningEvalTime + self.defaultControllerTime
+        self.endTime = self.learningRandomTime + self.learningEvalTime + self.defaultControllerTime
 
         self.t = np.arange(0.0, self.endTime, dt)
         maxNumTimesteps = np.size(self.t)
@@ -450,7 +379,7 @@ class Simulator(object):
         self.emptyQValue = np.zeros(maxNumTimesteps+1, dtype='bool')
         self.numTimesteps = maxNumTimesteps
 
-        self.controllerTypeOrder = ['defaultRandom', 'learnedRandom', 'learned', 'default']
+        self.controllerTypeOrder = ['training', 'learnedEval', 'default']
         self.counter = 0
         self.simulationData = []
     
@@ -460,53 +389,62 @@ class Simulator(object):
         numRunsCounter = 0
 
 
-        # three while loops for different phases of simulation, supervisedTraining, learning, default
-        self.idxDict['defaultRandom'] = self.counter
+        # three while loops for different phases of simulation: training, learnedEval, default
+
         loopStartIdx = self.counter
         simCutoff = min(loopStartIdx + self.supervisedTrainingTime/dt, self.numTimesteps)
-        while ((self.counter - loopStartIdx <  self.supervisedTrainingTime/dt) and self.counter < self.numTimesteps):
-            self.printStatusBar()
-            useQValueController = False
-            startIdx = self.counter
-            runData = self.runSingleSimulation(updateQValues=True, controllerType='defaultRandom',
-                                               simulationCutoff=simCutoff)
-
-            runData['startIdx'] = startIdx
-            runData['controllerType'] = "defaultRandom"
-            runData['duration'] = self.counter - runData['startIdx']
-            runData['endIdx'] = self.counter
-            runData['runNumber'] = numRunsCounter
-            numRunsCounter+=1
-            self.simulationData.append(runData)
-
-
-        self.idxDict['learnedRandom'] = self.counter
+        
+        
+        self.idxDict['training'] = self.counter
         loopStartIdx = self.counter
         simCutoff = min(loopStartIdx + self.learningRandomTime/dt, self.numTimesteps)
+        
+        firstTime = True
+
+        storedReward = []
+
         while ((self.counter - loopStartIdx < self.learningRandomTime/dt) and self.counter < self.numTimesteps):
             self.printStatusBar()
             startIdx = self.counter
-            runData = self.runSingleSimulation(updateQValues=True, controllerType='learnedRandom',
-                                               simulationCutoff=simCutoff)
-            runData['startIdx'] = startIdx
-            runData['controllerType'] = "learnedRandom"
-            runData['duration'] = self.counter - runData['startIdx']
-            runData['endIdx'] = self.counter
-            runData['runNumber'] = numRunsCounter
-            numRunsCounter+=1
-            self.simulationData.append(runData)
+            
+            if firstTime == True:
+                runData, prevReward = self.runSingleSimulation(updateQValues=True, controllerType='training',
+                                                   simulationCutoff=simCutoff)
+                storedReward.append(prevReward)
+                firstTime = False
+
+            else:
+                w = self.PolicySearchObj.sampleGaussianW()
+
+                self.PolicySearchObj.policyTheta += w 
+                runData, reward = self.runSingleSimulation(updateQValues=True, controllerType='training',
+                                                   simulationCutoff=simCutoff)
+                storedReward.append(reward)
+
+                eta = 1e-2
+                self.PolicySearchObj.policyTheta = self.PolicySearchObj.policyTheta -  eta * (reward - prevReward) * w
+                prevReward = reward
+
+                runData['startIdx'] = startIdx
+                runData['controllerType'] = "learnedRandom"
+                runData['duration'] = self.counter - runData['startIdx']
+                runData['endIdx'] = self.counter
+                runData['runNumber'] = numRunsCounter
+                numRunsCounter+=1
+                self.simulationData.append(runData)
 
 
-
-        self.idxDict['learned'] = self.counter
+        self.idxDict['learnedEval'] = self.counter
         loopStartIdx = self.counter
         simCutoff = min(loopStartIdx + self.learningEvalTime/dt, self.numTimesteps)
         while ((self.counter - loopStartIdx < self.learningEvalTime/dt) and self.counter < self.numTimesteps):
 
             self.printStatusBar()
             startIdx = self.counter
-            runData = self.runSingleSimulation(updateQValues=False, controllerType='learned',
+            runData, reward = self.runSingleSimulation(updateQValues=False, controllerType='learnedEval',
                                                simulationCutoff=simCutoff)
+            print "startIdx", startIdx
+            print "runData", runData
             runData['startIdx'] = startIdx
             runData['controllerType'] = "learned"
             runData['duration'] = self.counter - runData['startIdx']
@@ -523,7 +461,7 @@ class Simulator(object):
         while ((self.counter - loopStartIdx < self.defaultControllerTime/dt) and self.counter < self.numTimesteps-1):
             self.printStatusBar()
             startIdx = self.counter
-            runData = self.runSingleSimulation(updateQValues=False, controllerType='default',
+            runData, reward = self.runSingleSimulation(updateQValues=False, controllerType='default',
                                                simulationCutoff=simCutoff)
             runData['startIdx'] = startIdx
             runData['controllerType'] = "default"
@@ -542,8 +480,6 @@ class Simulator(object):
         self.controlInputData = self.controlInputData[0:self.counter+1]
         self.rewardData = self.rewardData[0:self.counter+1]
         self.endTime = 1.0*self.counter/self.numTimesteps*self.endTime
-
-
 
 
 
