@@ -12,9 +12,9 @@ Add to ~/.bash_profile or ~/.bash_rc:
 
 `alias ddConsoleApp=$HOME/path-to/build/bin/ddConsoleApp`
 
-### Recommended usage
+### Recommended example usage
 
-ddConsoleApp runPolicySearchTEST.py 
+`ddConsoleApp runPolicySearchTEST.py`
 
 ### How to run with iPython notebook
 
