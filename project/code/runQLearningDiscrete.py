@@ -1,5 +1,4 @@
 __author__ = 'manuelli'
-__author__ = 'manuelli'
 from simulator import Simulator
 import copy
 
@@ -8,12 +7,13 @@ options = dict()
 options['SARSA'] = dict()
 options['SARSA']['type'] = "discrete"
 options['SARSA']['lam'] = 0.7
-options['SARSA']['useQLearningUpdate'] = False
+options['SARSA']['useQLearningUpdate'] = True
 options['SARSA']['numInnerBins'] = 5
 options['SARSA']['numOuterBins'] = 4
 options['SARSA']['binCutoff'] = 0.5
 options['SARSA']['epsilonGreedy'] = 0.4
 options['SARSA']['alphaStepSize'] = 0.2
+options['SARSA']['epsilonGreedyExponent'] = 0.3
 
 options['SARSA']['useSupervisedTraining'] = False
 
@@ -45,7 +45,7 @@ options['dt'] = 0.05
 # setup the training time
 options['runTime'] = dict()
 options['runTime']['supervisedTrainingTime'] = 0
-options['runTime']['learningRandomTime'] = 8000
+options['runTime']['learningRandomTime'] = 6500
 options['runTime']['learningEvalTime'] = 1500
 options['runTime']['defaultControllerTime'] = 1000
 #
@@ -55,11 +55,11 @@ options['runTime']['defaultControllerTime'] = 1000
 # sim.defaultControllerTime = 1000
 
 
-options['SARSA']['burnInTime'] = options['runTime']['learningRandomTime']/2.0
+options['SARSA']['burnInTime'] = options['runTime']['learningRandomTime']/(2.0*options['dt'])
 
 
 
-# # setup the training time
+# setup the training time
 # options['runTime']['supervisedTrainingTime'] = 10
 # options['runTime']['learningRandomTime'] = 20
 # options['runTime']['learningEvalTime'] = 10
