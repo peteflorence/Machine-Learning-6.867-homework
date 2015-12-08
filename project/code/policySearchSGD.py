@@ -13,8 +13,8 @@ class PolicySearchSGD(PolicySearch):
         self.numOuterBins=numOuterBins
         self.numBins=numInnerBins + numOuterBins
         self.binCutoff=binCutoff
-        self.initializeZeroedParams()
-        #self.initializePolicyParams() #this doesn't crash
+        #self.initializeZeroedParams()
+        self.initializePolicyParams() #this doesn't crash
 
         self.mean = np.zeros((1,20))[0]
         self.epsilon = 1e-3
