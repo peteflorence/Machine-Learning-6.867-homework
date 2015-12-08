@@ -12,6 +12,10 @@ Add to ~/.bash_profile or ~/.bash_rc:
 
 `alias ddConsoleApp=$HOME/path-to/build/bin/ddConsoleApp`
 
+### Recommended usage
+
+ddConsoleApp runPolicySearchTEST.py 
+
 ### How to run with iPython notebook
 
 Find full path to `ipython`
