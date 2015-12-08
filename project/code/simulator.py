@@ -972,7 +972,10 @@ class Simulator(object):
         my_shelf = shelve.open(filename)
         sim.options = my_shelf['options']
         sim.initialize()
-        sim.Sarsa.QValues = np.array(my_shelf['SARSA_QValues'])
+
+        if sim.options['SARSA']['type'] == "discrete":
+            sim.Sarsa.QValues = np.array(my_shelf['SARSA_QValues'])
+
         sim.simulationData = my_shelf['simulationData']
         # sim.runStatistics = my_shelf['runStatistics']
         sim.stateOverTime = np.array(my_shelf['stateOverTime'])
