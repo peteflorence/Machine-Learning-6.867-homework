@@ -115,7 +115,7 @@ class World(object):
         maxNumObstacles = obsScalingFactor * worldArea
         
         numObstacles = int(obstaclesInnerFraction**2 * percentObsDensity/100.0 * maxNumObstacles)
-        #print numObstacles
+        print numObstacles
 
         # draw random stick obstacles
         obsLength = 2.0

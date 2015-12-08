@@ -2,7 +2,7 @@ __author__ = 'peteflorence'
 import numpy as np
 from policySearch import PolicySearch
 
-class PolicySearchREINFORCE(PolicySearch):
+class PolicySearchSigmoided(PolicySearch):
 
     def __init__(self, numInnerBins=4, numOuterBins=4, binCutoff=0.5, alphaStepSize=0.2,
                  useQLearningUpdate= False, **kwargs):
@@ -24,28 +24,6 @@ class PolicySearchREINFORCE(PolicySearch):
         print "raycastDistance shape", np.shape(raycastDistance)
         u = np.dot(policyTheta.T, raycastDistance)
         print "dot product is", u
-
-        return u
-
-    def computeBetaControlPolicy(self, S):
-        raycastDistance = S[1]
-        feature = raycastDistance * 0.0
-
-        for idx, i in enumerate(feature):
-            feature[idx] = (1/raycast[idx]) **2
-
-        theta_a = raycastDistance * 0.0
-        theta_a[:len(theta_a)/2] = 1.0
-        theta_a0 = 0
-
-        theta_b = raycastDistance * 0.0
-        theta_b[len(theta_b)/2:] = 1.0
-        theta_b0 = 0
-
-        a = np.dot(theta_a.T, feature) + theta_a0
-        b = np.dot(theta_b.T, feature) + theta_b0
-
-        u = np.random.beta(a, b) * 8 - 4
 
         return u
 
