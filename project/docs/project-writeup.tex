@@ -46,6 +46,16 @@
 \usepackage[accepted]{icml2015}
 
 \usepackage{enumitem}
+\usepackage{bbm}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+
 
 
 % The \icmltitle you define below is probably too long as a header.
@@ -92,7 +102,7 @@ In this project we evaluate the ability of several reinforcement learning method
 
 \subsection{Car Model}
 
-For our car model we consider a simplified Dubin's car model. The location of the vehicle is described by $(x,y,\theta)$, where $(x,y)$ denote cartesian position and $\theta$ denotes the orientation. For our purposes we suppose that we can control the derivative of the orientation, namely our control is $u = \dot{\theta}$. We also suppose a fixed speed $v$. Then the dynamics of the vehicle are given by
+For our car model we consider a simplified Dubin's car model. The location of the vehicle is described by $(x,y,\theta)$, where $(x,y)$ denote Cartesian position and $\theta$ denotes the orientation. For our purposes we suppose that we can control the derivative of the orientation, namely our control is $u = \dot{\theta}$. We also suppose a fixed speed $v$. Then the dynamics of the vehicle are given by
 \todo{figure illustrating car + lidars}
 %
 %
@@ -106,16 +116,19 @@ For our car model we consider a simplified Dubin's car model. The location of th
 %
 
 \subsection{Sensor Model}
-For our sensor model we use a small array of point LIDARs. In particular, $N$ beams are spread evenly over the field of view $[\theta_{min},\theta_{max}]$.  All experiments shown use $N=20$ and $[\theta_{min}=-\pi,\theta_{max}=\pi]$    Each laser has a maximum range of $d_{max}$. The $n^th$ laser then returns $x_n$, which the distance to the first obstacle it encounters, or $d_{max}$ if no obstacle is detected. Then one laser measurement can be summarized as $X = (x_1,\ldots,x_N)$.
+For our sensor model we use a small array of point LIDARs. In particular, $N$ beams are spread evenly over the field of view $[\theta_{min},\theta_{max}]$.  All experiments shown use $N=20$ and $[\theta_{min}=-\pi,\theta_{max}=\pi]$    Each laser has a maximum range of $d_{max}$. The $n^{th}$ laser then returns $x_n$, which the distance to the first obstacle it encounters, or $d_{max}$ if no obstacle is detected. Then one laser measurement can be summarized as $X = (x_1,\ldots,x_N)$.
 
 \subsection{Obstacle Environment}
 Picking the right obstacle environment for our task required some trial-and-error.  Obstacles that were too thin along one direction were not a good choice, as they could hide in between the ``array of point LIDARs'' as the robot approached.  Thus circular obstacles were chosen, as they circumvented this problem.  Picking the right density of obstacles and obstacle size was another trial-and-error process.  A listing of approximate parameters for the obstacle environments used is provided below.  Generalizations across obstacle environments it outside the scope of this project.
 
 \scalebox{0.7}{
   \begin{tabular}{l|c|c|l|c|c|c|c|c}
-	\textbf{Car and sensor parameters}\\
+	\textbf{Car parameters}\\
 	Car velocity, $v$ & 16 m/s \\ 
-	Maximum turning rate, $u_{max}$, 4 \\
+	Maximum turning rate, $u_{max}$ & 4 rad/s\\
+	\\
+	
+	\textbf{Sensor parameters}\\
 	Number of point LIDARS, N & 20 \\
 	Maximum laser range, $d_{max}$ & 10 m \\
 	Field of view $[\theta_{min},\theta_{max}]$ & $[-\pi, \pi]$ \\
@@ -137,9 +150,37 @@ Our software stack is integrated with a robotics visualization tool called Direc
 
 \subsection{Braitenberg (Hand-Designed) Controller}
 \label{default_controller}
-As a baseline against which to compare our learned controllers, we used a simple hand-designed controller inspired by the controllers of Valentino Braitenberg.  The simplest controller we tried used simply counted the number of non-max sensor returns on the left ($n_{left} = \sum_i [x_i < d_{max}]$ for $i = 1, ..., N/2)$ and compared to the number of non-max sensor returns on the right ($n_{right} = \sum_i [x_i < d_{max}]$ for $i = N/2 + 1, ..., N)$), and then selected the action to turn towards the direction $min(n_{left}, n_{right})$.  If no obstacles were seen ($n_{left} = n_{right} = 0$), then the controller would select to go straight.  Thus the action space for this simple controller is $A = \{-u_{max}, 0, u_{max} \}$.  
+As a baseline against which to compare our learned controllers, we used a simple hand-designed controller inspired by the controllers of Valentino Braitenberg.  The simplest controller we tried simply counts the number of non-max sensor returns on the left ($n_{left} = \sum_i^{N/2} \mathbbm{1}[x_i < d_{max}]$) and compared to the number of non-max sensor returns on the right ($n_{right} = \sum_{i=N/2+1}^N \mathbbm{1}[x_i < d_{max}]$), and then selected the action to turn towards the direction $min(n_{left}, n_{right})$.  If no obstacles were seen ($n_{left} = n_{right} = 0$), then the controller would select to go straight.  Thus the action space for this simple controller is $A = \{-u_{max}, 0, u_{max} \}$.  This controller actually works surprisingly well.
 
-Then describe controller based on $\phi$...
+The best Braitenberg-style controller we used is a slight improvement on the above version, but actually takes into the account the distances measured.  This controller uses the squared inverse of each of the sensor measurements as its features: $\phi_{B} (x_i) = \frac{1}{x_i^2}$.  The sum of these features is then computed for the left and right, and again the action is selected to turn towards the direction $min(n_{left}, n_{right})$.  An algorithm description is provided:
+%
+\begin{algorithm}[H]
+   \caption{Braitenberg Squared Inverse Controller (BSIC)}
+   \label{alg:bsic}
+\begin{algorithmic}
+   \STATE {\bfseries Input:} sensor data $x_i$, size $N$
+   \STATE {\bfseries Output:} u from $\mathcal{A} =  \{-u_{max}, 0, u_{max}\}$
+   \STATE Initialize $n_{left}$, $n_{right} = 0$
+   \FOR{$i=1$  {\bfseries to} $N/2$}
+   \STATE $n_{left} = n_{left} + 1/(x_i)^2$
+   \ENDFOR
+   \FOR{$i=N/2 + 1$  {\bfseries to} $N$}
+   \STATE $n_{right} = n_{right} + 1/(x_i)^2$
+   \ENDFOR
+   \IF {$n_{left} > n_{right}$}
+   \STATE $u = -u_{max}$ (TURN LEFT)
+   \ELSE 
+   \IF {$n_{left} < n_{right}$}
+   \STATE $u = u_{max}$ (TURN RIGHT)
+   \ELSE 
+   \STATE $u=0$ (GO STRAIGHT)
+   \ENDIF
+   \ENDIF
+
+\end{algorithmic}
+\end{algorithm}
+
+
 
 \section{Dynamic Programming: SARSA and Q-Learning}
 Two of the most popular methods in reinforcement learning are SARSA and Q-Learning. These methods both aim to find the optimal policy of a dynamic programming problem. Thus the first step is to reformulate our problem as a dynamic programming problem. 
