@@ -314,8 +314,7 @@ Intuitively this corresponds to adjusting the weights $w_a(n)$ to get the best a
 
 \subsubsection{Results}
 
-It is notoriously difficult to get function approximation methods for SARSA to perform well. Performance fundamentally depends on whether the chosen parametric form, given by (\ref{q_value_approx}), provides a good approximation of the Q-Values. Ultimately we were not able to get a meaningful controller out of this approach. In what follows I will try to describe why this might be and what the lessons learned were. the fist thing we noticed was that a much smaller step-size $\alpha$ was needed. After experimenting we found that $\alpha = 1e-4$ was small enough that the weights wouldn't diverge to $\infty$. For the training in sections \ref{discrete_sarsa} and \ref{discrete_q_learning} we initialized the Q-Values to zero. This approach didn't yield very good results for the function approximation SARSA method \todo{maybe need to elaborate on this, we end up spinning in circles etc.} An alternative, as outline in \todo{reference Leslie's practical reinforcement learning for mobile robots paper} to help the learning algorithms perform better is to run a known controller to help learn some baseline Q-Values. Essentially during a supervised learning period we are learning weights $\{w_a(n)\}$ which approximate the Q-Values under the known policy $\pi_{default}$. During this phase we are performing the weight updates from \todo{reference cts sarsa figure} but the policy is chosen according to $\pi_{default}$ rather than the epsilon greedy policy. In this setup we run this supervised training for a while before switching the standard SARSA($\lambda$) updates specified in \todo{table}. If we use the standard environment used in sections \ref{discrete_sarsa} and \ref{discrete_q_learning} we end up falling into the ``drive in circles'' failure mode outline in \ref{failure_modes}. Increasing the obstacle density to eliminate the ``obstacle free'' zones resolves this problem and we are able to get a function controller.
-
+It is notoriously difficult to get function approximation methods for SARSA to perform well. Performance fundamentally depends on whether the chosen parametric form, given by (\ref{q_value_approx}), provides a good approximation of the Q-Values. Ultimately we were not able to get a meaningful controller out of this approach. In what follows I will try to describe why this might be and what the lessons learned were. the fist thing we noticed was that a much smaller step-size $\alpha$ was needed. After experimenting we found that $\alpha = 1e-4$ was small enough that the weights wouldn't diverge to $\infty$. For the training in sections \ref{discrete_sarsa} and \ref{discrete_q_learning} we initialized the Q-Values to zero. This approach didn't yield very good results for the function approximation SARSA method \todo{maybe need to elaborate on this, we end up spinning in circles etc.} An alternative, as outline in \todo{reference Leslie's practical reinforcement learning for mobile robots paper} to help the learning algorithms perform better is to run a known controller to help learn some baseline Q-Values. Essentially during a supervised learning period we are learning weights $\{w_a(n)\}$ which approximate the Q-Values under the known policy $\pi_{default}$. During this phase we are performing the weight updates from \todo{reference cts sarsa figure} but the policy is chosen according to $\pi_{default}$ rather than the epsilon greedy policy. In this setup we run this supervised training for a while before switching the standard SARSA($\lambda$) updates specified in \todo{table}. If we use the standard environment used in sections \ref{discrete_sarsa} and \ref{discrete_q_learning} we end up falling into the ``drive in circles'' failure mode outline in \ref{failure_modes}. Increasing the obstacle density to eliminate the ``obstacle free'' zones resolves this problem and we are able to get a functioning controller. The controller performs reasonably well, but still worse than a QLearning controller on the same environment \todo{need to verify this}. The interesting thing is to attempt to understand the weights $\{w_a(n)\}$ that we are learning and why they might be working.
 
 
 %
@@ -355,6 +354,14 @@ We end up spinning around in circles. Maybe this is because we are assuming we a
 \includegraphics[scale=0.5]{figures/sarsaDiscrete_lam_0_7_6500_time_series_learned_controllers.png}
 \caption{$\lambda = 0.7$}
 \label{figures/sarsaDiscrete_lam_0_7_6500_time_series_learned_controllers.png}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{figures/sarsa_cts_weights.png}
+\caption{$\lambda = 0.7$}
+\label{figures/sarsa_cts_weights.png}
 \end{figure}
 
 
