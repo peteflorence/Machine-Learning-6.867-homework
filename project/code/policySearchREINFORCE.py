@@ -1,4 +1,4 @@
-__author__ = 'manuelli'
+__author__ = 'peteflorence'
 import numpy as np
 from policySearch import PolicySearch
 
@@ -14,6 +14,21 @@ class PolicySearchREINFORCE(PolicySearch):
         self.numBins=numInnerBins + numOuterBins
         self.binCutoff=binCutoff
         self.initializeBinData()
+
+        self.initializePolicyParams()
+
+    def initializePolicyParams(self):
+        np.random.seed(4)
+        self.policyTheta = np.random.randn(self.numRays,1)
+
+    def computeControlPolicy(self, S):
+        raycastDistance = S[1]
+        print "raycastDistance shape", np.shape(raycastDistance)
+        u = np.dot(policyTheta.T, raycastDistance)
+        print "dot product is", u
+
+        return u
+
 
     def computeDummyControlPolicy(self, S, randomize=True, counter=None):
         actionIdx = 1                  # hardcoded to go straight, for debugging
@@ -35,74 +50,15 @@ class PolicySearchREINFORCE(PolicySearch):
 
     def policySearchUpdate(self, S_current, A_idx_current, R, S_next, A_idx_next):
         self.updated = True
-        
 
-    def initializeBinData(self):
-        self.binData = ()
+    def computeFeatureVector(self, S):
+        carState, raycastDistance = S
+        featureVec = np.zeros(self.numFeatures)
+        featureVec[0] = 1
+        featureVec[1:] = utils.inverseTruncate(raycastDistance, self.cutoff, rayLength=self.rayLength,
+                                               collisionThreshold=self.collisionThreshold)
 
-        innerBinRays = self.computeBinRayIdx(self.numInnerBins)
-        for idx in xrange(self.numInnerBins):
-            d = dict()
-            d['type'] = "inner"
-            d['idx'] = idx
-            d['rayIdx'] = innerBinRays[idx]
-            d['minRange'] = self.collisionThreshold
-            d['maxRange'] = self.collisionThreshold + (self.rayLength - self.collisionThreshold)*self.binCutoff
-            self.binData+=(d,)
-
-        outerBinRays = self.computeBinRayIdx(self.numOuterBins)
-        for idx in xrange(self.numOuterBins):
-            d = dict()
-            d['type'] = "outer"
-            d['idx'] = idx
-            d['rayIdx'] = innerBinRays[idx]
-            d['minRange'] = self.collisionThreshold + (self.rayLength - self.collisionThreshold)*self.binCutoff
-            d['maxRange'] = self.rayLength - self.tol
-            self.binData+=(d,)
-
-
-    def computeBinRayIdx(self, numBins):
-        if numBins==0:
-            return 0
-        binRays = ()
-        cutoffs = np.floor(np.linspace(0,self.numRays,numBins+1))
-        for idx in xrange(numBins):
-            rayLeftIdx = cutoffs[idx]
-            rayRightIdx = cutoffs[idx+1]-1
-            if idx==numBins-1:
-                rayRightIdx=self.numRays
-            binRays+=(np.arange(rayLeftIdx,rayRightIdx, dtype='int'),)
-
-        return binRays
-
-    def computeBinOccupied(self,raycastDistance, binNum):
-        occupied=0
-        minRange = self.binData[binNum]['minRange']
-        maxRange = self.binData[binNum]['maxRange']
-        rayIdx = self.binData[binNum]['rayIdx']
-        if (np.any(np.logical_and(raycastDistance[rayIdx] > minRange, raycastDistance[rayIdx] < maxRange) ) ):
-            occupied = 1
-
-        return occupied
-
-
-    def computeFeatureVector(self,S,A_idx=None):
-        raycastDistance = S[1]
-        featureTuple = ()
-        for idx in xrange(self.numBins):
-            featureTuple+= (self.computeBinOccupied(raycastDistance, idx),)
-
-
-        if A_idx is not None:
-            featureTuple += (A_idx,)
-
-        return featureTuple
-
-
-    def deleteKeysFromDict(self, d, keys):
-        for key in keys:
-            if key in d:
-                del d[key]
+        return featureVec
 
 
 
