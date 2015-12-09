@@ -368,9 +368,9 @@ class Simulator(object):
         if startIdx == self.counter:
             self.counter += 1
 
-        simpleReward = self.counter - startIdx
+        duration = self.counter - startIdx
 
-        return runData, discountedReward, initialCarState
+        return runData, discountedReward, initialCarState, duration
 
 
     def runBatchSimulation(self, endTime=None, dt=0.05):
@@ -415,6 +415,7 @@ class Simulator(object):
         storedReward = []
         storedImprovement = []
         storedTheta = []
+        storedDuration = []
 
         while ((self.counter - loopStartIdx < self.learningRandomTime/dt) and self.counter < self.numTimesteps):
             self.printStatusBar()
@@ -424,9 +425,10 @@ class Simulator(object):
                 print "new round"
                 print self.PolicySearchObj.leftPolicy
                 storedTheta.append(np.copy(self.PolicySearchObj.leftPolicy))
-                runData, prevReward, initialCarState = self.runSingleSimulation(updateQValues=True, controllerType='training',
+                runData, prevReward, initialCarState, duration = self.runSingleSimulation(updateQValues=True, controllerType='training',
                                                    simulationCutoff=simCutoff, maxSteps=None)
                 storedReward.append(np.copy(prevReward))
+                storedDuration.append(np.copy(duration))
                 
                 firstTime = False
 
@@ -434,7 +436,7 @@ class Simulator(object):
                 print "before perturb", self.PolicySearchObj.leftPolicy 
                 self.PolicySearchObj.perturbOneParam()
                 print  "after perturb", self.PolicySearchObj.leftPolicy
-                runData, reward, initialCarState = self.runSingleSimulation(updateQValues=True, controllerType='training',
+                runData, reward, initialCarState, duration = self.runSingleSimulation(updateQValues=True, controllerType='training',
                                                    simulationCutoff=simCutoff, initialCarState=initialCarState, maxSteps=None)
                 #storedReward.append(np.copy(reward))
                 #storedTheta.append(np.copy(self.PolicySearchObj.leftPolicy))
@@ -472,6 +474,10 @@ class Simulator(object):
         pickle.dump(storedTheta, savefile)
         savefile.close()
 
+        savefile = open('storedDuration.txt', 'w')
+        pickle.dump(storedDuration, savefile)
+        savefile.close()
+
 
 
         self.idxDict['learnedEval'] = self.counter
@@ -481,7 +487,7 @@ class Simulator(object):
 
             self.printStatusBar()
             startIdx = self.counter
-            runData, reward, initialCarState = self.runSingleSimulation(updateQValues=False, controllerType='learnedEval',
+            runData, reward, initialCarState, duration = self.runSingleSimulation(updateQValues=False, controllerType='learnedEval',
                                                simulationCutoff=simCutoff)
             runData['startIdx'] = startIdx
             runData['controllerType'] = "learnedEval"
@@ -499,7 +505,7 @@ class Simulator(object):
         while ((self.counter - loopStartIdx < self.defaultControllerTime/dt) and self.counter < self.numTimesteps-1):
             self.printStatusBar()
             startIdx = self.counter
-            runData, reward, initialCarState = self.runSingleSimulation(updateQValues=False, controllerType='default',
+            runData, reward, initialCarState, duration = self.runSingleSimulation(updateQValues=False, controllerType='default',
                                                simulationCutoff=simCutoff)
             runData['startIdx'] = startIdx
             runData['controllerType'] = "default"
