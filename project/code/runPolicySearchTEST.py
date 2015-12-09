@@ -27,7 +27,7 @@ options['Reward']['raycastCost'] = 40.0
 
 
 options['Car'] = dict()
-options['Car']['velocity'] = 20.0
+options['Car']['velocity'] = 16.0
 
 options['World'] = dict()
 options['World']['obstaclesInnerFraction'] = 0.85
@@ -43,9 +43,9 @@ options['dt'] = 0.05
 # setup the training time
 options['runTime'] = dict()
 options['runTime']['supervisedTrainingTime'] = 0
-options['runTime']['learningRandomTime'] = 50
-options['runTime']['learningEvalTime'] = 50
-options['runTime']['defaultControllerTime'] = 50
+options['runTime']['learningRandomTime'] = 5000
+options['runTime']['learningEvalTime'] = 10
+options['runTime']['defaultControllerTime'] = 10
 #
 # sim.supervisedTrainingTime = 0
 # sim.learningRandomTime = 5000

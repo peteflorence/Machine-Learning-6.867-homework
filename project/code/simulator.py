@@ -402,15 +402,19 @@ class Simulator(object):
         firstTime = True
 
         storedReward = []
+        storedTheta = []
 
         while ((self.counter - loopStartIdx < self.learningRandomTime/dt) and self.counter < self.numTimesteps):
             self.printStatusBar()
             startIdx = self.counter
             
             if firstTime == True:
+                storedTheta.append(self.PolicySearchObj.leftPolicy)
                 runData, prevReward = self.runSingleSimulation(updateQValues=True, controllerType='training',
                                                    simulationCutoff=simCutoff)
                 storedReward.append(prevReward)
+                
+
                 firstTime = False
 
             else:
@@ -418,6 +422,7 @@ class Simulator(object):
                 runData, reward = self.runSingleSimulation(updateQValues=True, controllerType='training',
                                                    simulationCutoff=simCutoff)
                 storedReward.append(reward)
+                storedTheta.append(self.PolicySearchObj.leftPolicy)
                 self.PolicySearchObj.updateParams(reward, prevReward)
                 prevReward = reward
 
@@ -429,6 +434,16 @@ class Simulator(object):
                 numRunsCounter+=1
                 self.simulationData.append(runData)
 
+        import pickle
+        savefile = open('storedReward.txt', 'w')
+        pickle.dump(storedReward, savefile)
+        savefile.close()
+
+        savefile = open('storedTheta.txt', 'w')
+        pickle.dump(storedTheta, savefile)
+        savefile.close()
+
+
 
         self.idxDict['learnedEval'] = self.counter
         loopStartIdx = self.counter
@@ -439,8 +454,6 @@ class Simulator(object):
             startIdx = self.counter
             runData, reward = self.runSingleSimulation(updateQValues=False, controllerType='learnedEval',
                                                simulationCutoff=simCutoff)
-            print "startIdx", startIdx
-            print "runData", runData
             runData['startIdx'] = startIdx
             runData['controllerType'] = "learnedEval"
             runData['duration'] = self.counter - runData['startIdx']
@@ -571,7 +584,6 @@ class Simulator(object):
     def run(self, launchApp=True):
         self.counter = 1
         self.runBatchSimulation()
-        # self.Sarsa.plotWeights()
 
         if launchApp:
             self.setupPlayback()
