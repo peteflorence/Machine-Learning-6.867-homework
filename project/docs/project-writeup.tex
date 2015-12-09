@@ -64,6 +64,9 @@
 \usepackage[section]{placeins}
 
 
+\usepackage{capt-of}
+
+
 \makeatletter
 \def\BState{\State\hskip-\ALG@thistlm}
 \makeatother
@@ -115,12 +118,17 @@ Our initial goal was to implement a value-based learning method, and we were rec
 
 In short, there were distinct advantages and concerns found for the different approaches.    The value-function-based approaches benefit greatly from their Dynamic Programming formulation, but it is also their limitation, particularly due to the difficulties of discretization.  The policy-search-based approaches have some nice properties including that they are easy to ``seed'' with a favorable initialization, and do not need to be discretized, but do not benefit from Bellman's optimality principle (even if it does not hold, given the non-Markov observable state).  In most cases, the ability of the reinforcement learning agents to improve their performance, even if not without ``hand-holding'' from us, is quite remarkable to watch.  That said, significant effort and tuning is required, and in the end, we were not able to satisfiably outperform intuitive hand-designed controllers.  The Dynamic Programming techniques had a ceiling of performance imposed by the discretization, and the policy search methods were not able to improve upon essentially-perfect hand-designed controllers.  Although this was the case for the study presented, it seems that in scenarios where intuition is less readily applied, and/or with more patient tuning of parameters, even better results may be obtained for the reinforcement learning controllers.
 
+\begin{center}
+  \includegraphics[scale=0.5]{figures/firstFig.png}
+  \captionof{figure}{Screen capture from simulation setup: a car in a circular obstacle field with an array of point LIDAR measurements.}
+  \label{fig:test}
+\end{center}
+
 \section{Experiment Setup and Simulation Environment}
 
 \subsection{Car Model}
 
 For our car model we consider a simplified Dubin's car model. The location of the vehicle is described by $(x,y,\theta)$, where $(x,y)$ denote Cartesian position and $\theta$ denotes the orientation. For our purposes we suppose that we can control the derivative of the orientation, namely our control is $u = \dot{\theta}$. We also suppose a fixed speed $v$. Then the dynamics of the vehicle are given by
-\todo{figure illustrating car + lidars}
 %
 %
 \begin{align}
@@ -137,30 +145,30 @@ For our sensor model we use a small array of point LIDARs. In particular, $N$ be
 
 \subsection{Obstacle Environment}
 Picking the right obstacle environment for our task required some trial-and-error.  Obstacles that were too thin along one direction were not a good choice, as they could hide in between the ``array of point LIDARs'' as the robot approached.  Thus circular obstacles were chosen, as they circumvented this problem.  Picking the right density of obstacles and obstacle size was another trial-and-error process.  A square border prevented the car from escaping.  A listing of approximate parameters for the obstacle environments used is provided in Table 1.  Generalizations across obstacle environments it outside the scope of this project.
-
+%
+\begin{center}
 \scalebox{0.7}{
-  \begin{tabular}{l|c|c|l|c|c|c|c|c}
-	\textbf{Car parameters}\\
+  \begin{tabular}{lccl}
+	\textbf{Car parameters}\\ \hline
 	Car velocity, $v$ & 16 m/s \\ 
 	Maximum turning rate, $u_{max}$ & 4 rad/s\\
 	\\
 	
-	\textbf{Sensor parameters}\\
+	\textbf{Sensor parameters}\\ \hline
 	Number of point LIDARS, N & 20 \\
 	Maximum laser range, $d_{max}$ & 10 m \\
 	Field of view $[\theta_{min},\theta_{max}]$ & $[-\pi, \pi]$ \\
 	\\
 	
-	\textbf{Obstacle environment parameters}\\
+	\textbf{Obstacle environment parameters}\\ \hline
 	Area of square world & 250 $m^2$ \\
 	Obstacle density & 0.18 / $m^2$ (45 obstacles in 250 $m^2$)\\
 	Circular obstacle radius & 1.75 m \\
 	
   \end{tabular}
 }
-\\ \\
-\textit{Table 1.}  Simulation parameters used for the experiments, unless otherwise noted.
-
+\captionof{table}{Simulation parameters used for the experiments, unless otherwise noted.}
+\end{center}
 
 \subsection{Simulation Environment}
 
@@ -326,7 +334,7 @@ There are many parameters that must be chosen in order to run the SARSA lambda a
 Two of the most important parameters are the number of bins $N_{inner}, N_{outer}$ in the discretization. You need enough bins that so that the state is informative enough to pass through relatively narrow gaps between obstacles. However adding more bins comes at the cost of increasing the size of the state space which can increase training time. In addition if a particular action-state pair is not visited sufficiently many times then that Q-value $Q(s,a)$ will not be a good approximation to the true Q-value, and hence control decisions taken based on that Q-value will not be optimal (and in fact will be quite poor usually). Through many experiments we found that $N_{inner} = 5, N_{outer} = 4$ provided good performance while keeping the size of the discretized state-action space relatively small at $2^9 * 3 = 1536$. Another set of parameters that had a large impact on performance were those of the cost function. It turned out to be important to balance the reward for staying away from obstacles with the penalty for using large control action, $C_{action}$. If $C_{action}$ was too small the controller could end up learning to spin in circles, see Section \ref{failure_modes} for more discussion of this problem. Alternatively if $C_{action}$ was too high the behavior would bias too much towards driving straight and wouldn't do enough to avoid obstacles. Another important parameter was the step size $\alpha$ in the SARSA update. It needs to be small enough so that the Q-Value estimates don't diverge. However, if it is too small then the Q-values are updated only a small amount in each iteration and convergence would take a long time. For the discrete state-action case we found that $\alpha = 0.2$ worked well, although it is difficult to evaluate what the ``correct'' step size is. See Table 2 for our preferred set of default parameters.
 
 %
-\centering{
+\begin{center}
 \scalebox{1}{
 
 \begin{tabular}{|c|c|}
@@ -345,13 +353,11 @@ $C_0$ & $0.3$ \\ \hline
 $C_{raycast}$ & $40$ \\ \hline
 \end{tabular}
 }
-\\
-\textit{Table 2.}  Default parameter values for SARSA($\lambda$).}
 %
 %
+\captionof{table}{Default parameter values for SARSA($\lambda$).}
+\end{center}
 
-
-\normaljustify
 
 
 First we provide a qualitative discussion of the results of the Q-Learning using parameters from Table 2. We initialize all of the Q-values to zero and run the SARSA algorithm for 8000 seconds. Since our simulation timestep is $dt = 0.05$ this amounts to $8000/dt = 160,000$ iterations of the SARSA update. Our simulation runs at approximately $700$ Hz. Since it takes $20$ ticks of the simulator to complete one second this amounts to a simulation of 35$\times$ normal speed. Thus this training takes approximately $3.8$ minutes. The controller that we get out of this performs reasonably well. Specifically it manages to drive around the obstacle field shown in Figure \ref{figures/director.png}
