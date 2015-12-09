@@ -24,7 +24,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{todonotes}
-\usepackage[nomarkers]{endfloat}
+\usepackage[nomarkers, nolists]{endfloat}
 \renewcommand{\efloatseparator}{\mbox{}}
 
 % As of 2011, we use the hyperref package to produce hyperlinks in the
@@ -220,7 +220,19 @@ R(S,a) = C_{action} |a| + \langle W, \phi(X) \rangle
 %
 where $C_{action}$ is an action cost. Finally if the car is currently in collision with an obstacle, i.e. some laser $x_n$ is reading less than $d_{min}$ then we set $R(S,a) = C_{collision}$.
 
-Now let us think about why this may be a reasonable reward function for our objective, which is obstacle avoidance. One should think of $r_0,r_1, C_{action}, C_{collision} < 0$ and $C_{max} > 0$. Then we see that the components of $\phi(X)$ increase as we get close to obstacles. And they increase as the inverse of the distance to the obstacle. Thus this is penalizing getting too close to obstacles. Now consider the weights $W$. They have the following form \todo{include picture}. This means that it's worse to have obstacles in front of you than off to the side. The action cost is to encourage the car to drive straight rather than spin around in circles. Finally since we are interested in obstacle avoidance we impose a large penalty if the car does crash into an obstacle.
+Now let us think about why this may be a reasonable reward function for our objective, which is obstacle avoidance. One should think of $r_0,r_1, C_{action}, C_{collision} < 0$ and $C_{max} > 0$. Then we see that the components of $\phi(X)$ increase as we get close to obstacles. And they increase as the inverse of the distance to the obstacle. Thus this is penalizing getting too close to obstacles. Now consider the weights $W$ show in Figure \ref{figures/raycastRewardWeights.png}
+%
+%
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{figures/raycastRewardWeights.png}
+\caption{$\lambda = 0.7$}
+\label{figures/raycastRewardWeights.png}
+\end{figure}
+%
+%
+%
+ This means that it's worse to have obstacles in front of you than off to the side. The action cost is to encourage the car to drive straight rather than spin around in circles. Finally since we are interested in obstacle avoidance we impose a large penalty if the car does crash into an obstacle.
 
 The reason we have $\phi(X)$ and the weights $W$ is reward shaping. In reality all we care about is not crashing into obstacles, but it helps the algorithms to converge if the rewards ``guide'' them towards staying away from obstacles, e.g. if the reward is higher the further you are from the obstacles. 
 
