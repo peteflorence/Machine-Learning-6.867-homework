@@ -15,8 +15,8 @@ class Reward(object):
         self.rayLength = sensorObj.rayLength
         self.sensorObj = sensorObj
         self.collisionThreshold = collisionThreshold
-        self.collisionPenalty = collisionPenalty
-        self.actionCost = actionCost*0.1
+        self.collisionPenalty = collisionPenalty*10
+        self.actionCost = actionCost*1
         self.raycastCost = raycastCost
         self.initializeRaycastRewardWeights()
         self.largeConstant = 1e5*1.0
@@ -38,8 +38,8 @@ class Reward(object):
         if self.checkInCollision(raycastDistance):
             return -self.collisionPenalty
 
-        reward = -self.actionCost*np.linalg.norm(u)
-        reward += self.computeRaycastReward(S, u)
+        #reward = -self.actionCost*np.linalg.norm(u)
+        reward = self.computeRaycastReward(S, u)
         return reward
 
     def computeRaycastReward(self, S, u):

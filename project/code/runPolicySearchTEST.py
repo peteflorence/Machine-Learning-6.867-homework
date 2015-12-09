@@ -43,9 +43,9 @@ options['dt'] = 0.05
 # setup the training time
 options['runTime'] = dict()
 options['runTime']['supervisedTrainingTime'] = 0
-options['runTime']['learningRandomTime'] = 15000
-options['runTime']['learningEvalTime'] = 100
-options['runTime']['defaultControllerTime'] = 100
+options['runTime']['learningRandomTime'] = 500
+options['runTime']['learningEvalTime'] = 10
+options['runTime']['defaultControllerTime'] = 10
 #
 # sim.supervisedTrainingTime = 0
 # sim.learningRandomTime = 5000

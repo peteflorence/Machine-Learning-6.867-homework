@@ -413,6 +413,7 @@ class Simulator(object):
         firstTime = True
 
         storedReward = []
+        storedImprovement = []
         storedTheta = []
 
         while ((self.counter - loopStartIdx < self.learningRandomTime/dt) and self.counter < self.numTimesteps):
@@ -420,22 +421,28 @@ class Simulator(object):
             startIdx = self.counter
             
             if firstTime == True:
+                print "new round"
+                print self.PolicySearchObj.leftPolicy
                 storedTheta.append(np.copy(self.PolicySearchObj.leftPolicy))
                 runData, prevReward, initialCarState = self.runSingleSimulation(updateQValues=True, controllerType='training',
                                                    simulationCutoff=simCutoff, maxSteps=None)
-                #storedReward.append(np.copy(prevReward))
+                storedReward.append(np.copy(prevReward))
                 
                 firstTime = False
 
             else:
+                print "before perturb", self.PolicySearchObj.leftPolicy 
                 self.PolicySearchObj.perturbOneParam()
+                print  "after perturb", self.PolicySearchObj.leftPolicy
                 runData, reward, initialCarState = self.runSingleSimulation(updateQValues=True, controllerType='training',
                                                    simulationCutoff=simCutoff, initialCarState=initialCarState, maxSteps=None)
-                storedReward.append(np.copy(reward))
-                storedTheta.append(np.copy(self.PolicySearchObj.leftPolicy))
+                #storedReward.append(np.copy(reward))
+                #storedTheta.append(np.copy(self.PolicySearchObj.leftPolicy))
                 
                 
+                print "before update", self.PolicySearchObj.leftPolicy
                 self.PolicySearchObj.updateParams(reward, prevReward)
+                print "after update", self.PolicySearchObj.leftPolicy
                 prevReward = reward
                 firstTime = True
                 initialCarState = None
