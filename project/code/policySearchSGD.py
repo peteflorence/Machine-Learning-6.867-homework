@@ -15,14 +15,14 @@ class PolicySearchSGD(PolicySearch):
         self.binCutoff=binCutoff
         #self.initializeZeroedParams()
         #self.initializeRandomPolicyParams()
-        self.initializeOkayParams()
-        #self.initializeDesignedParams() # these are very good parameters
+        #self.initializeOkayParams()
+        self.initializeDesignedParams() # these are very good parameters
 
         self.mean = np.zeros((1,10))[0]
         self.epsilon = 1
         self.cov =  np.identity(10)*self.epsilon # diagonal covariance
 
-        self.eta = 1e-1
+        self.eta = 1e-2
 
     def initializeZeroedParams(self, random=False):
         self.leftPolicy = np.zeros((self.numRays/2,1))

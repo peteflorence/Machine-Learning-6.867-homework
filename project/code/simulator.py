@@ -425,7 +425,7 @@ class Simulator(object):
                 print self.PolicySearchObj.leftPolicy
                 storedTheta.append(np.copy(self.PolicySearchObj.leftPolicy))
                 runData, prevReward, initialCarState = self.runSingleSimulation(updateQValues=True, controllerType='training',
-                                                   simulationCutoff=simCutoff, maxSteps=None)
+                                                   simulationCutoff=simCutoff, maxSteps=200)
                 storedReward.append(np.copy(prevReward))
                 
                 firstTime = False
@@ -435,7 +435,7 @@ class Simulator(object):
                 self.PolicySearchObj.perturbOneParam()
                 print  "after perturb", self.PolicySearchObj.leftPolicy
                 runData, reward, initialCarState = self.runSingleSimulation(updateQValues=True, controllerType='training',
-                                                   simulationCutoff=simCutoff, initialCarState=initialCarState, maxSteps=None)
+                                                   simulationCutoff=simCutoff, initialCarState=initialCarState, maxSteps=200)
                 #storedReward.append(np.copy(reward))
                 #storedTheta.append(np.copy(self.PolicySearchObj.leftPolicy))
                 
