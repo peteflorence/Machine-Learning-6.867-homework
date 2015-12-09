@@ -458,6 +458,8 @@ Three scenarios for the performance of policy search are discussed: (i) starting
 
 For starting with $\theta_0 = \mathbf{0}$, a significant improvement in controller performance was able to be learned with a surprisingly small amount of training time.  To be clear, $\theta$ as a zero vector corresponds to ignoring all sensor measurements are going perfectly straight forward at every time step.  This is clearly not optimal controller performance.  
 
+A surprisingly \label{figures/policySearch_zeroVector_duration.png}
+
 \subsection{Beta distribution}
 
 
@@ -520,6 +522,29 @@ For starting with $\theta_0 = \mathbf{0}$, a significant improvement in controll
 \includegraphics[scale=0.5]{figures/qlearningMultiple.png}
 \caption{$\lambda = 0.7$}
 \label{figures/qlearningMultiple.png}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{figures/policySearch_zeroVector_duration.png}
+\caption{Roll-out duration vs. roll-out trial number, for Episodic REINFORCE}
+\label{figures/policySearch_zeroVector_duration.png}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{figures/policySearch_zeroVector_discR.png}
+\caption{Discounted reward vs. roll-out trial number, for Episodic REINFORCE}
+\label{figures/policySearch_zeroVector_discR.png}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{figures/policySearch_zeroVector_weights.png}
+\caption{Initial (zero-vector) and final weights, from Episodic REINFORCE after ~100 trials}
+\label{figures/policySearch_zeroVector_weights.png}
 \end{figure}
 
 
