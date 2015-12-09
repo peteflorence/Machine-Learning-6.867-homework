@@ -4,7 +4,7 @@ from sarsa import SARSA
 
 class SARSADiscrete(SARSA):
 
-    def __init__(self, numInnerBins=4, numOuterBins=4, binCutoff=0.5, alphaStepSize=0.2,
+    def __init__(self, numInnerBins=4, numOuterBins=4, binCutoff=0.5, alphaStepSize=0.2, forceDriveStraight=False,
                  useQLearningUpdate= False, **kwargs):
 
         SARSA.__init__(self, alphaStepSize=0.2, **kwargs)
@@ -14,6 +14,7 @@ class SARSADiscrete(SARSA):
         self.numBins=numInnerBins + numOuterBins
         self.binCutoff=binCutoff
         self.useQLearningUpdate = useQLearningUpdate
+        self.forceDriveStraight = forceDriveStraight
         self.initializeQValues()
         self.initializeBinData()
         self.resetElibilityTraces()
@@ -109,6 +110,14 @@ class SARSADiscrete(SARSA):
         QVec = self.computeQValueVector(S)
         actionIdx = np.argmax(QVec)
 
+        raycastDistance = S[1]
+        if self.forceDriveStraight:
+            if np.min(raycastDistance) > self.sensor.rayLength - 1e-3:
+                u = 0
+                actionIdx = np.where(self.actionSet==u)[0][0]
+                emptyQValue = False
+                return u, actionIdx, emptyQValue
+
         if QVec[actionIdx] == 0.0:
             emptyQValue=True
         else:
@@ -149,13 +158,23 @@ class SARSADiscrete(SARSA):
         delta = R + self.gamma*self.QValues[featureVecNext] - self.QValues[featureVecCurrent]
         self.eligibilityTrace[featureVecCurrent] = 1.0
 
+        QVecNext = self.computeQValueVector(S_next)
+        maxIdx = np.where(QVecNext == np.max(QVecNext))[0]
+
+
+
+
         # now we perform the update, only need to do it for those that have non-zero eliglibility trace
         # which is exactly those that appear in self.eligibilityTrace
         keysToRemove = []
         for key, eVal in self.eligibilityTrace.iteritems():
 
             self.QValues[key] = self.QValues[key] + self.alphaStepSize*delta*eVal
-            self.eligibilityTrace[key] = self.gamma*self.lam*eVal
+
+            if (A_idx_next in maxIdx):
+                self.eligibilityTrace[key] = self.gamma*self.lam*eVal
+            else:
+                self.eligibilityTrace[key] = 0
 
             # remove it from dict, i.e. set it to zero, if it gets too small
             if eVal < self.eligibilityTraceThreshold:

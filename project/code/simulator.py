@@ -5,6 +5,8 @@ from ddapp.debugVis import DebugData
 from ddapp.consoleapp import ConsoleApp
 from ddapp.timercallback import TimerCallback
 from ddapp import applogic
+from ddapp import screengrabberpanel
+
 from ddapp import transformUtils
 import numpy as np
 import time
@@ -129,6 +131,7 @@ class Simulator(object):
         defaultOptions['SARSA']['numInnerBins'] = 5
         defaultOptions['SARSA']['numOuterBins'] = 4
         defaultOptions['SARSA']['binCutoff'] = 0.5
+        defaultOptions['SARSA']['forceDriveStraight'] = True
 
 
         defaultOptions['World'] = dict()
@@ -240,7 +243,8 @@ class Simulator(object):
                                        binCutoff=self.options['SARSA']['binCutoff'],
                                        burnInTime = self.options['SARSA']['burnInTime'],
                                        epsilonGreedy=self.options['SARSA']['epsilonGreedy'],
-                                       epsilonGreedyExponent=self.options['SARSA']['epsilonGreedyExponent'])
+                                       epsilonGreedyExponent=self.options['SARSA']['epsilonGreedyExponent'],
+                                       forceDriveStraight=self.options['SARSA']['forceDriveStraight'])
         elif type=="continuous":
             self.Sarsa = SARSAContinuous(sensorObj=self.Sensor, actionSet=self.Controller.actionSet,
                                          lam=self.options['SARSA']['lam'],
@@ -421,6 +425,9 @@ class Simulator(object):
             self.counter += 1
 
         return runData
+
+    def setNumpyRandomSeed(self, seed=1):
+        np.random.seed(seed)
 
 
     def runBatchSimulation(self, endTime=None, dt=0.05):
@@ -618,6 +625,8 @@ class Simulator(object):
         applogic.resetCamera(viewDirection=[0.2,0,-1])
         self.view.showMaximized()
         self.view.raise_()
+        panel = screengrabberpanel.ScreenGrabberPanel(self.view)
+        panel.widget.show()
 
         elapsed = time.time() - self.startSimTime
         simRate = self.counter/elapsed
@@ -773,10 +782,13 @@ class Simulator(object):
             idxMap[controllerType][idx] = True
 
 
-    def plotRunData(self, controllerTypeToPlot=None, showPlot=True):
+    def plotRunData(self, controllerTypeToPlot=None, showPlot=True, onlyLearned=False):
 
         if controllerTypeToPlot==None:
             controllerTypeToPlot = self.colorMap.keys()
+
+        if onlyLearned:
+            controllerTypeToPlot = ['learnedRandom', 'learned']
 
         numRuns = len(self.simulationData)
         runStart = np.zeros(numRuns)
