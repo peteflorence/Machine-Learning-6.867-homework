@@ -5,6 +5,8 @@ from ddapp.debugVis import DebugData
 from ddapp.consoleapp import ConsoleApp
 from ddapp.timercallback import TimerCallback
 from ddapp import applogic
+from ddapp import screengrabberpanel
+
 from ddapp import transformUtils
 import numpy as np
 import time
@@ -618,6 +620,8 @@ class Simulator(object):
         applogic.resetCamera(viewDirection=[0.2,0,-1])
         self.view.showMaximized()
         self.view.raise_()
+        panel = screengrabberpanel.ScreenGrabberPanel(self.view)
+        panel.widget.show()
 
         elapsed = time.time() - self.startSimTime
         simRate = self.counter/elapsed
