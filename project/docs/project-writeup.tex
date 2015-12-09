@@ -23,9 +23,11 @@
 \usepackage{algorithmic}
 \usepackage{amsmath}
 \usepackage{amssymb}
+
 \usepackage{todonotes}
 \usepackage[nomarkers, nolists]{endfloat}
 \renewcommand{\efloatseparator}{\mbox{}}
+%\usepackage{float}
 
 % As of 2011, we use the hyperref package to produce hyperlinks in the
 % resulting PDF.  If this breaks your system, please commend out the
@@ -52,6 +54,14 @@
 \usepackage{bbm}
 \usepackage{amsmath}
 \usepackage{amsfonts}
+
+\makeatletter
+\def\normaljustify{%
+  \let\\\@centercr\rightskip\z@skip \leftskip\z@skip%
+  \parfillskip=0pt plus 1fil}
+\makeatother
+
+\usepackage[section]{placeins}
 
 
 \makeatletter
@@ -126,7 +136,7 @@ For our car model we consider a simplified Dubin's car model. The location of th
 For our sensor model we use a small array of point LIDARs. In particular, $N$ beams are spread evenly over the field of view $[\theta_{min},\theta_{max}]$.  All experiments shown use $N=20$ and $[\theta_{min}=-\pi,\theta_{max}=\pi]$.   Each laser has a maximum range of $d_{max}$. The $n^{th}$ laser then returns $x_n$, which is the distance to the first obstacle it encounters, or $d_{max}$ if no obstacle is detected. Then one laser measurement can be summarized as $X = (x_1,\ldots,x_N)$.
 
 \subsection{Obstacle Environment}
-Picking the right obstacle environment for our task required some trial-and-error.  Obstacles that were too thin along one direction were not a good choice, as they could hide in between the ``array of point LIDARs'' as the robot approached.  Thus circular obstacles were chosen, as they circumvented this problem.  Picking the right density of obstacles and obstacle size was another trial-and-error process.  A square border prevented the car from escaping.  A listing of approximate parameters for the obstacle environments used is provided below.  Generalizations across obstacle environments it outside the scope of this project.
+Picking the right obstacle environment for our task required some trial-and-error.  Obstacles that were too thin along one direction were not a good choice, as they could hide in between the ``array of point LIDARs'' as the robot approached.  Thus circular obstacles were chosen, as they circumvented this problem.  Picking the right density of obstacles and obstacle size was another trial-and-error process.  A square border prevented the car from escaping.  A listing of approximate parameters for the obstacle environments used is provided in Table 1.  Generalizations across obstacle environments it outside the scope of this project.
 
 \scalebox{0.7}{
   \begin{tabular}{l|c|c|l|c|c|c|c|c}
@@ -148,10 +158,15 @@ Picking the right obstacle environment for our task required some trial-and-erro
 	
   \end{tabular}
 }
+\\ \\
+\textit{Table 1.}  Simulation parameters used for the experiments, unless otherwise noted.
+
 
 \subsection{Simulation Environment}
 
 Our software stack is integrated with a robotics visualization tool called Director \cite{director}. We use the Director code for visualization and raycasting. This is the only external code that we use in addition to standard Python modules. Our simulation environment is written in Python. We have a main class called \code{Simulator} which combines together several other modules, e.g. \code{Car}, \code{Sensor}, \code{World}, \code{Controller}, \code{Reward}, \code{Sarsa}, etc, to construct a working simulation class. All of this code was written by us for the project. As mentioned before, the only fundamental pieces of code that we didn't write were the visualization tools and the raycasting method which we use for computing our sensor model. One nice feature of the Director application is that it uses Visualization Toolkit as the underlying graphics engine, and thus our raycast calls are actually in C++ and thus very efficient. We use a timestep of $dt = 0.05$ in all our experiments, and \code{spicy.integrate} is used to for integrating forward the dynamics.
+
+All of the code for this project is open-source and may be found at \url{github.com/peteflorence/Machine-Learning-6.867-homework}.
 
 \subsection{Braitenberg (Hand-Designed) Controller}
 \label{default_controller}
@@ -310,8 +325,10 @@ There are many parameters that must be chosen in order to run the SARSA lambda a
 
 Two of the most important parameters are the number of bins $N_{inner}, N_{outer}$ in the discretization. You need enough bins that so that the state is informative enough to pass through relatively narrow gaps between obstacles. However adding more bins comes at the cost of increasing the size of the state space which can increase training time. In addition if a particular action-state pair is not visited sufficiently many times then that Q-value $Q(s,a)$ will not be a good approximation to the true Q-value, and hence control decisions taken based on that Q-value will not be optimal (and in fact will be quite poor usually). Through many experiments we found that $N_{inner} = 5, N_{outer} = 4$ provided good performance while keeping the size of the discretized state-action space relatively small at $2^9 * 3 = 1536$. Another set of parameters that had a large impact on performance were those of the cost function. It turned out to be important to balance the reward for staying away from obstacles with the penalty for using large control action, $C_{action}$. If $C_{action}$ was too small the controller could end up learning to spin in circles, see Section \ref{failure_modes} for more discussion of this problem. Alternatively if $C_{action}$ was too high the behavior would bias too much towards driving straight and wouldn't do enough to avoid obstacles. Another important parameter was the step size $\alpha$ in the SARSA update. It needs to be small enough so that the Q-Value estimates don't diverge. However, if it is too small then the Q-values are updated only a small amount in each iteration and convergence would take a long time. For the discrete state-action case we found that $\alpha = 0.2$ worked well, although it is difficult to evaluate what the ``correct'' step size is. See Table
 
-\begin{table}
-\centering
+%
+\centering{
+\scalebox{1}{
+
 \begin{tabular}{|c|c|}
 \hline
 Parameter & Value  \\ \hline
@@ -326,17 +343,15 @@ $C_{max}$ & $20$ \\ \hline
 $C_{collision}$ & $100$ \\ \hline
 $C_0$ & $0.3$ \\ \hline
 $C_{raycast}$ & $40$ \\ \hline
-
 \end{tabular}
-\caption{Default Parameter Values}
-\label{table:defaultParameters}
-\end{table}
+}
+\\
+\textit{Table 1.}  Default parameter values for SARSA($\lambda$).}
 %
 %
 
 
-
-
+\normaljustify
 for our preferred set of default parameters.
 
 First we provide a qualitative discussion of the results of the Q-Learning using parameters from Table \ref{table:defaultParameters}. We initialize all of the Q-values to zero and run the SARSA algorithm for 8000 seconds. Since our simulation timestep is $dt = 0.05$ this amounts to $8000/dt = 160,000$ iterations of the SARSA update. Our simulation runs at approximately $700$ Hz. Since it takes $20$ ticks of the simulator to complete one second this amounts to a simulation of 35$\times$ normal speed. Thus this training takes approximately $3.8$ minutes. The controller that we get out of this performs reasonably well. Specifically it manages to drive around the obstacle field shown in Figure \ref{figures/director.png}
