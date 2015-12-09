@@ -16,7 +16,7 @@ class Reward(object):
         self.sensorObj = sensorObj
         self.collisionThreshold = collisionThreshold
         self.collisionPenalty = collisionPenalty
-        self.actionCost = actionCost
+        self.actionCost = actionCost*0.1
         self.raycastCost = raycastCost
         self.initializeRaycastRewardWeights()
         self.largeConstant = 1e5*1.0
@@ -44,13 +44,11 @@ class Reward(object):
 
     def computeRaycastReward(self, S, u):
         carState, raycastDistance = S
-        # raycastAdjusted = raycastDistance - self.collisionThreshold
-        # maxRangeIdx = np.where(raycastDistance > self.rayLength - self.tol)
-        # raycastAdjusted[maxRangeIdx] = self.largeConstant
-        #
-        # raycastAdjusted = self.setMaxRangeToLargeConstant()
-
-
+        raycastAdjusted = raycastDistance - self.collisionThreshold
+        maxRangeIdx = np.where(raycastDistance > self.rayLength - self.tol)
+        raycastAdjusted[maxRangeIdx] = self.largeConstant
+        
+        #raycastAdjusted = self.setMaxRangeToLargeConstant()
         inverseTruncated = utils.inverseTruncate(raycastDistance, self.cutoff, rayLength=self.rayLength,
                                                  collisionThreshold=self.collisionThreshold)
         return np.dot(self.raycastRewardWeights, inverseTruncated)

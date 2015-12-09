@@ -263,7 +263,7 @@ class Simulator(object):
                                    epsilonGreedyExponent=self.options['SARSA']['epsilonGreedyExponent'])
 
 
-    def runSingleSimulation(self, updateQValues=True, controllerType='default', simulationCutoff=None, initialCarState=None):
+    def runSingleSimulation(self, updateQValues=True, controllerType='default', simulationCutoff=None, initialCarState=None, maxSteps=None):
 
         if initialCarState is None:
             self.setCollisionFreeInitialState()
@@ -284,6 +284,7 @@ class Simulator(object):
         avgReward = 0
         totalReward = 0
         startIdx = self.counter
+
 
 
         while (self.counter < self.numTimesteps - 1):
@@ -345,6 +346,10 @@ class Simulator(object):
             if self.counter >= simulationCutoff:
                 break
 
+            if maxSteps is not None:
+                if (self.counter - startIdx) > maxSteps: 
+                    break
+
 
         # fill in the last state by hand
         self.stateOverTime[self.counter,:] = currentCarState
@@ -365,7 +370,7 @@ class Simulator(object):
 
         simpleReward = self.counter - startIdx
 
-        return runData, simpleReward, initialCarState
+        return runData, discountedReward, initialCarState
 
 
     def runBatchSimulation(self, endTime=None, dt=0.05):
@@ -417,25 +422,31 @@ class Simulator(object):
             if firstTime == True:
                 storedTheta.append(np.copy(self.PolicySearchObj.leftPolicy))
                 runData, prevReward, initialCarState = self.runSingleSimulation(updateQValues=True, controllerType='training',
-                                                   simulationCutoff=simCutoff)
-                storedReward.append(np.copy(prevReward))
+                                                   simulationCutoff=simCutoff, maxSteps=None)
+                #storedReward.append(np.copy(prevReward))
                 
                 firstTime = False
 
             else:
                 self.PolicySearchObj.perturbOneParam()
                 runData, reward, initialCarState = self.runSingleSimulation(updateQValues=True, controllerType='training',
-                                                   simulationCutoff=simCutoff, initialCarState=initialCarState)
+                                                   simulationCutoff=simCutoff, initialCarState=initialCarState, maxSteps=None)
                 storedReward.append(np.copy(reward))
                 storedTheta.append(np.copy(self.PolicySearchObj.leftPolicy))
                 
-                if reward > prevReward:
-                    self.PolicySearchObj.updateParams(reward, prevReward)
-                    prevReward = reward
-                else: 
-                    self.PolicySearchObj.revertParams()
-                    #initialCarState = None
-                    #firstTime = True
+                
+                self.PolicySearchObj.updateParams(reward, prevReward)
+                prevReward = reward
+                firstTime = True
+                initialCarState = None
+                
+                # if reward > prevReward:
+                #     self.PolicySearchObj.updateParams(reward, prevReward)
+                #     prevReward = reward
+                # else: 
+                #     self.PolicySearchObj.revertParams()
+                #     #initialCarState = None
+                #     #firstTime = True
 
             runData['startIdx'] = startIdx
             runData['controllerType'] = "training"
