@@ -128,7 +128,7 @@ In short, there were distinct advantages and concerns found for the different ap
 
 \subsection{Car Model}
 
-For our car model we consider a simplified Dubin's car model. The location of the vehicle is described by $(x,y,\theta)$, where $(x,y)$ denote Cartesian position and $\theta$ denotes the orientation. For our purposes we suppose that we can control the derivative of the orientation, namely our control is $u = \dot{\theta}$. We also suppose a fixed speed $v$. Then the dynamics of the vehicle are given by
+For our car model we consider a simplified Dubin's car model. The location of the vehicle is described by $(x,y,\theta)$, where $(x,y)$ denote Cartesian position and $\theta$ denotes the orientation. For our purposes we suppose that we can control the derivative of the orientation, namely our control is $u = \dot{\theta}$. We also suppose a fixed speed $v$. Then the dynamics of the vehicle are given by:
 %
 %
 \begin{align}
@@ -243,7 +243,7 @@ R(S,a) = C_{action} |a| + \frac{C_{raycast}}{\sum_n w_n} \langle W, \phi(X) \ran
 %
 where $C_{action}$ is an action cost. Finally if the car is currently in collision with an obstacle, i.e. some laser $x_n$ is reading less than $d_{min}$ then we set $R(S,a) = C_{collision}$.
 
-Now let us think about why this may be a reasonable reward function for our objective, which is obstacle avoidance. One should think of $r_0,r_1, C_{action}, C_{collision} < 0$ and $C_{max} > 0$. Then we see that the components of $\phi(X)$ increase as we get close to obstacles. And they increase as the inverse of the distance to the obstacle. Thus this is penalizing getting too close to obstacles. Now consider the weights $W$ show in Figure \ref{figures/raycastRewardWeights.png}
+Now let us think about why this may be a reasonable reward function for our objective, which is obstacle avoidance. One should think of $r_0,r_1, C_{action}, C_{collision} < 0$ and $C_{max} > 0$. Then we see that the components of $\phi(X)$ increase as we get close to obstacles. And they increase as the inverse of the distance to the obstacle. Thus this is penalizing getting too close to obstacles. Now consider the weights $W$ show in Figure \ref{figures/raycastRewardWeights.png}.
 %
 %
 \begin{figure}
