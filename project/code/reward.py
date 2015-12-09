@@ -39,7 +39,7 @@ class Reward(object):
             return -self.collisionPenalty
 
         reward = -self.actionCost*np.linalg.norm(u)
-        reward = self.computeRaycastReward(S, u)
+        reward += self.computeRaycastReward(S, u)
         return reward
 
     def computeRaycastReward(self, S, u):

@@ -22,7 +22,7 @@ class PolicySearchSGD(PolicySearch):
         self.epsilon = 1
         self.cov =  np.identity(10)*self.epsilon # diagonal covariance
 
-        self.eta = 1
+        self.eta = 1e-1
 
     def initializeZeroedParams(self, random=False):
         self.leftPolicy = np.zeros((self.numRays/2,1))
