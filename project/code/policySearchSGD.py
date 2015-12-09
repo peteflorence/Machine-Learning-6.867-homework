@@ -14,28 +14,37 @@ class PolicySearchSGD(PolicySearch):
         self.numBins=numInnerBins + numOuterBins
         self.binCutoff=binCutoff
         #self.initializeZeroedParams()
-        self.initializePolicyParams() #this doesn't crash
+        #self.initializeRandomPolicyParams()
+        self.initializeDesignedParams() #this doesn't crash
 
         self.mean = np.zeros((1,20))[0]
         self.epsilon = 1e-3
         self.cov =  np.identity(20)*self.epsilon # diagonal covariance
 
+        self.eta = 1e-2
+
     def initializeZeroedParams(self, random=False):
         self.policyTheta = np.zeros((self.numRays,1))
         self.policyTheta_0 = 0
 
-    def initializePolicyParams(self, random=False):
-        if random==True:
-            np.random.seed(4)
-            self.policyTheta = np.random.randn(self.numRays,1)
-        else:
-            self.policyTheta = np.zeros((self.numRays,1))
-            self.policyTheta[:len(self.policyTheta)/2] = -1.0 * 100
-            self.policyTheta[len(self.policyTheta)/2:] = 1.0 * 100
-            self.policyTheta[0:4] = 0.0
-            self.policyTheta[-4:] = 0.0
-            self.policyTheta_0 = 0
+    def initializeRandomParams(self):
+        np.random.seed(4)
+        self.policyTheta = np.random.randn(self.numRays,1)
 
+    def initializeDesignedParams(self):
+        self.policyTheta = np.zeros((self.numRays,1))
+        self.policyTheta[:len(self.policyTheta)/2] = -1.0 * 100
+        self.policyTheta[len(self.policyTheta)/2:] = 1.0 * 100
+        self.policyTheta[0:4] = 0.0
+        self.policyTheta[-4:] = 0.0
+        self.policyTheta_0 = 0
+
+    def perturbParams(self):
+        self.w = self.sampleGaussianW()
+        self.policyTheta += self.w 
+
+    def updateParams(self, reward, prevReward):
+        self.policyTheta = self.policyTheta -  self.eta * (reward - prevReward) * self.w
 
     def sampleGaussianW(self):
         w = np.random.multivariate_normal(self.mean, self.cov).T
@@ -54,7 +63,6 @@ class PolicySearchSGD(PolicySearch):
         a = np.dot(self.policyTheta.T, feature) + self.policyTheta_0
         u = (sigmoid(a) - 0.5)*8
         return u, 0
-
 
     def computeDummyControlPolicy(self, S, randomize=True, counter=None):
         actionIdx = 1                  # hardcoded to go straight, for debugging

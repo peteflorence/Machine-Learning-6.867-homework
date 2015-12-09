@@ -414,15 +414,11 @@ class Simulator(object):
                 firstTime = False
 
             else:
-                w = self.PolicySearchObj.sampleGaussianW()
-
-                self.PolicySearchObj.policyTheta += w 
+                self.PolicySearchObj.perturbParams()
                 runData, reward = self.runSingleSimulation(updateQValues=True, controllerType='training',
                                                    simulationCutoff=simCutoff)
                 storedReward.append(reward)
-
-                eta = 1e-2
-                self.PolicySearchObj.policyTheta = self.PolicySearchObj.policyTheta -  eta * (reward - prevReward) * w
+                self.PolicySearchObj.updateParams(reward, prevReward)
                 prevReward = reward
 
                 runData['startIdx'] = startIdx
