@@ -43,9 +43,9 @@ options['dt'] = 0.05
 # setup the training time
 options['runTime'] = dict()
 options['runTime']['supervisedTrainingTime'] = 0
-options['runTime']['learningRandomTime'] = 5000
-options['runTime']['learningEvalTime'] = 0
-options['runTime']['defaultControllerTime'] = 0
+options['runTime']['learningRandomTime'] = 50
+options['runTime']['learningEvalTime'] = 50
+options['runTime']['defaultControllerTime'] = 50
 #
 # sim.supervisedTrainingTime = 0
 # sim.learningRandomTime = 5000
@@ -83,22 +83,10 @@ options['SARSA']['burnInTime'] = options['runTime']['learningRandomTime']/2.0
 # sim2.run()
 
 
-simList = []
-lamList = [0.0, 0.2, 0.4, 0.6, 0.8, 0.9]
-lamList = [0.2]
-
-for lam in lamList:
-    sim = Simulator(autoInitialize=False, verbose=False)
-    sim.options = copy.deepcopy(options)
-    sim.options['SARSA']['lam'] = lam
-    simList.append(sim)
-    sim.initialize()
-    sim.run(launchApp=False)
-    #sim.plotRunData(showPlot=False)
-
-
-sim = simList[-1]
-sim.setupPlayback()
+sim = Simulator(autoInitialize=False, verbose=False)
+sim.options = copy.deepcopy(options)
+sim.initialize()
+sim.run()
 
 
 

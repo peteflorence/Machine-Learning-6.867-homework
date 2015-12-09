@@ -94,7 +94,7 @@ for lam in lamList:
     simList.append(sim)
     sim.initialize()
     sim.run(launchApp=False)
-    sim.plotRunData(showPlot=False)
+    sim.plotRunData(showPlot=True)
 
 
 

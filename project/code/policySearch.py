@@ -13,6 +13,8 @@ class PolicySearch(object):
             raise ValueError("you must specify the sensorObj and the action set and collisionThreshold")
         
         self.numRays = sensorObj.numRays
+        if self.numRays % 2 != 0:
+            raise ValueError("For the policy search implementation, the number of rays needs to be even")
         self.rayLength = sensorObj.rayLength
         self.sensor = sensorObj
         self.lam = lam

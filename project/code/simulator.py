@@ -422,7 +422,7 @@ class Simulator(object):
                 prevReward = reward
 
                 runData['startIdx'] = startIdx
-                runData['controllerType'] = "learnedRandom"
+                runData['controllerType'] = "training"
                 runData['duration'] = self.counter - runData['startIdx']
                 runData['endIdx'] = self.counter
                 runData['runNumber'] = numRunsCounter
@@ -442,7 +442,7 @@ class Simulator(object):
             print "startIdx", startIdx
             print "runData", runData
             runData['startIdx'] = startIdx
-            runData['controllerType'] = "learned"
+            runData['controllerType'] = "learnedEval"
             runData['duration'] = self.counter - runData['startIdx']
             runData['endIdx'] = self.counter
             runData['runNumber'] = numRunsCounter
@@ -696,7 +696,6 @@ class Simulator(object):
         grid = np.arange(1,numRuns+1)
         discountedReward = np.zeros(numRuns)
         avgReward = np.zeros(numRuns)
-        avgRewardNoCollisionPenalty = np.zeros(numRuns)
 
 
         idxMap = dict()
@@ -710,7 +709,6 @@ class Simulator(object):
             runDuration[idx] = val['duration']
             discountedReward[idx] = val['discountedReward']
             avgReward[idx] = val['avgReward']
-            avgRewardNoCollisionPenalty[idx] = val['avgRewardNoCollisionPenalty']
             controllerType = val['controllerType']
             idxMap[controllerType][idx] = True
 
@@ -726,7 +724,6 @@ class Simulator(object):
         grid = np.arange(1,numRuns+1)
         discountedReward = np.zeros(numRuns)
         avgReward = np.zeros(numRuns)
-        avgRewardNoCollisionPenalty = np.zeros(numRuns)
 
 
         idxMap = dict()
@@ -741,7 +738,7 @@ class Simulator(object):
             runDuration[idx] = val['duration']
             discountedReward[idx] = val['discountedReward']
             avgReward[idx] = val['avgReward']
-            avgRewardNoCollisionPenalty[idx] = val['avgRewardNoCollisionPenalty']
+            #avgRewardNoCollisionPenalty[idx] = val['avgRewardNoCollisionPenalty']
             controllerType = val['controllerType']
             idxMap[controllerType][idx] = True
 
@@ -754,7 +751,7 @@ class Simulator(object):
 
         self.runStatistics = dict()
         dataMap = {'duration': runDuration, 'discountedReward':discountedReward,
-                   'avgReward':avgReward, 'avgRewardNoCollisionPenalty':avgRewardNoCollisionPenalty}
+                   'avgReward':avgReward}
 
 
         def computeRunStatistics(dataMap):
@@ -803,56 +800,48 @@ class Simulator(object):
             plt.xticks(index + barWidth/2.0, controllerTypeToPlot)
 
 
-        plt.subplot(4,1,1)
-        plt.title('run duration')
-        scatterPlot(runDuration)
-        # for controllerType, idx in idxMap.iteritems():
-        #     plt.scatter(grid[idx], runDuration[idx], color=self.colorMap[controllerType])
-
-        # plt.scatter(runStart[idxDefaultRandom], runDuration[idxDefaultRandom], color='b')
-        # plt.scatter(runStart[idxQValueController], runDuration[idxQValueController], color='y')
-        # plt.scatter(runStart[idxDefault], runDuration[idxDefault], color='g')
-        plt.xlabel('run #')
-        plt.ylabel('episode duration')
-
-        plt.subplot(4,1,2)
-        plt.title('discounted reward')
-        scatterPlot(discountedReward)
-        # for key, val in plotData.iteritems():
-        #     plt.scatter(grid[idx], discountedReward[idx], color=self.colorMap[controllerType])
-
-
-        plt.subplot(4,1,3)
-        plt.title("average reward")
-        scatterPlot(avgReward)
-        # for key, val in plotData.iteritems():
-        #     plt.scatter(grid[val['idx']],avgReward[val['idx']], color=val['color'])
-
-
-        plt.subplot(4,1,4)
-        plt.title("average reward no collision penalty")
-        scatterPlot(avgRewardNoCollisionPenalty)
-        # for key, val in plotData.iteritems():
-        #     plt.scatter(grid[val['idx']],avgRewardNoCollisionPenalty[val['idx']], color=val['color'])
-
-
-        ## plot summary statistics
-        plt.figure()
-
-        plt.subplot(4,1,1)
-        barPlot("duration")
-
-        plt.subplot(4,1,2)
-        barPlot("discountedReward")
-
-        plt.subplot(4,1,3)
-        barPlot("avgReward")
-
-        plt.subplot(4,1,4)
-        barPlot("avgRewardNoCollisionPenalty")
-
-
+        plt.plot([1,2,3],[1,4,9])
         plt.show()
+
+        # plt.subplot(3,1,1)
+        # plt.title('run duration')
+        # scatterPlot(runDuration)
+        # # for controllerType, idx in idxMap.iteritems():
+        # #     plt.scatter(grid[idx], runDuration[idx], color=self.colorMap[controllerType])
+
+        # # plt.scatter(runStart[idxDefaultRandom], runDuration[idxDefaultRandom], color='b')
+        # # plt.scatter(runStart[idxQValueController], runDuration[idxQValueController], color='y')
+        # # plt.scatter(runStart[idxDefault], runDuration[idxDefault], color='g')
+        # plt.xlabel('run #')
+        # plt.ylabel('episode duration')
+
+        # plt.subplot(3,1,2)
+        # plt.title('discounted reward')
+        # scatterPlot(discountedReward)
+        # # for key, val in plotData.iteritems():
+        # #     plt.scatter(grid[idx], discountedReward[idx], color=self.colorMap[controllerType])
+
+
+        # plt.subplot(3,1,3)
+        # plt.title("average reward")
+        # scatterPlot(avgReward)
+        # # for key, val in plotData.iteritems():
+        # #     plt.scatter(grid[val['idx']],avgReward[val['idx']], color=val['color'])
+
+
+        # ## plot summary statistics
+        # plt.figure()
+
+        # plt.subplot(3,1,1)
+        # barPlot("duration")
+
+        # plt.subplot(3,1,2)
+        # barPlot("discountedReward")
+
+        # plt.subplot(3,1,3)
+        # barPlot("avgReward")
+
+        # plt.show()
 
 
     def plotMultipleRunData(self, simList, toPlot=['duration', 'discountedReward'], controllerType='learned'):

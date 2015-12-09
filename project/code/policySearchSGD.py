@@ -17,11 +17,11 @@ class PolicySearchSGD(PolicySearch):
         #self.initializeRandomPolicyParams()
         self.initializeDesignedParams() #this doesn't crash
 
-        self.mean = np.zeros((1,20))[0]
-        self.epsilon = 1e-3
-        self.cov =  np.identity(20)*self.epsilon # diagonal covariance
+        self.mean = np.zeros((1,10))[0]
+        self.epsilon = 1e-2
+        self.cov =  np.identity(10)*self.epsilon # diagonal covariance
 
-        self.eta = 1e-2
+        self.eta = 1e-4
 
     def initializeZeroedParams(self, random=False):
         self.policyTheta = np.zeros((self.numRays,1))
@@ -31,20 +31,25 @@ class PolicySearchSGD(PolicySearch):
         np.random.seed(4)
         self.policyTheta = np.random.randn(self.numRays,1)
 
+    def mirrorParams(self):
+        self.rightPolicy = -1.0 * self.leftPolicy[ ::-1 ] # this just flips the array, and flips the sign
+        self.policyTheta = np.vstack((self.leftPolicy, self.rightPolicy))
+
     def initializeDesignedParams(self):
-        self.policyTheta = np.zeros((self.numRays,1))
-        self.policyTheta[:len(self.policyTheta)/2] = -1.0 * 100
-        self.policyTheta[len(self.policyTheta)/2:] = 1.0 * 100
-        self.policyTheta[0:4] = 0.0
-        self.policyTheta[-4:] = 0.0
+        self.leftPolicy = np.zeros((self.numRays/2,1))
+        self.leftPolicy[:5] = -1.0 * 10
+        self.leftPolicy[5:] = -1.0 * 100
+        self.mirrorParams()
         self.policyTheta_0 = 0
 
     def perturbParams(self):
         self.w = self.sampleGaussianW()
-        self.policyTheta += self.w 
+        self.leftPolicy += self.w 
+        self.mirrorParams()
 
     def updateParams(self, reward, prevReward):
-        self.policyTheta = self.policyTheta -  self.eta * (reward - prevReward) * self.w
+        self.leftPolicy = self.leftPolicy -  self.eta * (reward - prevReward) * self.w
+        self.mirrorParams()
 
     def sampleGaussianW(self):
         w = np.random.multivariate_normal(self.mean, self.cov).T
