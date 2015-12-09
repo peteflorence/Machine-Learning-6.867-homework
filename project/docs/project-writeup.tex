@@ -433,18 +433,30 @@ It is interesting to note the list of differences with the methods of the last s
 
 \subsection{Episodic REINFORCE}
 
-Many different variants of gradient-descent-based optimization of a parametric policy were investigated.  The following was the algorithm with which the most empirical success was achieved.  It is different in a few ways from what might be considered a standard REINFORCE algorithm, and the reasons for these differences will be discussed.  
-
-The parametric form of the policy (for commanding the steering rate $u$) was chosen to take the following form: 
+Many different variants of gradient-descent-based optimization of a parametric policy were investigated.  The following was the algorithm with which the most empirical success was achieved.  It is different in a few ways from what might be considered a standard REINFORCE algorithm, and the reasons for these differences will be discussed.  The parametric form of the policy (for commanding the steering rate $u$) was chosen to take the following continuous form: 
 %
 %
 \begin{equation}
-u = (\sigma(\theta^T \phi_B(X)) - \frac{1}{2}) * u_{max} 
+\label{u_continuous}
+u = u_{max} \bigg(\sigma(\theta^T \phi_B(X)) - \frac{1}{2}\bigg) 
 \end{equation}
 %
 %
-%where $\sigma$ is the logistic sigmoid function, $\phi_B(x_i) = \frac{1}{x_i^2}$ as for the Braitenberg vehicle.  First we note that the above is deterministic, so that the stochasticity of the policy is on the parameters rather than the output.  
+where $\sigma$ is the logistic sigmoid function, and the features $\phi_B(x_i) = \frac{1}{x_i^2}$ are the same as for the Braitenberg vehicle.  (Empirically, these were found to work well.  Squaring the inverse serves to increase the emphasis even more on close obstacles.)  The logistic sigmoid function is pushed down by $1/2$ so that it is an odd function, and is then scaled by $u_{max}$.  Note that a bias term has purposely been left out, because it would only serve to bias left/right turning, whereas our desired controller would be symmetric.  We also note that the above is a deterministic function of the paramters, so that the stochasticity of the policy is on the parameters rather than the output.  The REINFORCE update is adapted from \todo{cite Roberts, Manchester, Tedrake 2011}:
+%
+%
+\begin{equation}
+\theta_{i+1} = \theta_i + \eta (R(\theta_i + \theta_{p_i}) - R(\theta_i)) \theta_{p_i},
+\end{equation}
+%
+%
+where $\theta_{p_i}$ is a sampled zero-mean Gaussian perturbation, and the update is such that if reward $R$ is increased due to the perturbation, then the parameter update will move in that direction.  We note from \todo{cite Roberts, Manchester, Tedrake 2011} that this matches the form of the gradient update for REINFORCE since $\frac{\partial}{\partial \theta_i} ln (p(\theta_{p_i} )) \propto (\phi_i' -\phi)$, and the scalar may be absorbed into the learning rate, $\eta$, term.  After exploring different options, the same reward function as in Section 3 was used (a combination of collision penalty, action cost, and large-sensor reward).  Although we have $N=20$ parameters in the vector $\theta$ in Equation \ref{u_continuous}, we recognize that the ideal behavior of the vehicle is symmetric, and so we reduce our model to just 10 parameters such that $\theta_{N-i} = - \theta_{i} $ for $i = 1,2,..., \frac{N}{2}$.  Also rather than sampling from a true zero-mean multivariate Gaussian, we take a page from Kiefer-Wolfowitz's finite-difference method and only perturb one parameter at a time.  This was found to be preferable since the contribution of one of the point LIDARs to the control action could be evaluated in isolation.  The implementation is to randomly select one of the 10 indices on each iteration, and perturb that one parameter by a zero-mean single-variate Gaussian.  This may break the algorithm's exact resemblance of REINFORCE, but it is clearly very similar.
 
+\subsubsection{Results}
+
+Three scenarios for the performance of policy search are discussed: (i) starting from a zero-vector $\theta$, (ii) starting from hand-chosen parameters that roughly work well already, and (iii) starting from hand-chosen parameters that already give near-perfect performance.
+
+For starting with $\theta_0 = \mathbf{0}$, a significant improvement in controller performance was able to be learned with a surprisingly small amount of training time.  To be clear, $\theta$ as a zero vector corresponds to ignoring all sensor measurements are going perfectly straight forward at every time step.  This is clearly not optimal controller performance.  
 
 \subsection{Beta distribution}
 
