@@ -15,25 +15,35 @@ class PolicySearchSGD(PolicySearch):
         self.binCutoff=binCutoff
         #self.initializeZeroedParams()
         #self.initializeRandomPolicyParams()
-        self.initializeDesignedParams() #this doesn't crash
+        self.initializeOkayParams()
+        #self.initializeDesignedParams() # these are very good parameters
 
         self.mean = np.zeros((1,10))[0]
-        self.epsilon = 1e-2
+        self.epsilon = 1
         self.cov =  np.identity(10)*self.epsilon # diagonal covariance
 
-        self.eta = 1e-4
+        self.eta = 1e-1
 
     def initializeZeroedParams(self, random=False):
-        self.policyTheta = np.zeros((self.numRays,1))
+        self.leftPolicy = np.zeros((self.numRays/2,1))
+        self.mirrorParams()
         self.policyTheta_0 = 0
 
     def initializeRandomParams(self):
         np.random.seed(4)
         self.policyTheta = np.random.randn(self.numRays,1)
+        self.policyTheta_0 = 0
 
     def mirrorParams(self):
         self.rightPolicy = -1.0 * self.leftPolicy[ ::-1 ] # this just flips the array, and flips the sign
         self.policyTheta = np.vstack((self.leftPolicy, self.rightPolicy))
+
+    def initializeOkayParams(self):
+        self.leftPolicy = np.zeros((self.numRays/2,1))
+        self.leftPolicy[:5] = -1.0 * 1
+        self.leftPolicy[5:] = -1.0 * 10
+        self.mirrorParams()
+        self.policyTheta_0 = 0
 
     def initializeDesignedParams(self):
         self.leftPolicy = np.zeros((self.numRays/2,1))
@@ -43,12 +53,30 @@ class PolicySearchSGD(PolicySearch):
         self.policyTheta_0 = 0
 
     def perturbParams(self):
+        self.previousLeftPolicy = self.leftPolicy
+
         self.w = self.sampleGaussianW()
         self.leftPolicy += self.w 
         self.mirrorParams()
 
+    def perturbOneParam(self):
+        self.previousLeftPolicy = self.leftPolicy
+
+        randIdx = np.random.choice(len(self.leftPolicy))
+        self.w = self.leftPolicy * 0.0
+        
+        randPerturb = np.random.randn()
+        self.w[randIdx] = randPerturb
+
+        self.leftPolicy += self.w
+        self.mirrorParams()
+
     def updateParams(self, reward, prevReward):
-        self.leftPolicy = self.leftPolicy -  self.eta * (reward - prevReward) * self.w
+        self.leftPolicy = self.previousLeftPolicy + self.eta * (reward - prevReward) * self.w
+        self.mirrorParams()
+
+    def revertParams(self):
+        self.leftPolicy = self.previousLeftPolicy
         self.mirrorParams()
 
     def sampleGaussianW(self):
