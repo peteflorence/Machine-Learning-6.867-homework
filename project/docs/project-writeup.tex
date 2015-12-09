@@ -195,7 +195,7 @@ To formulate our problem as a dynamic programming problem we need to define a ``
 %
 %
 \begin{equation}
-w_n = r_0 + r_1 \cos(\theta_n)
+w_n = C_0 + \cos(\theta_n)
 \end{equation}
 %
 %
@@ -214,7 +214,7 @@ Then $\phi$ has the effect of amplifying short distance measurements. Let $W = (
 %
 %
 \begin{equation}
-R(S,a) = C_{action} |a| + \langle W, \phi(X) \rangle
+R(S,a) = C_{action} |a| + \frac{C_{raycast}}{\sum_n w_n} \langle W, \phi(X) \rangle
 \end{equation}
 %
 %
@@ -308,11 +308,70 @@ In order to apply SARSA in the form described above we need to discretize the st
 
 There are many parameters that must be chosen in order to run the SARSA lambda algorithm. We discuss some of the most important here and give intuition on how we chose them. Then we will analyse how varying a few key parameters around our baseline setup affects performance. 
 
-Two of the most important parameters are the number of bins $N_{inner}, N_{outer}$ in the discretization. You need enough bins that so that the state is informative enough to pass through relatively narrow gaps between obstacles. However adding more bins comes at the cost of increasing the size of the state space which can increase training time. In addition if a particular action-state pair is not visited sufficiently many times then that Q-value $Q(s,a)$ will not be a good approximation to the true Q-value, and hence control decisions taken based on that Q-value will not be optimal (and in fact will be quite poor usually). Through many experiments we found that $N_{inner} = 5, N_{outer} = 4$ provided good performance while keeping the size of the discretized state-action space relatively small at $2^9 * 3 = 1536$. Another set of parameters that had a large impact on performance were those of the cost function. It turned out to be important to balance the reward for staying away from obstacles with the penalty for using large control action, $C_{action}$. If $C_{action}$ was too small the controller could end up learning to spin in circles, see Section \ref{failure_modes} for more discussion of this problem. Alternatively if $C_{action}$ was too high the behavior would bias too much towards driving straight and wouldn't do enough to avoid obstacles. Another important parameter was the step size $\alpha$ in the SARSA update. It needs to be small enough so that the Q-Value estimates don't diverge. However, if it is too small then the Q-values are updated only a small amount in each iteration and convergence would take a long time. For the discrete state-action case we found that $\alpha = 0.2$ worked well, although it is difficult to evaluate what the ``correct'' step size is. See Table \todo{make a table with default parameter values, put it in the appendix} for our preferred set of parameters.
+Two of the most important parameters are the number of bins $N_{inner}, N_{outer}$ in the discretization. You need enough bins that so that the state is informative enough to pass through relatively narrow gaps between obstacles. However adding more bins comes at the cost of increasing the size of the state space which can increase training time. In addition if a particular action-state pair is not visited sufficiently many times then that Q-value $Q(s,a)$ will not be a good approximation to the true Q-value, and hence control decisions taken based on that Q-value will not be optimal (and in fact will be quite poor usually). Through many experiments we found that $N_{inner} = 5, N_{outer} = 4$ provided good performance while keeping the size of the discretized state-action space relatively small at $2^9 * 3 = 1536$. Another set of parameters that had a large impact on performance were those of the cost function. It turned out to be important to balance the reward for staying away from obstacles with the penalty for using large control action, $C_{action}$. If $C_{action}$ was too small the controller could end up learning to spin in circles, see Section \ref{failure_modes} for more discussion of this problem. Alternatively if $C_{action}$ was too high the behavior would bias too much towards driving straight and wouldn't do enough to avoid obstacles. Another important parameter was the step size $\alpha$ in the SARSA update. It needs to be small enough so that the Q-Value estimates don't diverge. However, if it is too small then the Q-values are updated only a small amount in each iteration and convergence would take a long time. For the discrete state-action case we found that $\alpha = 0.2$ worked well, although it is difficult to evaluate what the ``correct'' step size is. See Table
 
-First we provide a qualitative discussion of the results of the Q-Learning using parameters from Table \todo{make a table with default parameter values, put it in the appendix}. We initialize all of the Q-values to zero and run the SARSA algorithm for 8000 seconds. Since our simulation timestep is $dt = 0.05$ this amounts to $8000/dt = 160,000$ iterations of the SARSA update. Our simulation runs at approximately $700$ Hz. Since it takes $20$ ticks of the simulator to complete one second this amounts to a simulation of 35$\times$ normal speed. Thus this training takes approximately $3.8$ minutes. The controller that we get out of this performs reasonably well. Specifically it manages to drive around the obstacle field shown in figure \todo{picture of the obstacle field} at a reasonably high speed with mean time between crashes of \todo{figure this out, currently it is 600} 30 seconds. One thing to note is that this is much worse than the performance of our default controller described in section \ref{default_controller}. At the given car speed in this run the default controller can essentially drive around indefinitely without crashing. However, it's behavior is to make a hard turn as soon as it detects an obstacle. Thus it has a tendency to get trapped within an area just going in circles as in figure \todo{show figure}. The default controller always turns as soon as it sees anything, and even if it goes through a gap, will do so by constantly alternating between left and right control actions. On the other hand since our reward function penalizes taking control actions (by $C_{action}$) it rewards our controller for going straight. Thus the learned controller will continue to go straight in some situations where we are detecting obstacles, but they are not in our direct path see figure \todo{include graphic}. This is an interesting behavior that is learned. Thus qualitatively our learned controller turns much less than the default controller and hence doesn't tend to get stuck circling in one spot. Another interesting feature of the controller is that learns how to drive through narrow gaps, see figure \todo{include graphic}.
+\begin{table}
+\centering
+\begin{tabular}{|c|c|}
+\hline
+Parameter & Value  \\ \hline
+$N_{inner}$ & $5$ \\ \hline
+$N_{outer}$ & $4$ \\ \hline
+$\beta_{cutoff}$ & $0.5$ \\ \hline
+$\alpha$ & $0.2$ \\ \hline
+$\gamma$ & $0.95$ \\ \hline
+$\lambda$ & $0.7$ \\ \hline
+$C_{action}$ & $0.4$ \\ \hline
+$C_{max}$ & $20$ \\ \hline
+$C_{collision}$ & $100$ \\ \hline
+$C_0$ & $0.3$ \\ \hline
+$C_{raycast}$ & $40$ \\ \hline
 
-For a more quantitative analysis we can consider plots showing the average and discounted reward. The plots show that as time progresses the algorithm improves its performance as is to be expected. Both the discounted reward and the run duration increase over time as the learning improves. 
+\end{tabular}
+\caption{Default Parameter Values}
+\label{table:defaultParameters}
+\end{table}
+%
+%
+
+
+
+
+for our preferred set of default parameters.
+
+First we provide a qualitative discussion of the results of the Q-Learning using parameters from Table \ref{table:defaultParameters}. We initialize all of the Q-values to zero and run the SARSA algorithm for 8000 seconds. Since our simulation timestep is $dt = 0.05$ this amounts to $8000/dt = 160,000$ iterations of the SARSA update. Our simulation runs at approximately $700$ Hz. Since it takes $20$ ticks of the simulator to complete one second this amounts to a simulation of 35$\times$ normal speed. Thus this training takes approximately $3.8$ minutes. The controller that we get out of this performs reasonably well. Specifically it manages to drive around the obstacle field shown in Figure \ref{figures/director.png}
+%
+%
+\begin{figure}
+\centering
+\includegraphics[scale=0.2]{figures/director.png}
+\caption{The obstacle field used for the majority of the learning runs}
+\label{figures/director.png}
+\end{figure}
+%
+%
+ at a reasonably high speed with mean time between crashes of approximately 30 seconds. One thing to note is that this is much worse than the performance of our default controller described in section \ref{default_controller}. A comparison of performance against the default controller is given in Figure \ref{figures/sarsaDiscrete_lam_0_7_6500_bar_all_controllers.png}. Is is apparent the the default controller provides highly superior performance in run duration, and to a lesser extent discounted reward. At the given car speed in this run the default controller can essentially drive around indefinitely without crashing. However, it's behavior is to make a hard turn as soon as it detects an obstacle. Thus it has a tendency to get trapped within an area just going in circles. The default controller always turns as soon as it sees anything, and even if it goes through a gap, will do so by constantly alternating between left and right control actions. On the other hand since our reward function penalizes taking control actions (by $C_{action}$) it rewards our controller for going straight. Thus the learned controller will continue to go straight in some situations where we are detecting obstacles, but they are not in our direct path as in Figure \ref{figures/driveStraightDirector.png}
+\begin{figure}
+\centering
+\includegraphics[scale=0.4]{figures/driveStraightDirector.png}
+\caption{A situation where the SARSA controller chooses the straight control action, while the default controller would choose a hard turn to the left.}
+\label{figures/driveStraightDirector.png}
+\end{figure}
+%
+%
+This is an interesting behavior that is learned. Thus qualitatively our learned controller turns much less than the default controller and hence doesn't tend to get stuck circling in one spot. Another interesting feature of the controller is that learns how to drive through narrow gaps such as in Figure \ref{figures/narrowGap.png}.
+%
+%
+\begin{figure}
+\centering
+\includegraphics[scale=0.6]{figures/narrowGap.png}
+\caption{An example situation where the SARSA controller would drive through the gap.}
+\label{figures/narrowGap.png}
+\end{figure}
+%
+%
+%
+For a more quantitative analysis we can consider the duration and discounted reward over time (see Figure \ref{figures/sarsaDiscrete_lam_0_7_6500_time_series_learned_controllers.png}). The upper plot shows that as time progresses the average duration of an episode increases. Similarly the lower plot show that as time progresses the algorithm also improves in terms of discounted reward. This plot clearly shows how the learning algorithm improves its performance over time, as is to be expected. 
 
 
 \subsubsection{Failure Modes}
@@ -328,10 +387,10 @@ A possible solution to this problem is to redesign the reward function. We could
 \subsubsection{Analysis}
 \label{sarsa_analysis}
 
-In this section we perform two experiments to further characterize the performance of our SARSA algorithm. In the first experiment we hold all the parameters fixed except $\lambda$. The $\lambda$ parameter affects the eligibility traces and controls the balance between a TD (temporal difference) update and an MC (Monte Carlo update). At the two extremes, $\lambda = 0$ corresponds to a pure TD update and $\lambda = 1$ corresponds to a pure MC update. Intuitively TD updates rely heavily on the Markov property and the Bellman equation for the Q-Values. On the other hand MC updates simply try to estimate $Q(S,a)$ using the empirically observed rewards that followed the state action pair $(S,a)$ and don't rely on the Markov property or the Bellman equation. It is known \todo{include reference} that $\lambda > 0$ can help convergence speed and may improve performance in non-Markov domains. In Figure \todo{include figure ref} we see a plot of performance data for several different $\lambda$ values. Since each run takes $5$ minutes to train we are limited in the number of simulations we can perform. Overall the trend seems to be that higher lambda values provide better performane. Since our observation state is highly non-Markov this coincides with the fact that SARSA($\lambda$) with $\lambda$ close to $1$ is less sensitive to violations of the Markov property since each update step is more similar to a MC update.
+In this section we perform two experiments to further characterize the performance of our SARSA algorithm. In the first experiment we hold all the parameters fixed except $\lambda$. The $\lambda$ parameter affects the eligibility traces and controls the balance between a TD (temporal difference) update and an MC (Monte Carlo update). At the two extremes, $\lambda = 0$ corresponds to a pure TD update and $\lambda = 1$ corresponds to a pure MC update. Intuitively TD updates rely heavily on the Markov property and the Bellman equation for the Q-Values. On the other hand MC updates simply try to estimate $Q(S,a)$ using the empirically observed rewards that followed the state action pair $(S,a)$ and don't rely on the Markov property or the Bellman equation. It is known \todo{include reference} that $\lambda > 0$ can help convergence speed and may improve performance in non-Markov domains. In Figure \ref{figures/sarsaMultiple.png} we see a plot of performance data for several different $\lambda$ values. Since each run takes $5$ minutes to train we are limited in the number of simulations we can perform. Overall the trend seems to be that higher lambda values provide better performane. Since our observation state is highly non-Markov this coincides with the fact that SARSA($\lambda$) with $\lambda$ close to $1$ is less sensitive to violations of the Markov property since each update step is more similar to a MC update.
 
 
-Another interesting fact that we noticed is that, even with the same set of parameters, different runs of the learning algorithm can produce quite varied performance. Figure \todo{include reference} shows several runs of the learning algorithm using the same set of parameters. Out of the 10 trials, runs 5 and 9 standout. They have extremely long average run durations which are an order of magnitude larger than all the rest. Investigating these runs more carefully they both succumbed to the ``drive in circles'' failure mode. Thus our learning algorithm is sensitive to this failure mode, with about a $20\%$ failure rate. We believe that with a more carefully designed reward function we could take care of this failure mode.
+Another interesting fact that we noticed is that, even with the same set of parameters, different runs of the learning algorithm can produce quite varied performance. Figure \ref{figures/sarsaMultiple.png} shows several runs of the learning algorithm using the same set of parameters. Out of the 10 trials, runs 5 and 9 standout. They have extremely long average run durations which are an order of magnitude larger than all the rest. Investigating these runs more carefully they both succumbed to the ``drive in circles'' failure mode. Thus our learning algorithm is sensitive to this failure mode, with about a $20\%$ failure rate. We believe that with a more carefully designed reward function we could take care of this failure mode.
 
 
 \subsection{Watkins Q-Learning}
@@ -373,7 +432,7 @@ Q-Learning is almost the same as SARSA but with a slight variation in the update
 
 \subsubsection{Results}
 
-The same preferred parameter set for SARSA given in Table \todo{reference} also works well for Q-Learning. The resulting controller exhibits similar qualitative performance to the SARSA controller described above. We repeat the two experiments from section \ref{sarsa_analysis}. The first is to vary the $\lambda$ parameter while holding everything else fixed. The results are shown in Figure \ref{figures/discreteQLearningLamComparison.png} and are very similar to those for SARSA. There seems to be a weak trend of increasing performance as we increase $\lambda$. Again this makes sense since a higher $\lambda$ corresponds to less reliance on the Markov and Bellman properties (which we know are violated in this case). Unfortunately Q-Learning does not resolve the ``driving in circles'' failure mode, and possibly is even more sensitive to it. It does happen occasionally and for essentially the same reasons as in SARSA. We repeated the experiment from section \ref{sarsa_analysis} that performed multiple runs with the same parameter set. The results are shown in Figure \ref{figures/qlearningMultiple.png}. In this case you can see that runs $2,6,9$ have an order of magnitude longer duration than the rest. These are exactly the runs where we ran into the ``drive in circles'' faiure mode. Thus for Q-Learning the failure rate was $30\%$, which is slightly higher than the $20\%$ for SARSA.
+The same preferred parameter set for SARSA given in Table \todo{reference} also works well for Q-Learning. The resulting controller exhibits similar qualitative performance to the SARSA controller described above and the plot of perfomance over time is almost identical to Figure \ref{figures/sarsaDiscrete_lam_0_7_6500_time_series_learned_controllers.png} so we omit it here. We do however repeat the two experiments from section \ref{sarsa_analysis}. The first is to vary the $\lambda$ parameter while holding everything else fixed. The results are shown in Figure \ref{figures/discreteQLearningLamComparison.png} and are very similar to those for SARSA. There seems to be a weak trend of increasing performance as we increase $\lambda$. Again this makes sense since a higher $\lambda$ corresponds to less reliance on the Markov and Bellman properties (which we know are violated in this case). Unfortunately Q-Learning does not resolve the ``driving in circles'' failure mode, and possibly is even more sensitive to it. It does happen occasionally and for essentially the same reasons as in SARSA. We repeated the experiment from section \ref{sarsa_analysis} that performed multiple runs with the same parameter set. The results are shown in Figure \ref{figures/qlearningMultiple.png}. In this case you can see that runs $2,6,9$ have an order of magnitude longer duration than the rest. These are exactly the runs where we ran into the ``drive in circles'' faiure mode. Thus for Q-Learning the failure rate was $30\%$, which is slightly higher than the $20\%$ for SARSA.
 
 
 
@@ -387,14 +446,37 @@ One of the major drawbacks of the methods presented in sections \ref{discrete_sa
 %
 \begin{equation}
 \label{q_value_approx}
-Q(S,a) = w_a(0) + \sum_{n = 1}^N w_a(n)\phi(x_n)
+Q(S,a, \mathbf{w}) = w_a(0) + \sum_{n = 1}^N w_a(n)\phi(x_n)
 \end{equation}
 %
 %
-We think this is a reasonable approximation to the q-values since it has almost the same form as the reward function. We include an intercept term $w_a(0)$ to capture the fact that even when the feature vector $\phi(X)$ is identically zero we prefer action $a = 0$ to actions $a=\{-u_{max},u_{max}\}$. In this case the SARSA($\lambda$) algorithm is given by
+where $\mathbf{w}$ be the matrix of weights. We think this is a reasonable approximation to the q-values since it has almost the same form as the reward function. We include an intercept term $w_a(0)$ to capture the fact that even when the feature vector $\phi(X)$ is identically zero we prefer action $a = 0$ to actions $a=\{-u_{max},u_{max}\}$. We implemented gradient descent SARSA($\lambda$). 
 %
 %
-\todo{describe algorithm here using algorithmic package}
+\begin{algorithm}[H]
+   \caption{gradient descent SARSA($\lambda$)}
+   \label{alg:gradDescentSARSA}
+\begin{algorithmic}
+   % \STATE {\bfseries Input:} sensor data $x_i$, size $N$
+   % \STATE {\bfseries Output:} u from $\mathcal{A} =  \{-u_{max}, 0, u_{max}\}$
+   \STATE Initialize weights $\mathbf{w}$ to $0$.
+   \REPEAT
+   \STATE{
+   $\mathbf{z} = 0$\\
+   $S, A \leftarrow$ initial state and action of episode
+   \FOR{each step of episode}
+       \STATE Take action $A$, observe reward $R$ and next state $S'$
+       \STATE $A' \leftarrow$ policy derived from Q-values at state $S'$ (using $\epsilon$-greedy)
+       \STATE $\delta \leftarrow R + \gamma Q(S', A', \mathbf{w}) - Q(S,A, \mathbf{w})$
+       \STATE $\mathbf{w}_{old} \leftarrow \mathbf{w}$
+       \STATE $\mathbf{w} \leftarrow \mathbf{w} + \alpha \delta \mathbf{z}$
+       \STATE $\mathbf{z} \leftarrow \gamma \lambda z + \nabla_{\mathbf{w}} Q(S,A,\mathbf{w}_{old})$
+       \STATE $S \leftarrow S', A \leftarrow A'$
+   \ENDFOR}
+   \UNTIL{end of episode}
+
+\end{algorithmic}
+\end{algorithm}
 %
 %
 Intuitively this corresponds to adjusting the weights $w_a(n)$ to get the best approximation to the Q-Values in a least squares sense (see Button-Sarto Ch. 9 for a precise statement) \todo{Barto-Sutton ref}. 
@@ -402,7 +484,7 @@ Intuitively this corresponds to adjusting the weights $w_a(n)$ to get the best a
 
 \subsubsection{Results}
 
-It is notoriously difficult to get function approximation methods for SARSA to perform well. Performance fundamentally depends on whether the chosen parametric form, given by (\ref{q_value_approx}), provides a good approximation of the Q-Values. The first thing we noticed was that a much smaller step-size $\alpha$ was needed. After experimenting we found that $\alpha = 1e-4$ was small enough that the weights wouldn't diverge to $\infty$. For the training in sections \ref{discrete_sarsa} and \ref{discrete_q_learning} we initialized the Q-Values to zero. The analog in this case corresponds to setting the weights $w_a(n) = 0$. This approach didn't yield very good results for the function approximation SARSA method \todo{maybe need to elaborate on this, we end up spinning in circles etc.} An alternative, as outline in \todo{reference Leslie's practical reinforcement learning for mobile robots paper} to help the learning algorithms perform better is to run a known controller to help learn some baseline Q-Values. Essentially during a supervised learning period we are learning weights $\{w_a(n)\}$ which approximate the Q-Values under the known policy $\pi_{default}$. During this phase we are performing the weight updates from \todo{reference cts sarsa figure} but the policy is chosen according to $\pi_{default}$ rather than the epsilon greedy policy. In this setup we run this supervised training for a while before switching to the standard SARSA($\lambda$) updates specified in \todo{table}. If we use the standard environment used in sections \ref{discrete_sarsa} and \ref{discrete_q_learning} we end up falling into the ``drive in circles'' failure mode outline in \ref{failure_modes}. Increasing the obstacle density to eliminate the ``obstacle free'' zones resolves this problem and we are able to get a functioning controller. The controller performs reasonably well, but still considerably worse than the Q-Learning controller on the same environment \todo{need to verify this}. The interesting thing is to attempt to understand the weights $\{w_a(n)\}$ that we are learning and why they might be working. The weights are plotted in Figure \ref{figures/sarsa_cts_weights.png}. The actions ${4,0,-4}$ correspond to Left, Straight, and Right, respectively. Also the laser measurements go from $-10$ to $10$ with $0$ corresponding to straight ahead. Thus $x_{-10}$ is our leftmost laser measurement. Not shown are the intercept terms $w_a(0)$. The greedy controller that can be derived from the Q-Values is $\pi(S) = \arg \max_{a'} Q(S,a')$. In other words we should choose the action that maximizes the Q-Value for the current state. Suppose there is an obstacle to our right, then the feature vector $\phi(X)$ will have $\phi(x_n)$ small for $n < 0$ (i.e. range measurements to our left are large) and $\phi(x_n)$ large for measurements to our right where the obstacle is. Since the weights corresponding to action $a = 4$, which is Left, are mostly positive for $w_4(n) > 0$ for $n > 0$, and since the only components of $\phi(X)$ which are large are those where the obstacle is (i.e. $n > 0$) we get that $w_{4}(n) \dot \phi(X)$ is moderately positive. On the other hand $w_{-4}(n)$ is exactly the opposite. For $n > 0$ we mostly have $w_{-4}(n) < 0$ and so $w_{-4}(n) \dot \phi(X)$ will most likely be negative. Thus we have that $Q(S,4) > Q(S, -4)$. So we prefer to go left rather than right. A similar logic applies to understanding why $Q(S,-4)$ could be larger than $Q(S,0)$. Thus in this case we would choose left. 
+It is notoriously difficult to get function approximation methods for SARSA to perform well. Performance fundamentally depends on whether the chosen parametric form, given by (\ref{q_value_approx}), provides a good approximation of the Q-Values. The first thing we noticed was that a much smaller step-size $\alpha$ was needed. After experimenting we found that $\alpha = 1e-4$ was small enough that the weights wouldn't diverge to $\infty$. For the training in sections \ref{discrete_sarsa} and \ref{discrete_q_learning} we initialized the Q-Values to zero. The analog in this case corresponds to setting the weights $w_a(n) = 0$. This approach didn't yield very good results for the function approximation SARSA method. An alternative, as outline in \todo{reference Leslie's practical reinforcement learning for mobile robots paper} to help the learning algorithms perform better is to run a known controller to help learn some baseline Q-Values. Essentially during a supervised learning period we are learning weights $\{w_a(n)\}$ which approximate the Q-Values under the known policy $\pi_{default}$. During this phase we are performing the weight updates from Algorithm \ref{alg:gradDescentSARSA} but the policy is chosen according to $\pi_{default}$ rather than the epsilon greedy policy. In this setup we run this supervised training for a while before switching to the standard SARSA($\lambda$) updates specified in Algorithm \ref{alg:gradDescentSARSA}. If we use the standard environment used in sections \ref{discrete_sarsa} and \ref{discrete_q_learning} we end up falling into the ``drive in circles'' failure mode outline in \ref{failure_modes}. Increasing the obstacle density to eliminate the ``obstacle free'' zones resolves this problem and we are able to get a functioning controller. The controller performs reasonably well, but still considerably worse than the Q-Learning controller on the same environment. The interesting thing is to attempt to understand the weights $\{w_a(n)\}$ that we are learning and why they might be working. The weights are plotted in Figure \ref{figures/sarsa_cts_weights.png}. The actions $\{4,0,-4\}$ correspond to Left, Straight, and Right, respectively. Also the laser measurements go from $-10$ to $10$ with $0$ corresponding to straight ahead. Thus $x_{-10}$ is our leftmost laser measurement. Not shown are the intercept terms $w_a(0)$. The greedy controller that can be derived from the Q-Values is $\pi(S) = \arg \max_{a'} Q(S,a')$. In other words we should choose the action that maximizes the Q-Value for the current state. Suppose there is an obstacle to our right, then the feature vector $\phi(X)$ will have $\phi(x_n)$ small for $n < 0$ (i.e. range measurements to our left are large) and $\phi(x_n)$ large for measurements to our right where the obstacle is. Since the weights corresponding to action $a = 4$, which is Left, are mostly positive for $w_4(n) > 0$ for $n > 0$, and since the only components of $\phi(X)$ which are large are those where the obstacle is (i.e. $n > 0$) we get that $w_{4}(n) \dot \phi(X)$ is moderately positive. On the other hand $w_{-4}(n)$ is exactly the opposite. For $n > 0$ we mostly have $w_{-4}(n) < 0$ and so $w_{-4}(n) \dot \phi(X)$ will most likely be negative. Thus we have that $Q(S,4) > Q(S, -4)$. So we prefer to go left rather than right. A similar logic applies to understanding why $Q(S,-4)$ could be larger than $Q(S,0)$. Thus in this case we would choose left. 
 
 The above exposition gets the general idea across. However, as can be seen in Figure \ref{figures/sarsa_cts_weights.png} the actual weights, while exhibiting some general trends, are quite messy and hard to parse.
 
@@ -513,7 +595,7 @@ Lucas implemented the value function based controllers (SARSA, and Q-Learning, b
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{figures/sarsaDiscrete_lam_0_7_6500_bar_all_controllers.png}
-\caption{$\lambda = 0.7$}
+\caption{Performance of three different controllers using the parameters in Table \ref{table:defaultParameters}. The duration is in simulator ticks, there are 20 ticks/second. learnedRandom corresponds to the SARSA controller during the learning phase where we are still randomizing the policy. learned is the actual SARSA with no randomization. And default is the Braitenburg controller from Algorithm \ref{alg:bsic} }
 \label{figures/sarsaDiscrete_lam_0_7_6500_bar_all_controllers.png}
 \end{figure}
 
@@ -522,13 +604,14 @@ Lucas implemented the value function based controllers (SARSA, and Q-Learning, b
 \includegraphics[scale=0.5]{figures/sarsaDiscrete_lam_0_7_6500_time_series_learned_controllers.png}
 \caption{$\lambda = 0.7$}
 \label{figures/sarsaDiscrete_lam_0_7_6500_time_series_learned_controllers.png}
+\caption{Performance over time of the SARSA learning controllers using parameters in Table \ref{table:defaultParameters}. The duration is in simulator ticks, there are 20 ticks/second. The orange points correspond to the learning phase where the SARSA controller is using the $\epsilon$-greedy control policy. Purple corresonds to the greedy control policy with no randomization.}
 \end{figure}
 
 
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{figures/sarsa_cts_weights.png}
-\caption{$\lambda = 0.7$}
+\caption{The weights $w_a(n)$ for function approximation version of SARSA($\lambda$)}
 \label{figures/sarsa_cts_weights.png}
 \end{figure}
 
@@ -537,14 +620,16 @@ Lucas implemented the value function based controllers (SARSA, and Q-Learning, b
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{figures/discreteSARSALamComparison.png}
+\captions{Comparison of performance of discrete SARSA($\lambda$) for different $\lambda$ values.}
 \caption{$\lambda = 0.7$}
+
 \label{figures/discreteSARSALamComparison.png}
 \end{figure}
 
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{figures/sarsaMultiple.png}
-\caption{$\lambda = 0.7$}
+\captions{Comparison of performance across 10 runs of discrete SARSA using parameters in Table \ref{table:defaultParameters}}
 \label{figures/sarsaMultiple.png}
 \end{figure}
 
@@ -553,6 +638,7 @@ Lucas implemented the value function based controllers (SARSA, and Q-Learning, b
 \centering
 \includegraphics[scale=0.5]{figures/discreteQLearningLamComparison.png}
 \caption{$\lambda = 0.7$}
+\captions{Comparison of performance of discrete Q-Learning($\lambda$) for different $\lambda$ values.}
 \label{figures/discreteQLearningLamComparison.png}
 \end{figure}
 
@@ -561,7 +647,7 @@ Lucas implemented the value function based controllers (SARSA, and Q-Learning, b
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{figures/qlearningMultiple.png}
-\caption{$\lambda = 0.7$}
+\captions{Comparison of performance across 10 runs of discrete Q-Learning using parameters in Table \ref{table:defaultParameters}}
 \label{figures/qlearningMultiple.png}
 \end{figure}
 
