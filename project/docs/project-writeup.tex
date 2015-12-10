@@ -183,7 +183,7 @@ Picking the right obstacle environment for our task required some trial-and-erro
 
 Our software stack is integrated with a robotics visualization tool called Director \cite{director}. We use the Director code for visualization and raycasting. This is the only external code that we use in addition to standard Python modules. Our simulation environment is written in Python. We have a main class called \code{Simulator} which combines together several other modules, e.g. \code{Car}, \code{Sensor}, \code{World}, \code{Controller}, \code{Reward}, \code{Sarsa}, etc, to construct a working simulation class. All of this code was written by us for the project. As mentioned before, the only fundamental pieces of code that we didn't write were the visualization tools and the raycasting method which we use for computing our sensor model. One nice feature of the Director application is that it uses Visualization Toolkit as the underlying graphics engine, and thus our raycast calls are actually in C++ and thus very efficient. We use a timestep of $dt = 0.05$ in all our experiments, and \code{scipy.integrate} is used to for integrating forward the dynamics.
 
-All of the code for this project is open-source and may be found at \url{github.com/peteflorence/Machine-Learning-6.867-homework}.
+All of the code for this project is open-source and may be found at \url{github.com/peteflorence/Machine-Learning-6.867-homework}.  We also strongly encourage readers to watch our YouTube video, linked from the GitHub repo, which displays the controllers in action, from the learning phase through to final learned controllers.
 
 \subsection{Braitenberg (Hand-Designed) Controller}
 \label{default_controller}
