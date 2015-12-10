@@ -15,9 +15,9 @@ class Reward(object):
         self.rayLength = sensorObj.rayLength
         self.sensorObj = sensorObj
         self.collisionThreshold = collisionThreshold
-        self.collisionPenalty = collisionPenalty*10
-        self.actionCost = actionCost*1
-        self.raycastCost = raycastCost
+        self.collisionPenalty = collisionPenalty*10.0
+        self.actionCost = actionCost*5.0
+        self.raycastCost = raycastCost*2
         self.initializeRaycastRewardWeights()
         self.largeConstant = 1e5*1.0
         self.tol = 1e-3

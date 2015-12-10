@@ -422,8 +422,8 @@ class Simulator(object):
             startIdx = self.counter
             
             if firstTime == True:
-                print "new round"
-                print self.PolicySearchObj.leftPolicy
+                #print "new round"
+                #print self.PolicySearchObj.leftPolicy
                 storedTheta.append(np.copy(self.PolicySearchObj.leftPolicy))
                 runData, prevReward, initialCarState, duration = self.runSingleSimulation(updateQValues=True, controllerType='training',
                                                    simulationCutoff=simCutoff, maxSteps=None)
@@ -433,18 +433,18 @@ class Simulator(object):
                 firstTime = False
 
             else:
-                print "before perturb", self.PolicySearchObj.leftPolicy 
+                #print "before perturb", self.PolicySearchObj.leftPolicy 
                 self.PolicySearchObj.perturbOneParam()
-                print  "after perturb", self.PolicySearchObj.leftPolicy
+                #print  "after perturb", self.PolicySearchObj.leftPolicy
                 runData, reward, initialCarState, duration = self.runSingleSimulation(updateQValues=True, controllerType='training',
                                                    simulationCutoff=simCutoff, initialCarState=initialCarState, maxSteps=None)
                 #storedReward.append(np.copy(reward))
                 #storedTheta.append(np.copy(self.PolicySearchObj.leftPolicy))
                 
                 
-                print "before update", self.PolicySearchObj.leftPolicy
+                #print "before update", self.PolicySearchObj.leftPolicy
                 self.PolicySearchObj.updateParams(reward, prevReward)
-                print "after update", self.PolicySearchObj.leftPolicy
+                #print "after update", self.PolicySearchObj.leftPolicy
                 prevReward = reward
                 firstTime = True
                 initialCarState = None

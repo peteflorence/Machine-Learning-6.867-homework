@@ -13,16 +13,16 @@ class PolicySearchSGD(PolicySearch):
         self.numOuterBins=numOuterBins
         self.numBins=numInnerBins + numOuterBins
         self.binCutoff=binCutoff
-        self.initializeZeroedParams()
+        #self.initializeZeroedParams()
         #self.initializeRandomPolicyParams()
-        #self.initializeOkayParams()
+        self.initializeOkayParams()
         #self.initializeDesignedParams() # these are very good parameters
 
         self.mean = np.zeros((1,10))[0]
         self.epsilon = 1
         self.cov =  np.identity(10)*self.epsilon # diagonal covariance
 
-        self.eta = 1e-1
+        self.eta = 0.2e-1
 
     def initializeZeroedParams(self, random=False):
         self.leftPolicy = np.zeros((self.numRays/2,1))
@@ -65,20 +65,20 @@ class PolicySearchSGD(PolicySearch):
         randIdx = np.random.choice(len(self.leftPolicy))
         self.w = self.leftPolicy * 0.0
         
-        randPerturb = np.random.randn() * 4.0
+        randPerturb = np.random.randn() * 6.0
         self.w[randIdx] = randPerturb
 
         self.leftPolicy += self.w
         self.mirrorParams()
 
     def updateParams(self, reward, prevReward):
-        print "######"
-        print "in update"
-        print "previousLeftPolicy", self.previousLeftPolicy
-        print "leftPolicy", self.leftPolicy
-        print "reward", reward
-        print "prevReward", prevReward
-        print "######"
+        # print "######"
+        # print "in update"
+        # print "previousLeftPolicy", self.previousLeftPolicy
+        # print "leftPolicy", self.leftPolicy
+        # print "reward", reward
+        # print "prevReward", prevReward
+        # print "######"
         self.leftPolicy = self.previousLeftPolicy + self.eta * (reward - prevReward) * self.w
         self.mirrorParams()
 
