@@ -120,7 +120,7 @@
 %\end{abstract} 
 
 \section{Introduction}
-In this project we evaluate the ability of several reinforcement learning methods to autonomously drive a car through a cluttered environment. We don't assume a map of the environment a priori but rather rely on our sensor (in this case a LIDAR) to make control decisions. A standard approach to solving this problem would require building up a map of the environment, possibly using an occupancy grid, and then planning a collision free path through this estimated map using a planner such as RRT*. On the other hand one notes that simple output feedback controllers, such as Braitenberg controllers, can be quite effective for obstacle avoidance tasks. Guided by this example we want to see how reinforcement learning performs in learning an output feedback controller for obstacle avoidance.
+In this project we evaluate the ability of several reinforcement learning methods to autonomously drive a car through a cluttered environment. We don't assume a map of the environment a priori but rather rely on our sensor (in this case a LIDAR) to inform control decisions. A standard approach to solving this problem would require building up a map of the environment, possibly using an occupancy grid, and then planning a collision free path through this estimated map using a planner such as RRT*. On the other hand one notes that simple output feedback controllers, such as Braitenberg controllers, can be quite effective for obstacle avoidance tasks. Guided by this example we want to see how reinforcement learning performs in learning an output feedback controller for obstacle avoidance.
 
 Our initial goal was to implement a value-based learning method, and we were recommended to start with SARSA.  After some initial encouraging results with SARSA, we decided implemented Q-learning and a continuous state-space version SARSA using function approximation. In addition we also tried policy search methods. 
 
@@ -153,7 +153,7 @@ For our car model we consider a simplified Dubin's car model. The location of th
 For our sensor model we use a small array of point LIDARs. In particular, $N$ beams are spread evenly over the field of view $[\theta_{min},\theta_{max}]$.  All experiments shown use $N=20$ and $[\theta_{min}=-\pi,\theta_{max}=\pi]$.   Each laser has a maximum range of $d_{max}$. The $n^{th}$ laser then returns $x_n$, which is the distance to the first obstacle it encounters, or $d_{max}$ if no obstacle is detected. Then one laser measurement can be summarized as $X = (x_1,\ldots,x_N)$.
 
 \subsection{Obstacle Environment}
-Picking the right obstacle environment for our task required some trial-and-error.  Obstacles that were too thin along one direction were not a good choice, as they could hide in between the ``array of point LIDARs'' as the robot approached.  Thus circular obstacles were chosen, as they circumvented this problem.  Picking the right density of obstacles and obstacle size was another trial-and-error process.  A square border prevented the car from escaping.  A listing of approximate parameters for the obstacle environments used is provided in Table 1.  Generalizations across obstacle environments it outside the scope of this project.
+Picking the right obstacle environment for our task required some trial-and-error.  Obstacles that were too thin along one direction were not a good choice, as they could hide in between the ``array of point LIDARs'' as the robot approached.  Thus circular obstacles were chosen, as they circumvented this problem.  Picking the right density of obstacles and obstacle size was another trial-and-error process.  A square border prevented the car from escaping.  A listing of approximate parameters for the obstacle environments used is provided in Table 1.  Generalizations across obstacle environments is outside the scope of this project.
 %
 \begin{center}
 \scalebox{0.7}{
@@ -187,7 +187,7 @@ All of the code for this project is open-source and may be found at \url{github.
 
 \subsection{Braitenberg (Hand-Designed) Controller}
 \label{default_controller}
-As a baseline against which to compare our learned controllers, we used a simple hand-designed controller inspired by the controllers of Valentino Braitenberg.  The most basic controller we tried simply counts the number of non-max sensor returns on the left ($n_{left} = \sum_i^{N/2} \mathbbm{1}[x_i < d_{max}]$) and compares with the number of non-max sensor returns on the right ($n_{right} = \sum_{i=N/2+1}^N \mathbbm{1}[x_i < d_{max}]$), and then selects the action to turn towards the direction $min(n_{left}, n_{right})$.  If no obstacles are seen ($n_{left} = n_{right} = 0$), then the controller selects to go straight.  Thus the action space for this simple controller is $A = \{-u_{max}, 0, u_{max} \}$.  This controller actually works surprisingly well.
+As a baseline against which to compare our learned controllers, we used a simple hand-designed controller inspired by the controllers of Valentino Braitenberg.  The most basic controller we tried simply counts the number of non-max sensor returns on the left ($n_{left} = \sum_i^{N/2} \mathbbm{1}[x_i < d_{max}]$) and compares with the number of non-max sensor returns on the right ($n_{right} = \sum_{i=N/2+1}^N \mathbbm{1}[x_i < d_{max}]$), and then selects the action to turn towards the direction $min(n_{left}, n_{right})$.  If no obstacles are seen ($n_{left} = n_{right} = 0$), then the controller selects to go straight.  Thus the action space for this simple controller is $A = \{u_{max}, 0, -u_{max} \}$.  This controller actually works surprisingly well.
 
 The best Braitenberg-style controller we used is a slight improvement on the above version: it actually takes into the account the distances measured.  This controller uses the squared inverse of each of the sensor measurements as its features: $\phi_{B} (x_i) = \frac{1}{x_i^2}$.  The sum of these features is then computed for the left and right, and again the action is selected to turn towards the direction $min(n_{left}, n_{right})$.  An algorithm description is provided (Algorithm \ref{alg:bsic}).
 %
@@ -196,7 +196,7 @@ The best Braitenberg-style controller we used is a slight improvement on the abo
    \label{alg:bsic}
 \begin{algorithmic}
    \STATE {\bfseries Input:} sensor data $x_i$, size $N$
-   \STATE {\bfseries Output:} u from $\mathcal{A} =  \{-u_{max}, 0, u_{max}\}$
+   \STATE {\bfseries Output:} u from $\mathcal{A} =  \{u_{max}, 0, -u_{max}\}$
    \STATE Initialize $n_{left}$, $n_{right} = 0$
    \FOR{$i=1$  {\bfseries to} $N/2$}
    \STATE $n_{left} = n_{left} + 1/(x_i)^2$
@@ -205,10 +205,10 @@ The best Braitenberg-style controller we used is a slight improvement on the abo
    \STATE $n_{right} = n_{right} + 1/(x_i)^2$
    \ENDFOR
    \IF {$n_{left} > n_{right}$}
-   \STATE $u = -u_{max}$ (TURN LEFT)
+   \STATE $u = u_{max}$ (TURN LEFT)
    \ELSE 
    \IF {$n_{left} < n_{right}$}
-   \STATE $u = u_{max}$ (TURN RIGHT)
+   \STATE $u = -u_{max}$ (TURN RIGHT)
    \ELSE 
    \STATE $u=0$ (GO STRAIGHT)
    \ENDIF
@@ -219,10 +219,10 @@ The best Braitenberg-style controller we used is a slight improvement on the abo
 
 
 
-\section{dynamic programming: SARSA and Q-Learning}
+\section{Dynamic Programming: SARSA and Q-Learning}
 Two of the most popular methods in reinforcement learning are SARSA and Q-Learning. These methods both aim to find the optimal policy of a dynamic programming problem. Thus the first step is to reformulate our problem as a dynamic programming problem. 
 
-\subsection{dynamic programming Formulation}
+\subsection{Dynamic Programming Formulation}
 To formulate our problem as a dynamic programming problem we need to define a ``state.'' 
 % In our specific setup this will not be a state in the true state of the word (sinc ethe true state is only partially observable), but rather will just be our observation (in this case the LIDAR measurement).
 %
@@ -255,7 +255,7 @@ R(S,a) = C_{action} |a| + \langle W, \phi(X) \rangle
 %
 where $C_{action}$ is an action cost. Finally if the car is currently in collision with an obstacle, i.e. some laser $x_n$ is reading less than $d_{min}$ then we set $R(S,a) = C_{collision}$.
 
-Now let us think about why this may be a reasonable reward function for our objective, which is obstacle avoidance. One should think of $C_{raycast}, C_{action}, C_{collision} < 0$ and $C_0, C_{max} > 0$. Then we see that the components of $\phi(X)$ increase as we get close to obstacles. And they increase as the inverse of the distance to the obstacle. Thus this is penalizing getting too close to obstacles. Now consider the weights $W$ show in Figure \ref{figures/raycastRewardWeights.png}
+Now let us think about why this may be a reasonable reward function for our objective, which is obstacle avoidance. One should think of $C_{raycast}, C_{action}, C_{collision} < 0$ and $C_0, C_{max} > 0$. Then we see that the components of $\phi(X)$ increase as we get close to obstacles. And they increase as the inverse of the distance to the obstacle. Thus this is penalizing getting too close to obstacles. Now consider the weights $W$ show in Figure \ref{figures/raycastRewardWeights.png}.
 
 %
 %
