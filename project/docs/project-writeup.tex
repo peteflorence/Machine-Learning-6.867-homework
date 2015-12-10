@@ -490,7 +490,7 @@ where $\mathbf{w}$ is the matrix of weights. We think this is a reasonable appro
 %
 %
 \begin{algorithm}[H]
-   \caption{gradient descent SARSA($\lambda$)}
+   \caption{Gradient Descent SARSA($\lambda$)}
    \label{alg:gradDescentSARSA}
 \begin{algorithmic}
    % \STATE {\bfseries Input:} sensor data $x_i$, size $N$
@@ -571,7 +571,33 @@ where $\sigma$ is the logistic sigmoid function, and the features $\phi_B(x_i) =
 \end{equation}
 %
 %
-where $\theta_{p_i}$ is a sampled zero-mean Gaussian perturbation, and the update is such that if total reward $R_{total}$ is increased due to the perturbation, then the parameter update will move in that direction.  We note from Roberts et al. that this matches the form of the gradient update for REINFORCE since $\frac{\partial}{\partial \theta_i} ln (p(\theta_{p_i} )) \propto (\phi_i' -\phi)$, and the scalar may be absorbed into the learning rate, $\eta$, term.  After exploring different options, the same reward function as in Section 3 was used (a combination of collision penalty, action cost, and large-sensor reward).  Although we have $N=20$ parameters in the vector $\theta$ in Equation \ref{u_continuous}, we recognize that the ideal behavior of the vehicle is symmetric, and so we reduce our model to just 10 parameters such that $\theta_{N-i} = - \theta_{i} $ for $i = 1,2,..., \frac{N}{2}$.  Also rather than sampling from a true zero-mean multivariate Gaussian, we take a page from Kiefer-Wolfowitz's finite-difference method and only perturb one parameter at a time.  This was found to be preferable since the contribution of one of the point LIDARs to the control action could be evaluated in isolation.  The implementation is to randomly select one of the 10 indices on each iteration, and perturb that one parameter by a zero-mean single-variate Gaussian with variance $\sigma_p^2$.  This may break the algorithm's exact resemblance of REINFORCE, but it is clearly very similar.  We note that this formulation is essentially stochastic gradient descent using finite differences.
+where $\theta_{p_i}$ is a sampled zero-mean Gaussian perturbation, and the update is such that if total reward $R_{total}$ is increased due to the perturbation, then the parameter update will move in that direction.  We note from Roberts et al. that this matches the form of the gradient update for REINFORCE since $\frac{\partial}{\partial \theta_i} ln (p(\theta_{p_i} )) \propto (\phi_i' -\phi)$, and the scalar may be absorbed into the learning rate, $\eta$, term.  After exploring different options, the same reward function as in Section 3 was used (a combination of collision penalty, action cost, and large-sensor reward).  Although we have $N=20$ parameters in the vector $\theta$ in Equation \ref{u_continuous}, we recognize that the ideal behavior of the vehicle is symmetric, and so we reduce our model to just 10 parameters such that $\theta_{N-i} = - \theta_{i} $ for $i = 1,2,..., \frac{N}{2}$.  Also rather than sampling from a true zero-mean multivariate Gaussian, we take a page from Kiefer-Wolfowitz's finite-difference method and only perturb one parameter at a time.  This was found to be preferable since the contribution of one of the point LIDARs to the control action could be evaluated in isolation.  The implementation is to randomly select one of the 10 indices on each iteration, and perturb that one parameter by a zero-mean single-variate Gaussian with variance $\sigma_p^2$.  This may break the algorithm's exact resemblance of REINFORCE, but it is clearly very similar.  We note that this formulation is essentially stochastic gradient descent using finite differences.  An algorithm description is provided below.
+%
+%
+\begin{algorithm}[H]
+   \caption{Variant of Episodic REINFORCE inspired by Roberts et al.}
+   \label{alg:REINFORCE}
+\begin{algorithmic}
+   % \STATE {\bfseries Input:} sensor data $x_i$, size $N$
+   % \STATE {\bfseries Output:} u from $\mathcal{A} =  \{-u_{max}, 0, u_{max}\}$
+   \STATE Initialize policy parameterization $\theta_i$ = $\theta_0$
+   \REPEAT
+   
+   \STATE compute $R_{total}$ for $\infty$-horizon roll-out with $u(\theta_i)$
+   \STATE randomly select index $j$ for one of $\theta_i$ in $\theta_{left}$
+   \STATE $\theta_{p_i} =$ zero vector, same length as $\theta$
+   \STATE $\theta_{p_i}[j] = \mathcal{N}(0,\sigma_p^2)$   
+   
+   \STATE compute $R'_{total}$ for $\infty$-horizon roll-out with $u(\theta_i +\theta_{p_i})$
+   
+   \STATE update policy: $$\theta_{i+1} = \theta_i + \eta (R_{total} - R'_{total})\theta_{p_i}$$
+   
+   \UNTIL{end of training time}
+
+\end{algorithmic}
+\end{algorithm}
+%
+%
 
 \subsubsection{Results}
 
@@ -579,19 +605,21 @@ Three scenarios for the performance of policy search are discussed: (i) starting
 
 Before we analyze each of the three scenarios, though, we note observations that applied in all cases.  For one, because the sigmoid function $\sigma(x)$ is very flat for $|x|>>0$, we expected it to be difficult to effectively change parameters usefully unless $\theta^T \phi_B(X)$ was close to 0.  Thus we expected the algorithm to be able to successfully descend away from a parameter initialization of all zeros (as in case (i)), but did not expect to as easily demonstrate unambiguous improvement for already $|\theta^T \phi_B(X)| >> 0$ policies.  Indeed, that is the case we observed in case (ii).
 
-(i) For starting with $\theta_0 = \mathbf{0}$, a significant improvement in controller performance was able to be learned with a surprisingly small amount of training time.  To be clear, $\theta$ as a zero vector corresponds to ignoring all sensor measurements and going perfectly straight forward at every time step.  This is clearly not optimal controller performance.  In practice when starting from zeroed initial conditions, the controller learns by having a large enough perturbation $\theta_{p_i}$ in the correct direction to be able to dodge an obstacle that it wasn't able to before.  Obviously when starting from the initial zero vector, it helps to use significantly large variance $\sigma_p^2$ for the perturbation sampling such that something actually capable of causing the car to dodge the ``straight into brick wall'' scenario.  In practice it seemed that $\sigma_p^2$ could be increased as long as $\eta$, the learning rate, was decreased further to compensate.  An example of the demonstrated increase in the amount of time the controller survived is provided in Figure \label{figures/policySearch_zeroVector_duration.png}
+(i) For starting with $\theta_0 = \mathbf{0}$, a significant improvement in controller performance was able to be learned with a surprisingly small amount of training time, as is shown in Figure \ref{zeroedParamsOverTime}.  Only 1-2 minutes of simulation (approximately 30-60 minutes of ``car'' time) were required to produce controllers that were capable of surviving in the obstacle field for 400 or more time steps (20 seconds ``car'' time).   To be clear, $\theta$ as a zero vector corresponds to ignoring all sensor measurements and going perfectly straight forward at every time step.  This is clearly not optimal controller performance.  In practice when starting from zeroed initial weights, the controller learns by having a large enough perturbation $\theta_{p_i}$ in the correct direction to be able to dodge an obstacle that it wasn't able to before.  Obviously when starting from the initial zero vector, it helps to use significantly large variance $\sigma_p^2$ for the perturbation sampling such that something actually capable of causing the car to dodge the ``straight into brick wall'' scenario.  In practice it seemed that $\sigma_p^2$ could be increased as long as $\eta$, the learning rate, was decreased further to compensate.  In addition to providing satisfactory performance, the final weights (Figure \ref{zeroFinalWeights}) make sense: for obstacles that are in front of the vehicle the $\theta_{left,i}$ for $i = 9, 8, ..$, a strong turn away from the obstacle is preferred (which corresponds to negative weights, for $\theta_{left}$  (We remind the reader that the weights are mirrored, so we only need to consider the left weights).  
 
-(ii) We also tried initializing the policy with parameters that already gave impressive obstacle-avoidance performance.  This is indeed an ideal property of policy search: it is easy to formulate ``seeding'' the policy search with a policy that is known or expected from other means to already be a good policy.  This may come, for example, from trajectory optimization techniques, but for us this ideal ``seeded'' policy was designed by hand. It was not hard to think about the 10 $\theta$ parameters and design ones that would work very well.  A sensible setting of the parameters was given by $\theta_{left, \text{ideal}} = [-10, -10, -10, -10, -10, -100, -100, -100, -100, -100 ]$, and $\theta_{right}$ was imposed to be $-\theta_{left}^{\mathcal{R}}$ as discussed. These settings cause sharp turning motions away from obstacles out in front of the vehicle, and only slightly turning away from the obstacles out to the sides.  The smaller weights for the lasers pointing out to the sides cause less erratic turning when driving parallel to a wall or obstacles, and because there is an action cost on the control input, this seems to positively impact the total reward of a roll-out.  Indeed, this $\theta_{left, \text{ideal}} $, with zero optimization, was found to give a controller that did not crash on many environments.  To increase the challenge, the obstacle density and the car's velocity were increased.
+In general the weights $\theta_{left}$ found by the policy search were more strongly negative.  In closer detail, it is interesting to note some surprising parameter settings are found by policy search.  For example. having small negative parameters for the left lasers out in front of you, and one very large parameter for out to the left side, would produce interesting behavior.  With this controller, as the robot approached obstacles from afar, it would only be slightly turning away from them.  This has the benefit of not incurring a large action cost and allowing the robot to drive more straight.  When the robot comes very close to the obstacle, though, its measurement for out to the side will kick in, and it will very sharply turn away from the obstacle.  Since the other weights were in the right direction but small, this prevented the robot from actually moving towards an obstacle head on, and so the ``out to the side'' measurement was able to help kick it away from the obstacle.  
 
-In the end, at least with the parameters attempted, the ability of the policy gradient descent to ``improve'' this already-stellar policy seemed tenuous.  Settings of $\sigma_p^2$ and $\eta$ either seemed to produce $\theta$ that would barely change from the initial condition, or if the updates were too large, would diverge randomly.  This seems plausible if the controller's already stellar performance represents a local maxima.  Additionally, as mentioned the effects of perturbations are expected to be small when the input to the sigmoid already contains values far from zero, as is the case with these large initial parameters.  It is possible that this is primarily a result of the sigmoid formulation for the control input.  In short, if the policy is already really good, then policy search may not surprisingly have a difficult job of improving performance.
+Another unexpected behavior was that for the weights for the lasers pointing out to the sides of the car, having them be positive in $\theta_{left}$ could actually give qualitatively better controller performance.  The policy search parameters shown in Figure \ref{zeroFinalWeights} show this characteristic. With a significant positive weight for example for the farthest left lasers $x_1, x_2$, the the car would turn slightly around obstacles after it passed them.  This had the effect of helping the car not get stuck in the square boundary corners of the world. It turns out that this is a key strategy for the obstacle environments that were used.  It also had the capability of causing `circling'. As discussed before with the DP approaches, a cost on action helped negate the circling behavior.  This did, however, unsurprisingly make it much harder to learn ``dodging the brick wall'' for the initially-zeroed parameters case.  To verify, most learned controllers, including the one in Figures \ref{zeroedParamsOverTime} and \ref{zeroFinalWeights}, did not produce circling behavior but instead produced desirable `dodge obstacles' behavior.
 
-(iii)  Finally, we investigate a third scenario, where the initial parameters are not stellar, but they are also not zero.  For this purpose, $\theta_{left, \text{okay}} = [-1, -1, -1, -1, -1, -10, -10, -10, -10, -10 ]$ sufficed.  This is similar to the parameters just discussed, but with less strong turning.  In this case, the policy gradient descent was able to find improved parameterizations.  In particular it is interesting to note that a variety of parameter settings were capable of producing successful robot behavior.  In one case, for example, having small negative parameters for the left lasers out in front of you, and one very large parameter for out to the left side, would produce interesting behavior.  With this controller, as the robot approached obstacles from afar, it would only be slightly turning away from them.  This has the benefit of not incurring a large action cost and allowing the robot to drive more straight.  When the robot comes very close to the obstacle, though, its measurement for out to the side will kick in, and it will very sharply turn away from the obstacle.  Since the other weights were in the right direction but small, this prevented the robot from actually moving towards an obstacle head on, and so the ``out to the side'' measurement was able to help kick it away from the obstacle.  Another unexpected behavior was that for some of the weights, having them be positive in $\theta_{left}$ would actually give impressive controller performance.  This only applies to the measurements out to the side: if there was a large positive weight for example for the farthest left laser $x_1$, but there were also sizable negative weights for $x_2$ and $x_3$, this would have the effect of driving close but not too close to the walls, and driving around obstacle but not too far around them.  It turns out that this is also a successful strategy for the obstacle environments that were used.
+(ii) We also tried initializing the policy with parameters that already gave impressive obstacle-avoidance performance.  This is indeed an ideal property of policy search: it is easy to formulate ``seeding'' the policy search with a policy that is known or expected from other means to already be a good policy.  This may come, for example, from trajectory optimization techniques, but for us this ideal ``seeded'' policy was designed by hand. It was not hard to think about the 10 $\theta$ parameters and design ones that would work very well.  A sensible setting of the parameters was given by $\theta_{left, \text{ideal}} = [-10, -10, -10, -10, -10, -100, -100, -100, -100, -100 ]$, and $\theta_{right}$ was imposed to be $-\theta_{left}^{\mathcal{R}}$ as discussed. These settings cause sharp turning motions away from obstacles out in front of the vehicle, and only slightly turning away from the obstacles out to the sides.  The smaller weights for the lasers pointing out to the sides cause less erratic turning when driving parallel to a wall or obstacles, and because there is an action cost on the control input, this seems to positively impact the total reward of a roll-out.  Indeed, this $\theta_{left, \text{ideal}} $, with zero optimization, was found to give a controller that did not crash on many environments.  To increase the challenge, the obstacle density and the car's velocity were increased.  It was difficult, however, to find a setting where the car still ``had a chance'', but just was not making the best control decisions.  In other words, these initial parameters are near perfect.
 
-Finally, we note that, as with the dynamic programming methods, the ``going in circles'' failure mode would also sometimes manifest.  As with the DP approaches, a cost on action helped negate the circling behavior.  This did, however, unsurprisingly make it much harder to learn ``dodging the brick wall'' for the initially-zeroed parameters case.
+In the end, at least with the parameters attempted, the ability of the policy gradient descent to ``improve'' this already-stellar policy seemed tenuous.  Settings of $\sigma_p^2$ and $\eta$ either seemed to produce $\theta$ that would barely change from the initial condition, or if the updates were too large, would diverge randomly.  This seems plausible if the controller's already stellar performance represents a local maxima.  Additionally, as mentioned the effects of perturbations are expected to be small when the input to the sigmoid already contains values far from zero, as is the case with these large initial parameters.  It is possible that this is primarily a result of using the sigmoid function.  In short, if the policy is already really good, then policy search may not surprisingly have a difficult job of improving performance.
+
+(iii)  Finally, we investigate a third scenario, where the initial parameters are not stellar, but they are also not zero.  For this purpose, $\theta_{left, \text{okay}} = [-1, -1, -1, -1, -1, -10, -10, -10, -10, -10 ]$ sufficed.  This is similar to the parameters just discussed, but with less strong turning.  In this case, the policy gradient descent was able to find improved parameterizations, as shown in Figure   \ref{okayParamsOverTime}, although of course the increase in performance was not as drastic as it was for the zeroed initial parameters.  The parameters found by policy search (Figure \ref{okayParamsFinalWeights}) were sensibly more negative than the initial parameters.  It is interesting to note that although the weights appear to be very ``noisy'' from $\theta_i$ to $\theta_{i+1}$, if we think about this, it is not too surprising.  Having a sequence of three weights be $[-10,-40,-10]$ is not all that different from $[-20,-20,-20]$ since in these obstacle environments, if one laser is intersecting an obstacle, then the chances are that its neighbor is as well.
 
 \subsection{Beta distribution}
 
-As an alternative option, a second formulation of the policy parameterization was used.  The largest difference here was that the policy is actually probabilistic, even given given a specific parameterization.  (In the previous subsection, the controller was only stochastic due to a probability distribution on the parameters.)  It was hypothesized that a beta distribution (scaled by $u_{max}$) might offer a useful way to encode a probability distribution over $[-u_{max}, u_{max}]$.  In particular the formulation was:
+As an alternative option, a second formulation of the policy parameterization was used.  The largest difference here was that the policy is actually probabilistic, even given a specific parameterization.  (In the previous subsection, the controller was only stochastic due to a probability distribution on the parameters.)  It was hypothesized that a beta distribution (scaled by $u_{max}$) might offer a useful way to encode a probability distribution over $[-u_{max}, u_{max}]$.  In particular the formulation was:
 %
 %
 \begin{equation}
@@ -605,7 +633,7 @@ b = \theta_b^T \phi_B(X) + \theta_{b, 0}
 \end{equation}
 %
 %
-Whereas the previous formulation has 20 parameters (only 10 independent due to symmetry), this formulation has 42 parameters, with $\theta_b = -\theta_a^{\mathcal{R}}$ reducing this to 21 by symmetry.
+Whereas the previous formulation has 20 parameters (only 10 independent due to symmetry), this formulation has 42 parameters, with $\theta_b = \theta_a^{\mathcal{R}}$ reducing this to 21 by symmetry.
 
 With some thought, one can design parameters for this controller that seem to make sense.  As with all the other controllers studied, if all of the weights for the lasers to one side of the car has the same, appropriate sign, then performance will generally be good.  
 
@@ -615,7 +643,7 @@ A detailed case-by-case for all cases of interest are omitted for brevity, but t
 
 In conclusion, we have investigated a number of RL methods for learning controllers for our obstacle-avoidance task.  To summarize briefly, we highlight again the most notable differences between the methods.
 
-The dynamic programming methods were able to learn controllers that would improve performance with training time, as expected.  Even though the ``state'' of the robot is highly non-Markov, the value function estimation seems to still work well, as evidenced by the controller performance.  Discretizing the state and action space, even for this small toy robot, was a limitation that we expect prevented the robot from achieving optimal performance given the robot's limitations. Both SARSA and Q-Learning worked well in the discretized domain, except for occasional failure modes that were described in section \ref{failure_modes}. Ultimately there wasn't much difference in performance between SARSA and Q-Learning.. Function approximation was investigated in order to avoid discretizing the state space. The function approximation method was more sensitive to divergence and failure modes, but with careful parameter choices could be made to work.
+The dynamic programming methods were able to learn controllers that would improve performance with training time, as expected.  Even though the ``state'' of the robot is highly non-Markov, the value function estimation seems to still work well, as evidenced by the controller performance.  Discretizing the state and action space, even for this small toy robot, was a limitation that we expect prevented the robot from achieving optimal performance given the robot's limitations. Both SARSA and Q-Learning worked well in the discretized domain, except for occasional failure modes that were described in section \ref{failure_modes}. Ultimately there wasn't much difference in performance between SARSA and Q-Learning. Function approximation was investigated in order to avoid discretizing the state space. The function approximation method was more sensitive to divergence and failure modes, but with careful parameter choices could be made to work.
 
 The policy search methods offered a different set of advantages and disadvantages.  One clear advantage is that the robot does not have to discretize either the state or action space: both can be continuous.  This allows the robot to make control decisions based on much richer information, and execute smoother maneuvers.  Another advantage is that it was very easy to seed the policy parameterization with a highly functional policy.  Policy search is also known, because it avoids the curse of dimensionality from discretization, to scale to higher dimensional systems better.  Although ``not dynamic programming'' is an advantage of the policy search methods, it is also a major disadvantage.  The search through policy space has no guarantees other than to find local optima.
 
@@ -635,7 +663,7 @@ The authors would like to thank Professor Leslie Kaelbling for her enthusiasm, f
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{figures/sarsaDiscrete_lam_0_7_6500_bar_all_controllers.png}
-\caption{Performance of three different controllers using the parameters in Table \ref{table:defaultParameters}. The duration is in simulator ticks, there are 20 ticks/second. learnedRandom corresponds to the SARSA controller during the learning phase where we are still randomizing the policy. learned is the actual SARSA with no randomization. And default is the Braitenburg controller from Algorithm \ref{alg:bsic} }
+\caption{Performance of three different controllers using the parameters in Table \ref{table:defaultParameters}. The duration is in simulator ticks, there are 20 ticks/second. learnedRandom corresponds to the SARSA controller during the learning phase where we are still randomizing the policy. learned is the actual SARSA with no randomization. And default is the Braitenburg controller from Algorithm \ref{alg:bsic}. }
 \label{figures/sarsaDiscrete_lam_0_7_6500_bar_all_controllers.png}
 \end{figure}
 
@@ -667,7 +695,7 @@ The authors would like to thank Professor Leslie Kaelbling for her enthusiasm, f
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{figures/sarsaMultiple.png}
-\caption{Comparison of performance across 10 runs of discrete SARSA using parameters in Table \ref{table:defaultParameters}}
+\caption{Comparison of performance across 10 runs of discrete SARSA using parameters in Table \ref{table:defaultParameters}. The duration is in simulator ticks, there are 20 ticks/second.}
 \label{figures/sarsaMultiple.png}
 \end{figure}
 
@@ -675,7 +703,7 @@ The authors would like to thank Professor Leslie Kaelbling for her enthusiasm, f
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{figures/discreteQLearningLamComparison.png}
-\caption{Comparison of performance of discrete Q-Learning($\lambda$) for different $\lambda$ values.}
+\caption{Comparison of performance of discrete Q-Learning($\lambda$) for different $\lambda$ values. }
 \label{figures/discreteQLearningLamComparison.png}
 \end{figure}
 
@@ -684,32 +712,40 @@ The authors would like to thank Professor Leslie Kaelbling for her enthusiasm, f
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{figures/qlearningMultiple.png}
-\caption{Comparison of performance across 10 runs of discrete Q-Learning using parameters in Table \ref{table:defaultParameters}}
+\caption{Comparison of performance across 10 runs of discrete Q-Learning using parameters in Table \ref{table:defaultParameters}.}
 \label{figures/qlearningMultiple.png}
 \end{figure}
 
 
 \begin{figure}
 \centering
-\includegraphics[scale=0.5]{figures/policySearch_zeroVector_duration.png}
-\caption{Roll-out duration vs. roll-out trial number, for Episodic REINFORCE}
-\label{figures/policySearch_zeroVector_duration.png}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[scale=0.5]{figures/policySearch_zeroVector_discR.png}
-\caption{Discounted reward vs. roll-out trial number, for Episodic REINFORCE}
-\label{figures/policySearch_zeroVector_discR.png}
+\includegraphics[scale=0.5]{figures/policySearchFigs/zeroedParams/eta5e_neg2/overtime.png}
+\caption{Performance (run duration and discounted reward) over time of the policy search controller (Episodic REINFORCE), initialized with all zero weights.  Parameters for the gradient descent update were $\eta = 5e-2$ and $\sigma_p^2 = 4.0$.  }
+\label{zeroedParamsOverTime}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics[scale=0.5]{figures/policySearch_zeroVector_weights.png}
-\caption{Initial (zero-vector) and final weights, from Episodic REINFORCE after ~100 trials}
-\label{figures/policySearch_zeroVector_weights.png}
+\includegraphics[scale=0.5]{figures/policySearchFigs/zeroedParams/eta5e_neg2/finalweights.png}
+\caption{Initial (all zero) and final weights $\theta_{left}$ of the policy search controller (Episodic REINFORCE), for the same trained controller as in the figure above.  }
+\label{zeroFinalWeights}
 \end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{figures/policySearchFigs/okayedParams/cov6/overtime.png}
+\caption{Performance (run duration and discounted reward) over time of the policy search controller (Episodic REINFORCE), initialized with sensible but imperfect weights (as plotted in the figure below).  Parameters for the gradient descent update were $\eta = 2e-2$ and $\sigma_p^2 = 6.0$.  }
+\label{okayParamsOverTime}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{figures/policySearchFigs/okayedParams/cov6/weights.png}
+\caption{Initial and final weights $\theta_{left}$ of the policy search controller (Episodic REINFORCE), for the same trained controller as in the figure above.  }
+\label{okayParamsFinalWeights}
+\end{figure}
+
+
 
 
 
