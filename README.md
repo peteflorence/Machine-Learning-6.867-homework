@@ -2,6 +2,11 @@
 
 ## Q-Learning Project
 
+Project video: https://www.youtube.com/watch?v=ticezSoAzxQ
+
+[![Drone Autonomously Avoiding Obstacles at 30 MPH](http://img.youtube.com/vi/ticezSoAzxQ/0.jpg)](https://www.youtube.com/watch?v=ticezSoAzxQ)
+
+
 ### Dependencies
 
 https://github.com/RobotLocomotion/director
